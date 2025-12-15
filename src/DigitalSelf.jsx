@@ -75,23 +75,14 @@ export default function DigitalSelf() {
           <h2 className="text-4xl font-light text-stone-800 mb-12">Identity</h2>
           
           <div className="space-y-16">
-            <div>
-              <h3 className="text-sm tracking-widest text-stone-400 mb-4">WHO I AM</h3>
-              <div className="space-y-6 text-lg text-stone-700 leading-relaxed">
-                <p>
-                  <span className="text-2xl font-light text-stone-800">믿는 자.</span><br />
-                  넘어지되 다시 일어나는 자.
-                </p>
-                <p>
-                  <span className="text-2xl font-light text-stone-800">질문하는 자.</span><br />
-                  문제 푸는 사람.
-                </p>
-                <p>
-                  <span className="text-2xl font-light text-stone-800">확신.</span><br />
-                  참 인간은 주님의 임재 안에서 가능하다.
-                </p>
-              </div>
-            </div>
+<div>
+  <h3 className="text-xs tracking-widest text-stone-400 mb-8">WHO I AM</h3>
+  <div className="space-y-4 text-stone-700 leading-relaxed">
+    <p><span className="font-semibold">믿는 자.</span> 넘어지되 다시 일어나는 자.</p>
+    <p><span className="font-semibold">질문하는 자.</span> 문제 푸는 사람.</p>
+    <p><span className="font-semibold">확신.</span> 참 인간은 주님의 임재 안에서 가능하다.</p>
+  </div>
+</div>
 
             <div className="border-t border-stone-200 pt-12">
               <h3 className="text-sm tracking-widest text-stone-400 mb-6">THE FINITE & THE ETERNAL</h3>
