@@ -264,7 +264,7 @@ export default function DigitalSelf() {
             </div>
 
 <div className="flex gap-3">
-  <a href="mailto:giujeong@gmail.com" className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200">
+ <a href="https://mail.google.com/mail/?view=cm&fs=1&to=giujeong@gmail.com" target="_blank"className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200">
     EMAIL
   </a>
 </div>
