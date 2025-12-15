@@ -3,15 +3,10 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Noto Serif KR', serif;
-}
-
-/* Hebrew text styling */
-[lang="he"] {
-  font-family: 'SBL Hebrew', 'Times New Roman', serif;
-  direction: rtl;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300;
 }
