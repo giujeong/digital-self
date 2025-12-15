@@ -104,7 +104,7 @@ export default function DigitalSelf() {
                   <span className="text-stone-700 font-medium">세대의 끝.</span>
                 </p>
                 <p className="text-stone-600 leading-relaxed mb-4">
-                  아내와 나 사이에 아이는 없다.<br />
+                  아내와 나 사이에 아직 아이는 없다.<br />
                   우리가 <span className="text-stone-700 font-medium">마지막 세대</span>일 수 있다.
                 </p>
                 <p className="text-stone-600 leading-relaxed mb-4">
