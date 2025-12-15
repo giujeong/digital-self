@@ -263,14 +263,11 @@ export default function DigitalSelf() {
               <p>함께 질문하고, 함께 발견하고 싶습니다.</p>
             </div>
 
-            <div className="flex gap-3">
-              <a href="#" className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200">
-                EMAIL
-              </a>
-              <a href="#" className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200">
-                BLOG
-              </a>
-            </div>
+<div className="flex gap-3">
+  <a href="mailto:giujeong@gmail.com" className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200">
+    EMAIL
+  </a>
+</div>
           </div>
 
           <div className="mt-24 pt-8 border-t border-stone-200 text-center">
