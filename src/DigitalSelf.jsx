@@ -316,7 +316,7 @@ export default function DigitalSelf() {
       <footer className="py-8 text-center text-xs text-stone-400">
         <p>정기우 · {ageInYears}세 · {ageInDays.toLocaleString()}일</p>
         <p className="mt-1">믿는 자 · 질문하는 자 · 문제 푸는 사람</p>
-        <p className="mt-1 text-stone-300">updated 2026.10.20</p>
+        <p className="mt-1 text-stone-300">updated {__BUILD_DATE__}</p>
       </footer>
     </div>
   );
