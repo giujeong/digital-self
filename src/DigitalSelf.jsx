@@ -115,6 +115,18 @@ export default function DigitalSelf() {
             </div>
 
             <div>
+              <p className="text-xs tracking-widest text-stone-400 mb-6">WHERE I STAND</p>
+              <div className="text-sm text-stone-600 leading-loose space-y-4">
+                <p>하나님 앞에서 인간의 존엄을 믿기에 국가의 오만을 경계하고,</p>
+                <p>현장을 믿기에 설계자를 의심하며,</p>
+                <p>기술로 이념의 토대를 바꾸려는</p>
+                <p className="text-stone-800 pt-4 border-t border-stone-200">
+                  복음주의 실사구시자.
+                </p>
+              </div>
+            </div>
+
+            <div>
               <p className="text-xs tracking-widest text-stone-400 mb-6">THE FINITE & THE ETERNAL</p>
               <div className="text-sm text-stone-600 leading-loose space-y-4">
                 <p>2025년, 양가의 조부모 세대가 모두 이 땅을 떠나셨다.</p>
