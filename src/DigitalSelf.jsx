@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { Youtube } from 'lucide-react';
 
 export default function DigitalSelf() {
   const [activeSection, setActiveSection] = useState('home');
@@ -292,6 +293,16 @@ export default function DigitalSelf() {
               >
                 EMAIL
               </a>
+              <a 
+                href="https://www.youtube.com/@giujeong" 
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube 채널"
+                className="inline-flex items-center gap-2 px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200"
+              >
+                <Youtube size={14} strokeWidth={1.5} />
+                YOUTUBE
+              </a>
             </div>
           </div>
 
@@ -316,6 +327,15 @@ export default function DigitalSelf() {
       <footer className="py-8 text-center text-xs text-stone-400">
         <p>정기우 · {ageInYears}세 · {ageInDays.toLocaleString()}일</p>
         <p className="mt-1">믿는 자 · 질문하는 자 · 문제 푸는 사람</p>
+        <a
+          href="https://www.youtube.com/@giujeong"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="YouTube 채널"
+          className="inline-flex mt-3 text-stone-400 hover:text-stone-700 transition-colors"
+        >
+          <Youtube size={18} strokeWidth={1.5} />
+        </a>
         <p className="mt-1 text-stone-300">updated {__BUILD_DATE__}</p>
       </footer>
     </div>
