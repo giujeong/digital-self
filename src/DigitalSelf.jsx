@@ -2,9 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { Youtube } from 'lucide-react';
+import { mdWorks, findWork } from './content';
+
+const slugFromPath = () => {
+  const m = window.location.pathname.match(/^\/works\/([^/]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+};
+const STAGES = ['질문', '푸는 중', '변화'];
 
 export default function DigitalSelf() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [workSlug, setWorkSlug] = useState(slugFromPath());
+  const [activeSection, setActiveSection] = useState(slugFromPath() ? 'work' : 'home');
+
+  useEffect(() => {
+    const onPop = () => {
+      const slug = slugFromPath();
+      setWorkSlug(slug);
+      setActiveSection(slug ? 'work' : 'home');
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const openWork = (slug) => {
+    window.history.pushState({}, '', `/works/${slug}`);
+    setWorkSlug(slug);
+    setActiveSection('work');
+    window.scrollTo(0, 0);
+  };
+
+  const closeWork = () => {
+    window.history.pushState({}, '', '/');
+    setWorkSlug(null);
+    setActiveSection('works');
+    window.scrollTo(0, 0);
+  };
+
+  const currentWork = workSlug ? findWork(workSlug) : null;
+
+  useEffect(() => {
+    document.title = currentWork ? `${currentWork.title} | 정기우` : '정기우 | Digital Self';
+  }, [currentWork]);
+
+  const StageSteps = ({ stage }) => (
+    <div className="flex gap-1.5 mt-3">
+      {STAGES.map((s) => (
+        <span
+          key={s}
+          className={`text-xs px-2.5 py-0.5 rounded-full border ${s === stage ? 'bg-stone-800 text-white border-stone-800' : 'border-stone-200 text-stone-500'}`}
+        >
+          {s}
+        </span>
+      ))}
+    </div>
+  );
   const [showQuote, setShowQuote] = useState(0);
   const [works, setWorks] = useState([]);
   const [loadingWorks, setLoadingWorks] = useState(true);
@@ -243,9 +294,26 @@ export default function DigitalSelf() {
           <h2 className="text-2xl font-light text-stone-800 mb-4">Works</h2>
           <p className="text-sm text-stone-500 mb-16">질문하고, 문제 풀고, 나누는 것들</p>
           
+          {mdWorks.length > 0 && (
+            <div className="space-y-10 mb-12">
+              {mdWorks.map((w) => (
+                <button
+                  key={w.slug}
+                  onClick={() => openWork(w.slug)}
+                  className="block w-full text-left pb-8 border-b border-stone-200 group"
+                >
+                  {w.question && <p className="text-xs text-amber-800 mb-1">Q. {w.question}</p>}
+                  <p className="text-lg font-medium text-stone-800 group-hover:underline underline-offset-4">{w.title}</p>
+                  <p className="text-xs text-stone-500 mt-1">{w.category} · {w.date}</p>
+                  <StageSteps stage={w.stage} />
+                </button>
+              ))}
+            </div>
+          )}
+
           {loadingWorks ? (
             <p className="text-sm text-stone-400">불러오는 중...</p>
-          ) : works.length === 0 ? (
+          ) : works.length === 0 && mdWorks.length === 0 ? (
             <p className="text-sm text-stone-400">아직 등록된 작업이 없습니다.</p>
           ) : (
             <div className="space-y-12">
@@ -272,6 +340,51 @@ export default function DigitalSelf() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+    ),
+
+    work: currentWork ? (
+      <div className="min-h-screen py-20 px-6">
+        <article className="max-w-xl mx-auto">
+          <button
+            onClick={closeWork}
+            className="text-xs text-stone-500 hover:text-stone-700 mb-16 transition-colors"
+          >
+            ← Works
+          </button>
+          {currentWork.question && (
+            <p className="text-xs text-amber-800 mb-2">Q. {currentWork.question}</p>
+          )}
+          <h1 className="text-3xl font-light text-stone-800 mb-3">{currentWork.title}</h1>
+          <p className="text-xs text-stone-500">{currentWork.category} · {currentWork.date} · {currentWork.version}</p>
+          <StageSteps stage={currentWork.stage} />
+
+          <div className="mt-14 space-y-6 text-base text-stone-700 leading-loose break-keep">
+            {currentWork.body.split(/\n\s*\n/).map((para, i) => (
+              <p key={i}>
+                {para.split('\n').map((line, j, arr) => (
+                  <React.Fragment key={j}>
+                    {line}
+                    {j < arr.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </p>
+            ))}
+          </div>
+
+          {currentWork.history && (
+            <p className="mt-16 pt-6 border-t border-stone-200 text-xs text-stone-500">
+              이력 · {currentWork.history}
+            </p>
+          )}
+        </article>
+      </div>
+    ) : (
+      <div className="min-h-screen py-20 px-6">
+        <div className="max-w-xl mx-auto">
+          <button onClick={closeWork} className="text-xs text-stone-500 mb-16">← Works</button>
+          <p className="text-sm text-stone-500">글을 찾을 수 없습니다.</p>
         </div>
       </div>
     ),
