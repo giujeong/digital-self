@@ -67,6 +67,8 @@ export default function DigitalSelf() {
           <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4">
             정기우
           </h1>
+          <p className="text-2xl text-stone-600 mb-1" lang="he" dir="rtl">קָם</p>
+          <p className="text-xs text-stone-400 mb-6">캄</p>
           <p className="text-sm text-stone-500 mb-2">1988. 3. 4 —</p>
           <p className="text-xs text-stone-400 mb-16">
             {ageInDays.toLocaleString()}일째 살아가는 중
@@ -88,6 +90,12 @@ export default function DigitalSelf() {
                 {section.toUpperCase()}
               </button>
             ))}
+          </div>
+
+          <div className="mt-16">
+            <p className="text-base text-stone-600 tracking-widest">千里之行 始於足下</p>
+            <p className="text-base text-stone-600 tracking-widest mt-2">無爲故無敗</p>
+            <p className="text-xs text-stone-400 mt-3">노자, 『도덕경』</p>
           </div>
         </div>
       </div>
