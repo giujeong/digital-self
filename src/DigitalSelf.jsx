@@ -284,7 +284,7 @@ export default function DigitalSelf() {
               함께 질문하고, 함께 발견하고 싶습니다.
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <a 
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=giujeong@gmail.com" 
                 target="_blank"
@@ -302,6 +302,24 @@ export default function DigitalSelf() {
               >
                 <Youtube size={14} strokeWidth={1.5} />
                 YOUTUBE
+              </a>
+              <a
+                href="https://x.com/giujeong_me"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X 계정"
+                className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200"
+              >
+                X
+              </a>
+              <a
+                href="https://www.instagram.com/giujeong"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram 계정"
+                className="px-5 py-2 text-xs tracking-wider text-stone-500 border border-stone-200 hover:border-stone-400 hover:text-stone-700 transition-all duration-200"
+              >
+                INSTAGRAM
               </a>
             </div>
           </div>
