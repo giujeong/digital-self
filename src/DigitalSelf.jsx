@@ -95,7 +95,10 @@ export default function DigitalSelf() {
           <div className="mt-16">
             <p className="text-base text-stone-600 tracking-widest">千里之行 始於足下</p>
             <p className="text-base text-stone-600 tracking-widest mt-2">無爲故無敗</p>
-            <p className="text-xs text-stone-400 mt-3">노자, 『도덕경』</p>
+          </div>
+
+          <div className="mt-10">
+            <p className="text-base text-stone-600 tracking-widest">待人春風 持己秋霜</p>
           </div>
         </div>
       </div>
