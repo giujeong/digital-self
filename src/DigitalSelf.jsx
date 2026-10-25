@@ -481,7 +481,39 @@ export default function DigitalSelf() {
           </article>
         </div>
       );
-    })() : currentWork ? (
+    })() : currentWork && workProject?.type === 'dictionary' ? (
+      <div className="min-h-screen py-16 px-6">
+        <article className="max-w-lg mx-auto">
+          <button onClick={() => openProject(workProject.slug)} className="text-xs text-stone-500 hover:text-stone-700 mb-14 transition-colors">
+            ← {workProject.title}
+          </button>
+          <div className="border-t-2 border-stone-800 pt-6">
+            <h1 className="text-3xl text-stone-800 break-keep" style={{ fontFamily: "'Noto Serif KR', serif" }}>{currentWork.title}</h1>
+            {currentWork.th && <p className="text-base text-stone-500 mt-2" lang="th">{currentWork.th}</p>}
+            <p className="text-xs text-stone-500 mt-2">{currentWork.date}</p>
+          </div>
+          <div className="mt-10 space-y-10">
+            {currentWork.body.split(/^## /m).filter((b) => b.trim()).map((sec, k) => {
+              const [head, ...rest] = sec.split('\n');
+              const text = rest.join('\n').trim();
+              const th = head.trim() === 'ภาษาไทย';
+              return (
+                <section key={k} lang={th ? 'th' : undefined} className={th ? 'pt-8 border-t border-stone-200' : ''}>
+                  <p className="text-xs tracking-widest text-stone-500 mb-3">{head.trim()}</p>
+                  <div className="space-y-4 text-[17px] text-stone-800 leading-[1.9] break-keep" style={{ fontFamily: th ? undefined : "'Noto Serif KR', serif" }}>
+                    {text.split(/\n\s*\n/).map((para, j) => (
+                      <p key={j} className={para.startsWith('*') ? 'text-sm text-stone-500 italic' : ''}>
+                        {para.replace(/^\*|\*$/g, '').split('\n').map((line, n, arr) => (<React.Fragment key={n}>{line}{n < arr.length - 1 && <br />}</React.Fragment>))}
+                      </p>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </article>
+      </div>
+    ) : currentWork ? (
       <div className="min-h-screen py-20 px-6">
         <article className="max-w-xl mx-auto">
           <button
