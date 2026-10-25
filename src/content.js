@@ -33,7 +33,16 @@ export const mdProjects = Object.values(projectFiles)
   .filter((p) => p.slug)
   .map((p) => {
     const posts = mdWorks.filter((w) => w.project === p.slug);
-    return { ...p, posts, updated: posts[0]?.date || '' };
+    const base = { ...p, posts, updated: posts[0]?.date || '' };
+    if (p.type !== 'book') return base;
+    // 책: 본문의 '목차' 줄 아래가 살아있는 목차. 글은 frontmatter toc: 로 목차 줄과 연결
+    const [intro, tocRaw = ''] = p.body.split(/\n목차\n/);
+    const toc = tocRaw.split('\n').filter((l) => l.trim()).map((l) => {
+      const text = l.trim();
+      return { text, sub: /^\s/.test(l), post: posts.find((w) => w.toc === text) || null };
+    });
+    const reading = toc.filter((t) => t.post).map((t) => t.post);
+    return { ...base, intro: intro.trim(), toc, reading };
   })
   .sort((a, b) => (Number(a.order) || 99) - (Number(b.order) || 99) || (b.updated || '').localeCompare(a.updated || ''));
 

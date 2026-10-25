@@ -408,7 +408,56 @@ export default function DigitalSelf() {
       </div>
     ),
 
-    work: currentWork ? (
+    work: currentWork && workProject?.type === 'book' ? (() => {
+      const r = workProject.reading;
+      const i = r.findIndex((w) => w.slug === currentWork.slug);
+      const prev = i > 0 ? r[i - 1] : null;
+      const next = i >= 0 && i < r.length - 1 ? r[i + 1] : null;
+      const tocItem = workProject.toc.find((t) => t.post?.slug === currentWork.slug);
+      const partIdx = tocItem ? workProject.toc.indexOf(tocItem) : -1;
+      const part = partIdx > 0 && tocItem.sub ? [...workProject.toc.slice(0, partIdx)].reverse().find((t) => !t.sub)?.text : null;
+      return (
+        <div className="min-h-screen py-16 px-6 bg-[#faf8f3]">
+          <article className="max-w-lg mx-auto" style={{ fontFamily: "'Noto Serif KR', serif" }}>
+            <button
+              onClick={() => openProject(workProject.slug)}
+              className="text-xs text-stone-500 hover:text-stone-700 mb-14 transition-colors"
+              style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}
+            >
+              ← 『{workProject.title}』 목차
+            </button>
+            <p className="text-xs tracking-widest text-stone-500 text-center">{part || workProject.title}</p>
+            <h1 className="text-2xl text-stone-800 text-center mt-4 mb-2 break-keep leading-snug">{currentWork.title}</h1>
+            {currentWork.question && <p className="text-sm text-stone-500 text-center break-keep">{currentWork.question}</p>}
+            <div className="w-10 h-px bg-stone-300 mx-auto my-12" />
+            <div className="space-y-7 text-[17px] text-stone-800 leading-[2] break-keep">
+              {currentWork.body.split(/\n\s*\n/).map((para, k) =>
+                para.startsWith('> ') ? (
+                  <blockquote key={k} className="border-l-2 border-stone-300 pl-4 text-stone-600">{para.replace(/^> ?/gm, '')}</blockquote>
+                ) : (
+                  <p key={k}>{para.split('\n').map((line, j, arr) => (<React.Fragment key={j}>{line}{j < arr.length - 1 && <br />}</React.Fragment>))}</p>
+                )
+              )}
+            </div>
+            <div className="w-10 h-px bg-stone-300 mx-auto my-14" />
+            <nav className="flex justify-between gap-4 text-sm" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>
+              {prev ? (
+                <button onClick={() => openWork(prev.slug)} className="text-left text-stone-600 hover:text-stone-900">
+                  <span className="block text-xs text-stone-400">← 이전</span>{prev.title}
+                </button>
+              ) : <span />}
+              {next ? (
+                <button onClick={() => openWork(next.slug)} className="text-right text-stone-600 hover:text-stone-900">
+                  <span className="block text-xs text-stone-400">다음 →</span>{next.title}
+                </button>
+              ) : (
+                <span className="text-right text-xs text-stone-400 self-end">다음 글은 연재 중</span>
+              )}
+            </nav>
+          </article>
+        </div>
+      );
+    })() : currentWork ? (
       <div className="min-h-screen py-20 px-6">
         <article className="max-w-xl mx-auto">
           <button
@@ -458,7 +507,53 @@ export default function DigitalSelf() {
       </div>
     ),
 
-    project: currentProject ? (
+    project: currentProject && currentProject.type === 'book' ? (
+      <div className="min-h-screen py-16 px-6 bg-[#faf8f3]">
+        <div className="max-w-lg mx-auto">
+          <button
+            onClick={() => {
+              if (projectBack === 'journey') {
+                window.history.pushState({}, '', '/');
+                setProjectSlug(null);
+                setActiveSection('journey');
+                window.scrollTo(0, 0);
+              } else closeWork();
+            }}
+            className="text-xs text-stone-500 hover:text-stone-700 mb-14 transition-colors"
+          >
+            ← {projectBack === 'journey' ? 'Journey' : 'Works'}
+          </button>
+          <div className="text-center" style={{ fontFamily: "'Noto Serif KR', serif" }}>
+            <h1 className="text-3xl text-stone-800">{currentProject.title}</h1>
+            {currentProject.subtitle && <p className="text-sm text-stone-500 mt-3">{currentProject.subtitle}</p>}
+            <p className="text-xs text-stone-400 mt-6">정기우</p>
+          </div>
+          {currentProject.question && <p className="text-xs text-amber-800 text-center mt-10">Q. {currentProject.question}</p>}
+          <div className="flex justify-center">{currentProject.stage && <StageSteps stage={currentProject.stage} />}</div>
+          <p className="mt-10 text-sm text-stone-600 leading-relaxed break-keep text-center">{currentProject.intro}</p>
+
+          <div className="mt-14 pt-10 border-t border-stone-300" style={{ fontFamily: "'Noto Serif KR', serif" }}>
+            <p className="text-xs tracking-widest text-stone-500 mb-8 text-center" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>목차</p>
+            <ol className="space-y-3">
+              {currentProject.toc.map((t, k) => (
+                <li key={k} className={t.sub ? 'pl-5' : k ? 'pt-5' : ''}>
+                  {t.post ? (
+                    <button onClick={() => openWork(t.post.slug)} className="text-left text-stone-800 hover:underline underline-offset-4 break-keep">
+                      {t.text}
+                    </button>
+                  ) : (
+                    <span className={`break-keep ${t.sub ? 'text-stone-400' : 'text-stone-600'}`}>{t.text}</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-stone-400 mt-10 text-center" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>
+              진하게 보이는 글은 읽을 수 있어요 · 목차는 쓰면서 자란다 (처음 잡은 목차 기준)
+            </p>
+          </div>
+        </div>
+      </div>
+    ) : currentProject ? (
       <div className="min-h-screen py-20 px-6">
         <div className="max-w-xl mx-auto">
           <button

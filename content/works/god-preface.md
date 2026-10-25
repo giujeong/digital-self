@@ -2,6 +2,7 @@
 title: 서문 — 이 책이 시작된 대화
 slug: god-preface
 project: questions-meet-god
+toc: 서문 · 이 책이 시작된 대화
 date: 2026-10-25
 category: 질문으로 만나는 하나님
 ---
