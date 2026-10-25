@@ -55,6 +55,30 @@ export default function DigitalSelf() {
     window.scrollTo(0, 0);
   };
 
+  const ProjectBack = () => (
+    <button
+      onClick={() => {
+        if (projectBack === 'journey') {
+          window.history.pushState({}, '', '/');
+          setProjectSlug(null);
+          setActiveSection('journey');
+          window.scrollTo(0, 0);
+        } else closeWork();
+      }}
+      className="text-xs text-stone-500 hover:text-stone-700 mb-14 transition-colors"
+    >
+      ← {projectBack === 'journey' ? 'Journey' : 'Works'}
+    </button>
+  );
+  const ProjectHead = ({ p }) => (
+    <>
+      {p.question && <p className="text-xs text-amber-800 mb-2">Q. {p.question}</p>}
+      <h1 className="text-3xl font-light text-stone-800 mb-3 break-keep">{p.title}</h1>
+      {p.stage && <StageSteps stage={p.stage} />}
+      <div className="mt-8 text-sm text-stone-700 leading-relaxed break-keep whitespace-pre-wrap">{p.body}</div>
+    </>
+  );
+
   const currentWork = workSlug ? findWork(workSlug) : null;
   const currentProject = projectSlug ? findProject(projectSlug) : null;
   const workProject = currentWork?.project ? findProject(currentWork.project) : null;
@@ -550,6 +574,88 @@ export default function DigitalSelf() {
             <p className="text-xs text-stone-400 mt-10 text-center" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>
               진하게 보이는 글은 읽을 수 있어요 · 목차는 쓰면서 자란다 (처음 잡은 목차 기준)
             </p>
+          </div>
+        </div>
+      </div>
+    ) : currentProject && currentProject.type === 'study' ? (() => {
+      const chars = currentProject.posts.flatMap((w) => (w.kanji || '').split(/\s+/).filter(Boolean).map((c) => ({ c, w })));
+      return (
+        <div className="min-h-screen py-16 px-6">
+          <div className="max-w-xl mx-auto">
+            <ProjectBack />
+            <ProjectHead p={currentProject} />
+            <div className="mt-12 flex items-baseline gap-3">
+              <span className="text-5xl font-light text-stone-800">{chars.length}</span>
+              <span className="text-sm text-stone-500">자 익힘 · 글 {currentProject.posts.length}편</span>
+            </div>
+            <div className="mt-6 grid grid-cols-5 sm:grid-cols-8 gap-2">
+              {chars.map(({ c, w }, k) => (
+                <button
+                  key={k}
+                  onClick={() => openWork(w.slug)}
+                  title={w.title}
+                  className="aspect-square flex items-center justify-center text-2xl text-stone-800 bg-white border border-stone-200 rounded hover:border-stone-500"
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-stone-500 mt-3">글자를 누르면 그 글자가 나온 글로 가요</p>
+            <div className="mt-12 space-y-6">
+              {currentProject.posts.map((w) => (
+                <button key={w.slug} onClick={() => openWork(w.slug)} className="block w-full text-left pb-5 border-b border-stone-200 group">
+                  <p className="text-base text-stone-800 group-hover:underline underline-offset-4 break-keep">{w.title}</p>
+                  <p className="text-xs text-stone-500 mt-1">{[w.category, w.date].filter(Boolean).join(' · ')}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    })() : currentProject && currentProject.type === 'log' ? (
+      <div className="min-h-screen py-16 px-6">
+        <div className="max-w-xl mx-auto">
+          <ProjectBack />
+          <ProjectHead p={currentProject} />
+          <p className="text-xs tracking-widest text-stone-500 mt-14 mb-6">기록</p>
+          <ol className="relative border-l border-stone-300 ml-2">
+            {currentProject.posts.map((w) => (
+              <li key={w.slug} className="ml-6 pb-10">
+                <span className="absolute -left-[5px] mt-1.5 w-2.5 h-2.5 rounded-full bg-stone-800" />
+                <p className="text-xs text-stone-500">{w.date}</p>
+                <button onClick={() => openWork(w.slug)} className="text-left text-lg text-stone-800 hover:underline underline-offset-4 break-keep">
+                  {w.title}
+                </button>
+                {w.question && <p className="text-xs text-amber-800 mt-1">Q. {w.question}</p>}
+                {w.stage && <StageSteps stage={w.stage} />}
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-stone-500">현장과 개발에서 나온 기록이 날짜순으로 쌓여요</p>
+        </div>
+      </div>
+    ) : currentProject && currentProject.type === 'dictionary' ? (
+      <div className="min-h-screen py-16 px-6">
+        <div className="max-w-xl mx-auto">
+          <ProjectBack />
+          <ProjectHead p={currentProject} />
+          <div className="mt-12 border-t-2 border-stone-800 pt-6">
+            <p className="text-xs tracking-widest text-stone-500 mb-6">단어</p>
+            {currentProject.posts.length ? (
+              <dl className="space-y-6">
+                {[...currentProject.posts].sort((a, b) => a.title.localeCompare(b.title, 'ko')).map((w) => (
+                  <button key={w.slug} onClick={() => openWork(w.slug)} className="block w-full text-left group">
+                    <dt className="text-xl text-stone-800 group-hover:underline underline-offset-4">{w.title}</dt>
+                    {w.th && <dd className="text-sm text-stone-500">{w.th}</dd>}
+                  </button>
+                ))}
+              </dl>
+            ) : (
+              <div className="text-stone-500">
+                <p className="text-xl text-stone-400">（첫 단어 공개 준비 중）</p>
+                <p className="text-xs mt-4">한 단어마다 · 단어 — 그 단어에 담긴 기억 — 아내에게</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

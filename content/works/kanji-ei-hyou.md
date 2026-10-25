@@ -2,6 +2,7 @@
 title: 길게 흐르는 물, 얼어붙은 물 — 永 泳 詠 氷 冫
 slug: kanji-ei-hyou
 project: japanese-retry
+kanji: 永 泳 詠 氷 冫
 date: 2026-10-25
 category: 한자 익히기
 source: 『통쾌한 한자』 참고 (67쪽, 247~250)
