@@ -2,23 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { Youtube } from 'lucide-react';
-import { mdWorks, findWork } from './content';
+import { mdWorks, findWork, mdProjects, findProject, standaloneWorks } from './content';
 
 const slugFromPath = () => {
   const m = window.location.pathname.match(/^\/works\/([^/]+)/);
   return m ? decodeURIComponent(m[1]) : null;
 };
+const projectFromPath = () => {
+  const m = window.location.pathname.match(/^\/projects\/([^/]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+};
+const sectionFromPath = () => (slugFromPath() ? 'work' : projectFromPath() ? 'project' : 'home');
 const STAGES = ['질문', '푸는 중', '변화'];
 
 export default function DigitalSelf() {
   const [workSlug, setWorkSlug] = useState(slugFromPath());
-  const [activeSection, setActiveSection] = useState(slugFromPath() ? 'work' : 'home');
+  const [projectSlug, setProjectSlug] = useState(projectFromPath());
+  const [activeSection, setActiveSection] = useState(sectionFromPath());
 
   useEffect(() => {
     const onPop = () => {
-      const slug = slugFromPath();
-      setWorkSlug(slug);
-      setActiveSection(slug ? 'work' : 'home');
+      setWorkSlug(slugFromPath());
+      setProjectSlug(projectFromPath());
+      setActiveSection(sectionFromPath());
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -34,15 +40,29 @@ export default function DigitalSelf() {
   const closeWork = () => {
     window.history.pushState({}, '', '/');
     setWorkSlug(null);
+    setProjectSlug(null);
     setActiveSection('works');
     window.scrollTo(0, 0);
   };
 
+  const [projectBack, setProjectBack] = useState('works');
+  const openProject = (slug, from) => {
+    if (from) setProjectBack(from);
+    window.history.pushState({}, '', `/projects/${slug}`);
+    setProjectSlug(slug);
+    setWorkSlug(null);
+    setActiveSection('project');
+    window.scrollTo(0, 0);
+  };
+
   const currentWork = workSlug ? findWork(workSlug) : null;
+  const currentProject = projectSlug ? findProject(projectSlug) : null;
+  const workProject = currentWork?.project ? findProject(currentWork.project) : null;
 
   useEffect(() => {
-    document.title = currentWork ? `${currentWork.title} | 정기우` : '정기우 | Digital Self';
-  }, [currentWork]);
+    const t = currentWork?.title || currentProject?.title;
+    document.title = t ? `${t} | 정기우` : '정기우 | Digital Self';
+  }, [currentWork, currentProject]);
 
   const StageSteps = ({ stage }) => (
     <div className="flex gap-1.5 mt-3">
@@ -270,12 +290,19 @@ export default function DigitalSelf() {
           </div>
 
           <div className="mt-16 pt-8 border-t border-stone-200">
-            <p className="text-xs tracking-widest text-stone-400 mb-4">CURRENT PROJECT</p>
-            <p className="font-medium text-stone-800 mb-2">「질문으로 만나는 하나님」</p>
-            <p className="text-sm text-stone-500">
-              성경 원어 학습을 통해 하나님의 말씀을 더 깊이 알아가며,
-              그 여정에서 발견한 것들을 나누는 책 프로젝트
-            </p>
+            <p className="text-xs tracking-widest text-stone-400 mb-4">CURRENT PROJECTS</p>
+            {mdProjects.map((p, i) => (
+              <button
+                key={p.slug}
+                onClick={() => openProject(p.slug, 'journey')}
+                className={`block w-full text-left group ${i ? 'mt-8' : ''}`}
+              >
+                <p className="font-medium text-stone-800 mb-1 group-hover:underline underline-offset-4">「{p.title}」</p>
+                {p.question && <p className="text-xs text-amber-800 mb-1">Q. {p.question}</p>}
+                <p className="text-sm text-stone-500">{p.body.split('\n')[0]}</p>
+                <p className="text-xs text-stone-500 mt-1">{[p.stage, p.posts.length ? `글 ${p.posts.length}편` : '공개 준비 중'].filter(Boolean).join(' · ')}</p>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -295,8 +322,45 @@ export default function DigitalSelf() {
           <p className="text-sm text-stone-500 mb-16">질문하고, 문제 풀고, 나누는 것들</p>
           
           {mdWorks.length > 0 && (
+            <div className="mb-16">
+              <p className="text-xs tracking-widest text-stone-500 mb-6">RECENT</p>
+              <div className="space-y-5">
+                {mdWorks.slice(0, 5).map((w) => {
+                  const proj = w.project ? findProject(w.project) : null;
+                  return (
+                    <button key={w.slug} onClick={() => openWork(w.slug)} className="block w-full text-left group">
+                      <p className="text-xs text-stone-500">{[w.date, proj?.title].filter(Boolean).join(' · ')}</p>
+                      <p className="text-base text-stone-800 group-hover:underline underline-offset-4 break-keep">{w.title}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {mdProjects.length > 0 && (
+            <p className="text-xs tracking-widest text-stone-500 mb-6">PROJECTS</p>
+          )}
+          {mdProjects.length > 0 && (
+            <div className="space-y-10 mb-10">
+              {mdProjects.map((p) => (
+                <button
+                  key={p.slug}
+                  onClick={() => openProject(p.slug, 'works')}
+                  className="block w-full text-left pb-8 border-b border-stone-200 group"
+                >
+                  {p.question && <p className="text-xs text-amber-800 mb-1">Q. {p.question}</p>}
+                  <p className="text-lg font-medium text-stone-800 group-hover:underline underline-offset-4">{p.title}</p>
+                  <p className="text-xs text-stone-500 mt-1">프로젝트 · {p.posts.length ? `글 ${p.posts.length}편` : '공개 준비 중'}{p.updated ? ` · 최근 ${p.updated}` : ''}</p>
+                  {p.stage && <StageSteps stage={p.stage} />}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {standaloneWorks.length > 0 && (
             <div className="space-y-10 mb-12">
-              {mdWorks.map((w) => (
+              {standaloneWorks.map((w) => (
                 <button
                   key={w.slug}
                   onClick={() => openWork(w.slug)}
@@ -304,8 +368,8 @@ export default function DigitalSelf() {
                 >
                   {w.question && <p className="text-xs text-amber-800 mb-1">Q. {w.question}</p>}
                   <p className="text-lg font-medium text-stone-800 group-hover:underline underline-offset-4">{w.title}</p>
-                  <p className="text-xs text-stone-500 mt-1">{w.category} · {w.date}</p>
-                  <StageSteps stage={w.stage} />
+                  <p className="text-xs text-stone-500 mt-1">{[w.category, w.date].filter(Boolean).join(' · ')}</p>
+                  {w.stage && <StageSteps stage={w.stage} />}
                 </button>
               ))}
             </div>
@@ -348,18 +412,22 @@ export default function DigitalSelf() {
       <div className="min-h-screen py-20 px-6">
         <article className="max-w-xl mx-auto">
           <button
-            onClick={closeWork}
+            onClick={() => (workProject ? openProject(workProject.slug) : closeWork())}
             className="text-xs text-stone-500 hover:text-stone-700 mb-16 transition-colors"
           >
-            ← Works
+            ← {workProject ? workProject.title : 'Works'}
           </button>
           {currentWork.question && (
             <p className="text-xs text-amber-800 mb-2">Q. {currentWork.question}</p>
           )}
           <h1 className="text-3xl font-light text-stone-800 mb-3">{currentWork.title}</h1>
-          <p className="text-xs text-stone-500">{currentWork.category} · {currentWork.date} · {currentWork.version}</p>
-          <StageSteps stage={currentWork.stage} />
+          <p className="text-xs text-stone-500">{[currentWork.category, currentWork.date, currentWork.version].filter(Boolean).join(' · ')}</p>
+          {currentWork.source && <p className="text-xs text-stone-500 mt-1">출처 · {currentWork.source}</p>}
+          {currentWork.stage && <StageSteps stage={currentWork.stage} />}
 
+          {currentWork.format === 'note' ? (
+            <div className="mt-12 whitespace-pre-wrap text-sm text-stone-700 leading-relaxed break-keep">{currentWork.body}</div>
+          ) : (
           <div className="mt-14 space-y-6 text-base text-stone-700 leading-loose break-keep">
             {currentWork.body.split(/\n\s*\n/).map((para, i) => (
               <p key={i}>
@@ -372,6 +440,7 @@ export default function DigitalSelf() {
               </p>
             ))}
           </div>
+          )}
 
           {currentWork.history && (
             <p className="mt-16 pt-6 border-t border-stone-200 text-xs text-stone-500">
@@ -385,6 +454,51 @@ export default function DigitalSelf() {
         <div className="max-w-xl mx-auto">
           <button onClick={closeWork} className="text-xs text-stone-500 mb-16">← Works</button>
           <p className="text-sm text-stone-500">글을 찾을 수 없습니다.</p>
+        </div>
+      </div>
+    ),
+
+    project: currentProject ? (
+      <div className="min-h-screen py-20 px-6">
+        <div className="max-w-xl mx-auto">
+          <button
+            onClick={() => {
+              if (projectBack === 'journey') {
+                window.history.pushState({}, '', '/');
+                setProjectSlug(null);
+                setActiveSection('journey');
+                window.scrollTo(0, 0);
+              } else closeWork();
+            }}
+            className="text-xs text-stone-500 hover:text-stone-700 mb-16 transition-colors"
+          >
+            ← {projectBack === 'journey' ? 'Journey' : 'Works'}
+          </button>
+          {currentProject.question && <p className="text-xs text-amber-800 mb-2">Q. {currentProject.question}</p>}
+          <h1 className="text-3xl font-light text-stone-800 mb-3">{currentProject.title}</h1>
+          <p className="text-xs text-stone-500">프로젝트 · {currentProject.posts.length ? `글 ${currentProject.posts.length}편` : '공개 준비 중'}</p>
+          {currentProject.stage && <StageSteps stage={currentProject.stage} />}
+          <div className="mt-10 text-sm text-stone-700 leading-relaxed break-keep whitespace-pre-wrap">{currentProject.body}</div>
+
+          <div className="mt-14 space-y-8">
+            {currentProject.posts.map((w) => (
+              <button
+                key={w.slug}
+                onClick={() => openWork(w.slug)}
+                className="block w-full text-left pb-6 border-b border-stone-200 group"
+              >
+                <p className="text-base font-medium text-stone-800 group-hover:underline underline-offset-4 break-keep">{w.title}</p>
+                <p className="text-xs text-stone-500 mt-1">{[w.category, w.date].filter(Boolean).join(' · ')}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="min-h-screen py-20 px-6">
+        <div className="max-w-xl mx-auto">
+          <button onClick={closeWork} className="text-xs text-stone-500 mb-16">← Works</button>
+          <p className="text-sm text-stone-500">프로젝트를 찾을 수 없습니다.</p>
         </div>
       </div>
     ),

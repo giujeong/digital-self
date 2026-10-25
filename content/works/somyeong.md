@@ -1,6 +1,7 @@
 ---
 title: 소명
 slug: somyeong
+project: eum
 date: 2026-10-24
 stage: 변화
 question: 나는 왜 이 일을 하는가?

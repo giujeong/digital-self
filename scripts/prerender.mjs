@@ -51,9 +51,32 @@ for (const { meta, body } of works) {
   fs.writeFileSync(path.join(DIST, 'works', meta.slug, 'index.html'), html);
 }
 
-const urls = [{ loc: SITE + '/' }, ...works.map((w) => ({ loc: `${SITE}/works/${w.meta.slug}`, lastmod: w.meta.date }))];
+// 프로젝트 페이지 (글 목록 포함)
+const pdir = 'content/projects';
+const projects = fs.existsSync(pdir) ? fs.readdirSync(pdir).filter((f) => f.endsWith('.md'))
+  .map((f) => parse(fs.readFileSync(path.join(pdir, f), 'utf8'))).filter((p) => p.meta.slug) : [];
+for (const { meta, body } of projects) {
+  const posts = works.filter((w) => w.meta.project === meta.slug).sort((a, b) => (b.meta.date || '').localeCompare(a.meta.date || ''));
+  const url = `${SITE}/projects/${meta.slug}`;
+  const title = `${meta.title} | 정기우`;
+  const desc = meta.question ? `Q. ${meta.question} — ${body.split('\n')[0]}` : body.split('\n')[0];
+  const article = `<article><p>Q. ${esc(meta.question || '')}</p><h1>${esc(meta.title)}</h1><p>${esc(body).replace(/\n/g, '<br>')}</p><ul>` +
+    posts.map((w) => `<li><a href="/works/${w.meta.slug}">${esc(w.meta.title)}</a></li>`).join('') + `</ul></article>`;
+  const html = template
+    .replace(/<title>.*?<\/title>/, `<title>${esc(title)}</title>`)
+    .replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${esc(desc)}" />`)
+    .replace('</head>', `${headTags({ title, desc, url, type: 'website' })}\n  </head>`)
+    .replace('<div id="root"></div>', `<div id="root">${article}</div>`);
+  fs.mkdirSync(path.join(DIST, 'projects', meta.slug), { recursive: true });
+  fs.writeFileSync(path.join(DIST, 'projects', meta.slug, 'index.html'), html);
+  meta.updated = posts[0]?.meta.date;
+}
+
+const urls = [{ loc: SITE + '/' },
+  ...projects.map((p) => ({ loc: `${SITE}/projects/${p.meta.slug}`, lastmod: p.meta.updated })),
+  ...works.map((w) => ({ loc: `${SITE}/works/${w.meta.slug}`, lastmod: w.meta.date }))];
 fs.writeFileSync(path.join(DIST, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n') + `\n</urlset>\n`);
 fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
-console.log(`prerender: ${works.length}개 글, sitemap.xml, robots.txt`);
+console.log(`prerender: 프로젝트 ${projects.length}개, 글 ${works.length}개, sitemap.xml, robots.txt`);
