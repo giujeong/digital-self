@@ -79,6 +79,18 @@ export default function DigitalSelf() {
     </>
   );
 
+  // [텍스트](/works/slug | https://…) → 링크. 내부 글은 페이지 안에서 이동
+  const inline = (text) => text.split(/(\[[^\]]+\]\([^)]+\))/g).map((seg, i) => {
+    const m = seg.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (!m) return <React.Fragment key={i}>{seg}</React.Fragment>;
+    const [, label, href] = m;
+    const internal = href.startsWith('/works/');
+    return (
+      <a key={i} href={href} target={internal ? undefined : '_blank'} rel={internal ? undefined : 'noreferrer'}
+        onClick={internal ? (e) => { e.preventDefault(); openWork(href.slice(7)); } : undefined}
+        className="underline underline-offset-4 decoration-stone-400 hover:decoration-stone-800">{label}</a>
+    );
+  });
   // 백서(guide): ## 소제목 · - 목록 · > 알림 · | 표 를 읽어 그린다
   const lines = (s) => s.split('\n').map((l, j, a) => (<React.Fragment key={j}>{l}{j < a.length - 1 && <br />}</React.Fragment>));
   const GuideBody = ({ body }) => (
@@ -532,11 +544,11 @@ export default function DigitalSelf() {
                     </div>
                   );
                 })() : para.startsWith('- ') ? (
-                  <ul key={k} className="space-y-3 text-[16px]">{para.split(/\n(?=- )/).map((li, j) => <li key={j}>{li.replace(/^- /, '').split('\n').map((l, n, a) => (<React.Fragment key={n}>{l}{n < a.length - 1 && <br />}</React.Fragment>))}</li>)}</ul>
+                  <ul key={k} className="space-y-3 text-[16px]">{para.split(/\n(?=- )/).map((li, j) => <li key={j}>{li.replace(/^- /, '').split('\n').map((l, n, a) => (<React.Fragment key={n}>{inline(l)}{n < a.length - 1 && <br />}</React.Fragment>))}</li>)}</ul>
                 ) : para.startsWith('> ') ? (
                   <blockquote key={k} className="border-l-2 border-stone-300 pl-4 text-stone-600">{para.replace(/^> ?/gm, '')}</blockquote>
                 ) : (
-                  <p key={k}>{para.split('\n').map((line, j, arr) => (<React.Fragment key={j}>{line}{j < arr.length - 1 && <br />}</React.Fragment>))}</p>
+                  <p key={k}>{para.split('\n').map((line, j, arr) => (<React.Fragment key={j}>{inline(line)}{j < arr.length - 1 && <br />}</React.Fragment>))}</p>
                 )
               )}
             </div>

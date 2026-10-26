@@ -7,17 +7,25 @@ date: 2026-10-26
 category: 봄바람처럼 건네는 일본어
 version: v0.1 (계속 늘어남)
 ---
+각 장의 짧은 주석은 이 페이지로 이어진다. 원어민과 선생님의 감수가 끝나면 주석을 한데 모아 이 마지막 장에서 정리한다.
+
 이 책의 설명은 일본 정부의 국어 정책 문서, 일본의 국어 연구 기관, 일본 언론사의 자료를 기준으로 삼는다. 대화모임에서 들은 설명은 이 자료들과 맞춰 본 뒤에 싣고, 아직 맞춰 보지 못한 것은 본문에 그렇다고 밝힌다.
 
 ## 기준 문헌
 
 - 文化審議会(문화심의회) 답신 「敬語の指針」, 文化庁(문화청), 2007년 2월 2일.
 경어를 존경어·겸양어Ⅰ·겸양어Ⅱ(정중어)·정녕어·미화어의 다섯 가지로 나누어 설명한다(14쪽). 경어 사용은 "어디까지나 「자기표현」이어야 한다"는 것이 이 지침의 바탕이다(8쪽).
-https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/keigo_tosin.pdf
+[文化庁 PDF 원문](https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/keigo_tosin.pdf)
 
 - 井上文子(이노우에 후미코) 「依頼表現の地域差：買物場面における言語行動」, 国立国語研究所(국립국어연구소), 2021.
 가게에서 엽서를 사는 장면의 부탁 표현을 전국 조사로 나누어 본 연구. 2장의 "가게에서 쓰는 말" 참고.
-https://repository.ninjal.ac.jp/record/3388/files/openhouse2019_25.pdf
+[国立国語研究所 PDF 원문](https://repository.ninjal.ac.jp/record/3388/files/openhouse2019_25.pdf)
+
+## 이 자료를 쓴 글
+
+- [들어가며 — 대인춘풍 지기추상](/works/keigo-00-intro)
+- [1장 묻기](/works/keigo-01-ask) — 「敬語の指針」 8쪽
+- [2장 부탁하기](/works/keigo-02-request) — 「敬語の指針」 8·14·25·28쪽, 국립국어연구소 의뢰 표현 연구
 
 ## 대조 예정
 
