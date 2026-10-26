@@ -519,7 +519,21 @@ export default function DigitalSelf() {
             <div className="w-10 h-px bg-stone-300 mx-auto my-12" />
             <div className="space-y-7 text-[17px] text-stone-800 leading-[2] break-keep">
               {currentWork.body.split(/\n\s*\n/).map((para, k) =>
-                para.startsWith('> ') ? (
+                para.startsWith('## ') ? (
+                  <h2 key={k} className="text-lg text-stone-900 pt-8 text-center">{para.slice(3)}</h2>
+                ) : para.startsWith('|') ? (() => {
+                  const rows = para.split('\n').filter((r) => !/^\|\s*-/.test(r)).map((r) => r.replace(/^\||\|$/g, '').split('|').map((c) => c.trim()));
+                  return (
+                    <div key={k} className="overflow-x-auto" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>
+                      <table className="w-full text-[13px] leading-relaxed border-collapse">
+                        <thead><tr>{rows[0].map((c, j) => <th key={j} className="text-left font-medium border-b border-stone-400 py-2 pr-3 align-bottom">{c}</th>)}</tr></thead>
+                        <tbody>{rows.slice(1).map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} className="border-b border-stone-200 py-2 pr-3 align-top">{c}</td>)}</tr>)}</tbody>
+                      </table>
+                    </div>
+                  );
+                })() : para.startsWith('- ') ? (
+                  <ul key={k} className="space-y-3 text-[16px]">{para.split(/\n(?=- )/).map((li, j) => <li key={j}>{li.replace(/^- /, '').split('\n').map((l, n, a) => (<React.Fragment key={n}>{l}{n < a.length - 1 && <br />}</React.Fragment>))}</li>)}</ul>
+                ) : para.startsWith('> ') ? (
                   <blockquote key={k} className="border-l-2 border-stone-300 pl-4 text-stone-600">{para.replace(/^> ?/gm, '')}</blockquote>
                 ) : (
                   <p key={k}>{para.split('\n').map((line, j, arr) => (<React.Fragment key={j}>{line}{j < arr.length - 1 && <br />}</React.Fragment>))}</p>
