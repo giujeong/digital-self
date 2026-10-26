@@ -79,6 +79,37 @@ export default function DigitalSelf() {
     </>
   );
 
+  // 백서(guide): ## 소제목 · - 목록 · > 알림 · | 표 를 읽어 그린다
+  const lines = (s) => s.split('\n').map((l, j, a) => (<React.Fragment key={j}>{l}{j < a.length - 1 && <br />}</React.Fragment>));
+  const GuideBody = ({ body }) => (
+    <div className="space-y-5 text-[15px] text-stone-700 leading-[1.85] break-keep">
+      {body.split(/\n\s*\n/).map((para, k) => {
+        if (para.startsWith('## ')) return <h2 key={k} className="text-lg text-stone-900 font-medium pt-6 border-t border-stone-200">{para.slice(3)}</h2>;
+        if (para.startsWith('> ')) return <div key={k} className="bg-amber-50 border-l-2 border-amber-600 px-4 py-3 text-sm text-stone-700">{lines(para.replace(/^> ?/gm, ''))}</div>;
+        if (para.startsWith('|')) {
+          const rows = para.split('\n').filter((r) => !/^\|\s*-/.test(r)).map((r) => r.replace(/^\||\|$/g, '').split('|').map((c) => c.trim()));
+          return (
+            <div key={k} className="overflow-x-auto -mx-1">
+              <table className="w-full text-[13px] border-collapse">
+                <thead><tr>{rows[0].map((c, j) => <th key={j} className="text-left font-medium text-stone-800 border-b border-stone-400 py-2 pr-3 align-bottom">{c}</th>)}</tr></thead>
+                <tbody>{rows.slice(1).map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} className="border-b border-stone-200 py-2 pr-3 align-top">{c}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
+          );
+        }
+        if (para.startsWith('- ')) return <ul key={k} className="space-y-2 pl-4 list-disc marker:text-stone-400">{para.split(/\n(?=- )/).map((li, j) => <li key={j}>{lines(li.replace(/^- /, ''))}</li>)}</ul>;
+        return <p key={k}>{lines(para)}</p>;
+      })}
+    </div>
+  );
+  const GuideMeta = ({ w }) => (
+    <dl className="mt-6 grid grid-cols-[4.5rem_1fr] gap-y-1 text-xs text-stone-600 border border-stone-200 rounded px-4 py-3">
+      {[['버전', w.version], ['갱신', w.date], ['근거', w.basis], ['검증', w.verified]].filter(([, v]) => v).map(([k, v]) => (
+        <React.Fragment key={k}><dt className="text-stone-400">{k}</dt><dd className="break-keep">{v}</dd></React.Fragment>
+      ))}
+    </dl>
+  );
+
   const currentWork = workSlug ? findWork(workSlug) : null;
   const currentProject = projectSlug ? findProject(projectSlug) : null;
   const workProject = currentWork?.project ? findProject(currentWork.project) : null;
@@ -432,7 +463,39 @@ export default function DigitalSelf() {
       </div>
     ),
 
-    work: currentWork && workProject?.type === 'book' ? (() => {
+    work: currentWork && workProject?.type === 'guide' ? (() => {
+      const r = workProject.reading;
+      const i = r.findIndex((w) => w.slug === currentWork.slug);
+      const prev = i > 0 ? r[i - 1] : null;
+      const next = i >= 0 && i < r.length - 1 ? r[i + 1] : null;
+      return (
+        <div className="min-h-screen py-16 px-4 sm:px-6">
+          <article className="max-w-xl mx-auto">
+            <button onClick={() => openProject(workProject.slug)} className="text-xs text-stone-500 hover:text-stone-700 mb-12 transition-colors">
+              ← {workProject.title} 목차
+            </button>
+            <p className="text-xs tracking-widest text-stone-500">{workProject.title}</p>
+            <h1 className="text-2xl text-stone-900 mt-2 break-keep leading-snug">{currentWork.title}</h1>
+            {currentWork.question && <p className="text-sm text-stone-500 mt-2 break-keep">{currentWork.question}</p>}
+            <GuideMeta w={currentWork} />
+            <div className="mt-10"><GuideBody body={currentWork.body} /></div>
+            <p className="mt-12 text-xs text-stone-400 break-keep">이 글은 절차 안내이며 법률 자문이 아닙니다. 구체적 사안은 관할 경찰서·변호사에게 확인하세요.</p>
+            <nav className="mt-8 pt-6 border-t border-stone-200 flex justify-between gap-4 text-sm">
+              {prev ? (
+                <button onClick={() => openWork(prev.slug)} className="text-left text-stone-600 hover:text-stone-900">
+                  <span className="block text-xs text-stone-400">← 이전</span>{prev.title}
+                </button>
+              ) : <span />}
+              {next ? (
+                <button onClick={() => openWork(next.slug)} className="text-right text-stone-600 hover:text-stone-900">
+                  <span className="block text-xs text-stone-400">다음 →</span>{next.title}
+                </button>
+              ) : <span className="text-right text-xs text-stone-400 self-end">다음 장은 작성 중</span>}
+            </nav>
+          </article>
+        </div>
+      );
+    })() : currentWork && workProject?.type === 'book' ? (() => {
       const r = workProject.reading;
       const i = r.findIndex((w) => w.slug === currentWork.slug);
       const prev = i > 0 ? r[i - 1] : null;
@@ -607,6 +670,35 @@ export default function DigitalSelf() {
               진하게 보이는 글은 읽을 수 있어요 · 목차는 쓰면서 자란다 (처음 잡은 목차 기준)
             </p>
           </div>
+        </div>
+      </div>
+    ) : currentProject && currentProject.type === 'guide' ? (
+      <div className="min-h-screen py-16 px-4 sm:px-6">
+        <div className="max-w-xl mx-auto">
+          <ProjectBack />
+          {currentProject.question && <p className="text-xs text-amber-800 mb-2">Q. {currentProject.question}</p>}
+          <h1 className="text-3xl font-light text-stone-800 break-keep">{currentProject.title}</h1>
+          {currentProject.subtitle && <p className="text-sm text-stone-500 mt-2">{currentProject.subtitle}</p>}
+          {currentProject.stage && <StageSteps stage={currentProject.stage} />}
+          <div className="mt-8 text-sm text-stone-700 leading-relaxed break-keep whitespace-pre-wrap">{currentProject.intro}</div>
+          <div className="mt-6 bg-amber-50 border-l-2 border-amber-600 px-4 py-3 text-xs text-stone-700 break-keep">
+            살아있는 문서입니다. 장마다 버전·갱신일·근거·검증 상태를 적고, 법이 바뀌거나 현장에서 확인되면 고칩니다. 절차 안내이며 법률 자문이 아닙니다.
+          </div>
+          <p className="text-xs tracking-widest text-stone-500 mt-12 mb-4">목차</p>
+          <ol className="divide-y divide-stone-200 border-t border-b border-stone-200">
+            {currentProject.toc.map((t, k) => (
+              <li key={k} className="py-3">
+                {t.post ? (
+                  <button onClick={() => openWork(t.post.slug)} className="w-full text-left group">
+                    <span className="text-stone-800 group-hover:underline underline-offset-4 break-keep">{t.text}</span>
+                    <span className="block text-xs text-stone-400 mt-0.5">{[t.post.version, t.post.date, t.post.verified].filter(Boolean).join(' · ')}</span>
+                  </button>
+                ) : (
+                  <span className="text-stone-400 break-keep">{t.text} <span className="text-xs">· 작성 중</span></span>
+                )}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     ) : currentProject && currentProject.type === 'study' ? (() => {

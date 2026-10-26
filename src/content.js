@@ -34,7 +34,7 @@ export const mdProjects = Object.values(projectFiles)
   .map((p) => {
     const posts = mdWorks.filter((w) => w.project === p.slug);
     const base = { ...p, posts, updated: posts[0]?.date || '' };
-    if (p.type !== 'book') return base;
+    if (p.type !== 'book' && p.type !== 'guide') return base;
     // 책: 본문의 '목차' 줄 아래가 살아있는 목차. 글은 frontmatter toc: 로 목차 줄과 연결
     const [intro, tocRaw = ''] = p.body.split(/\n목차\n/);
     const toc = tocRaw.split('\n').filter((l) => l.trim()).map((l) => {
