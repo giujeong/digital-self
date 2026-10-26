@@ -201,11 +201,11 @@ export default function DigitalSelf() {
     home: (
       <div className="min-h-screen flex flex-col justify-center items-center px-6">
         <div className="text-center max-w-xl">
+          <img src="/logo.svg" alt="캄 — 엎드러질지라도 일어나는 자" width="64" height="64" className="mx-auto mb-6 rounded-lg" />
           <p className="text-xs tracking-widest text-stone-400 mb-6">DIGITAL SELF</p>
           <h1 className="text-4xl md:text-5xl font-light text-stone-800 mb-4">
             정기우
           </h1>
-          <p className="text-2xl text-stone-600 mb-1" lang="he" dir="rtl">קָם</p>
           <p className="text-xs text-stone-400 mb-6">캄</p>
           <p className="text-sm text-stone-500 mb-2">1988. 3. 4 —</p>
           <p className="text-xs text-stone-400 mb-16">

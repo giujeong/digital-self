@@ -25,6 +25,7 @@ const headTags = ({ title, desc, url, type }) => `
     <meta property="og:description" content="${esc(desc)}" />
     <meta property="og:url" content="${url}" />
     <meta property="og:locale" content="ko_KR" />
+    <meta property="og:image" content="${SITE}/logo-512.png" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@giujeong_me" />`;
 
