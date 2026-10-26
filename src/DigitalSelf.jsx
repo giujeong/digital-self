@@ -517,7 +517,7 @@ export default function DigitalSelf() {
             <h1 className="text-2xl text-stone-800 text-center mt-4 mb-2 break-keep leading-snug">{currentWork.title}</h1>
             {currentWork.question && <p className="text-sm text-stone-500 text-center break-keep">{currentWork.question}</p>}
             <div className="w-10 h-px bg-stone-300 mx-auto my-12" />
-            <div className="space-y-7 text-[17px] text-stone-800 leading-[2] break-keep">
+            <div className="space-y-7 text-[17px] text-stone-800 leading-[2] break-keep [overflow-wrap:anywhere]">
               {currentWork.body.split(/\n\s*\n/).map((para, k) =>
                 para.startsWith('## ') ? (
                   <h2 key={k} className="text-lg text-stone-900 pt-8 text-center">{para.slice(3)}</h2>
