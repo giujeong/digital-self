@@ -610,7 +610,8 @@ export default function DigitalSelf() {
         </div>
       </div>
     ) : currentProject && currentProject.type === 'study' ? (() => {
-      const chars = currentProject.posts.flatMap((w) => (w.kanji || '').split(/\s+/).filter(Boolean).map((c) => ({ c, w })));
+      const seen = new Set();
+      const chars = currentProject.posts.flatMap((w) => (w.kanji || '').split(/\s+/).filter(Boolean).map((c) => ({ c, w }))).filter(({ c }) => (seen.has(c) ? false : (seen.add(c), true)));
       return (
         <div className="min-h-screen py-16 px-6">
           <div className="max-w-xl mx-auto">
