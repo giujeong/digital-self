@@ -643,13 +643,13 @@ export default function DigitalSelf() {
             ← {projectBack === 'journey' ? 'Journey' : 'Works'}
           </button>
           <div className="text-center" style={{ fontFamily: "'Noto Serif KR', serif" }}>
-            <h1 className="text-3xl text-stone-800">{currentProject.title}</h1>
+            <h1 className="text-3xl text-stone-800 break-keep leading-snug">{currentProject.title}</h1>
             {currentProject.subtitle && <p className="text-sm text-stone-500 mt-3">{currentProject.subtitle}</p>}
             <p className="text-xs text-stone-400 mt-6">정기우</p>
           </div>
           {currentProject.question && <p className="text-xs text-amber-800 text-center mt-10">Q. {currentProject.question}</p>}
           <div className="flex justify-center">{currentProject.stage && <StageSteps stage={currentProject.stage} />}</div>
-          <p className="mt-10 text-sm text-stone-600 leading-relaxed break-keep text-center">{currentProject.intro}</p>
+          <p className="mt-10 text-sm text-stone-600 leading-relaxed break-keep text-center whitespace-pre-line">{currentProject.intro}</p>
 
           <div className="mt-14 pt-10 border-t border-stone-300" style={{ fontFamily: "'Noto Serif KR', serif" }}>
             <p className="text-xs tracking-widest text-stone-500 mb-8 text-center" style={{ fontFamily: 'Pretendard, Inter, sans-serif' }}>목차</p>
