@@ -4,6 +4,7 @@ slug: keigo-02-request
 project: keigo-japanese
 toc: 2장 부탁하기 — ください, お願いします, お願いできますか
 date: 2026-10-26
+time: 21:13
 category: 봄바람처럼 건네는 일본어
 version: 초고 v0.1
 ---

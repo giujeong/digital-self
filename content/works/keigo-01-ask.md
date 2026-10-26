@@ -4,6 +4,7 @@ slug: keigo-01-ask
 project: keigo-japanese
 toc: 1장 묻기 — どう와 いかが, よろしいですか
 date: 2026-10-26
+time: 21:13
 category: 봄바람처럼 건네는 일본어
 version: 초고 v0.1
 ---

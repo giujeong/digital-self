@@ -18,7 +18,8 @@ export const mdWorks = Object.values(files)
     return { ...meta, body, origin: 'md' };
   })
   .filter((w) => w.slug)
-  .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  // 같은 날짜가 여러 편이면 frontmatter time:(HH:MM)이 늦은 글이 먼저 — RECENT가 날짜만으로는 순서를 못 정함
+  .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.time || '').localeCompare(a.time || ''));
 
 export const findWork = (slug) => mdWorks.find((w) => w.slug === slug);
 

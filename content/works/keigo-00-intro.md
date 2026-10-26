@@ -4,6 +4,7 @@ slug: keigo-00-intro
 project: keigo-japanese
 toc: 들어가며 · 대인춘풍 지기추상
 date: 2026-10-26
+time: 20:18
 category: 봄바람처럼 건네는 일본어
 version: 초고 v0.1
 ---

@@ -4,6 +4,7 @@ slug: keigo-03-decline
 project: keigo-japanese
 toc: 3장 받기와 거절하기 — いいです의 두 얼굴
 date: 2026-10-26
+time: 21:37
 category: 봄바람처럼 건네는 일본어
 version: 초고 v0.1
 ---
