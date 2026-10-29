@@ -1,6 +1,11 @@
 {
   "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "jpkanji.giujeong.me" }], "destination": "/kanji/index.html" },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "jpkanji.giujeong.me" }], "destination": "/kanji/:path*" },
     { "source": "/works/:slug", "destination": "/index.html" },
     { "source": "/projects/:slug", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/kanji/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
   ]
 }
