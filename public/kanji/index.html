@@ -518,9 +518,11 @@ function renderInfo(){
   $('mnimg').innerHTML='';$('mnimg').appendChild(partsSVG(c));
   $('parts').innerHTML=c.pg.map((g,i)=>`<span style="color:${GC[i%3]}">${g[0]}</span>`).join(' + ');$('memo').innerHTML=esc(c.memo)+(c.draft?' <em class="draft">신지 초안</em>':'');$('ill').innerHTML=illSVG(curC);
   renderRP();
-  $('exs').innerHTML=c.ex.filter(e=>!selR||e.r===selR).map(e=>`<div class="ex"><div class="r ${isKata(e.r)?'on':'kun'}">${e.r}${isKata(e.r)?'<small>'+hira(e.r)+'</small>':''}</div><div><div class="jprow"><button class="say" data-say="${esc(e.kana)}" aria-label="예문 듣기">▶</button><div class="jp">${esc(e.jp).split(curC).join('<mark>'+curC+'</mark>')}</div></div><div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}</div></div></div>`).join('');
+  $('exs').innerHTML=c.ex.filter(e=>!selR||e.r===selR).map(e=>`<div class="ex"><div class="r ${isKata(e.r)?'on':'kun'}">${e.r}${isKata(e.r)?'<small>'+hira(e.r)+'</small>':''}</div><div><div class="jprow"><button class="say" data-say="${esc(e.kana)}" aria-label="예문 듣기">▶</button><div class="jp">${esc(e.jp).split(curC).join('<mark>'+curC+'</mark>')}</div></div><div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}${e.by?' <em class="draft">신지 예문</em>':''}</div></div></div>`).join('');
+  if(!c.ex.length){const mem=(lessonOf(curC)||curL).chars.filter(x=>x!==curC&&D.chars[x].w&&D.chars[x].w.length);
+    $('exs').innerHTML=mem.length?`<div class="note" style="padding:8px 0">단독으로 읽지 않는 부수예요 — 이 부수가 들어간 단어</div>`+mem.map(x=>{const w=D.chars[x].w[0];return `<div class="ex"><div class="r ${isKata(w.r)?'on':'kun'}">${x}<small>${w.r}</small></div><div><div class="jprow"><button class="say" data-say="${esc(w.kana)}" aria-label="듣기">▶</button><div class="jp">${esc(w.w).split(x).join('<mark>'+x+'</mark>')}</div></div><div class="kana">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`}).join(''):'';}
   bindSay($('exs'));
-  $('point').innerHTML=`<b>${curL.head}</b> 계열 포인트 — ${esc(curL.point)}`;
+  $('point').hidden=!curL.point;$('point').innerHTML=`<b>${curL.head}</b> 계열 포인트 — ${esc(curL.point||'')}`;
   const s=S[curC];
   $('learnbtn').hidden=!!s;
   $('learnnote').textContent=s?(s.stage>=5?'복습 완료한 글자예요.':`복습 중 · 다음 복습 ${s.due===TODAY?'오늘':s.due} (${IVL_L[s.stage]} 단계)`):'누르면 라이프복습 간격(오늘·1일·3일·7일·1달)으로 복습에 들어가요.';
