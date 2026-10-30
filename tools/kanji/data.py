@@ -147,6 +147,13 @@ HX={"某":[sx("ボウ","某所で会議が開かれました。","ぼうしょ�
 for h,xs in HX.items():
     if h in C and not C[h]["ex"]:
         C[h]["ex"]=[x[0] for x in xs];C[h]["w"]=[x[1] for x in xs]
+ANT={"大":"小","入":"出","天":"地","失":"得","貧":"富","登":"降","発":"着","澄":"濁","太":"細","分":"合","信":"疑","肥":"痩","未":"既"}
+ANTH={"小":"작을 소","地":"땅 지","得":"얻을 득","富":"부자 부","降":"내릴 강","着":"붙을 착","濁":"흐릴 탁","細":"가늘 세","合":"합할 합","疑":"의심할 의","痩":"파리할 수","既":"이미 기"}
+for a,b in list(ANT.items()):
+    for x,y in ((a,b),(b,a)):
+        if x in C and not C[x].get("ant"):
+            C[x]["ant"]=y;C[x]["antd"]=True
+            if y not in C and y in ANTH: C[x]["anth"]=ANTH[y]
 heads={}
 open(os.path.join(HERE,"data.json"),"w",encoding="utf-8").write(json.dumps({"chars":C,"lessons":L,"heads":heads},ensure_ascii=False))
 print(len(C),"chars",len(L),"lessons")
