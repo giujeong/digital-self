@@ -477,6 +477,13 @@ Object.assign(ILL,{
 '勹':()=>`<path class="i" d="M60 40 Q60 22 78 22 L112 22 Q132 22 130 46 L122 90 Q120 98 110 94"/><circle class="a" cx="96" cy="60" r="14"/><path class="i" d="M64 44 Q76 40 80 52"/><text x="4" y="12">몸을 구부려</text><text x="4" y="28">감싸 안다</text>`,
 });
 
+
+Object.assign(ILL,{
+'巴':()=>`<path class="i" d="M20 60 Q40 56 60 50 M24 70 Q44 66 62 58"/><path class="i" d="M62 50 L76 44 M62 58 L78 56 M60 66 L74 68"/>`+AR(82,52,122,52)+`<circle class="a" cx="134" cy="52" r="10"/><text x="8" y="94">손을 내밀어 잡으려 함</text>`,
+'尸':()=>`<path class="i" d="M20 70 H140 M30 70 V82 M130 70 V82"/><circle class="i" cx="40" cy="56" r="8"/><path class="i" d="M48 58 H122"/><path class="a d" d="M60 44 Q70 26 64 10 M90 44 Q100 26 94 10"/><text x="100" y="98">누운 주검</text>`,
+'卩':()=>`<circle class="i" cx="70" cy="18" r="8"/><path class="i" d="M70 26 V58 L96 58 V88 M70 40 L90 48"/><path class="i" d="M50 88 H110"/><text x="100" y="30">무릎 꿇은</text><text x="100" y="46">사람</text>`,
+});
+
 function illSVG(ch){const f=ILL[ch];return f?`<svg viewBox="0 0 160 100" role="img" aria-label="${ch} 연상 그림">${f()}</svg>`:''}
 
 let selR=null;
