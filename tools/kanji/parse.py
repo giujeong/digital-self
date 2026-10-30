@@ -25,7 +25,7 @@ def parse_file(path):
                 cur['chars'].append(head)
             i+=1;continue
         m=re.match(r'^\s+('+CJK+r') = (.+)$',ln)
-        if m and cur is not None and m.group(1) in chars and chars[m.group(1)].get('rad'):
+        if m and mode!='point' and cur is not None and m.group(1) in chars and chars[m.group(1)].get('rad') and not chars[m.group(1)]['memo']:
             v=chars[m.group(1)];v['memo']=m.group(2).strip()
             pp=re.match(r'^(\S+ \+ [^:—]+?)\s*[:—]',v['memo'])
             if pp: v['parts']=pp.group(1).strip()

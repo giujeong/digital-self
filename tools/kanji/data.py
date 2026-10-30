@@ -103,7 +103,7 @@ for f in files:
         has=ensure(ch)
         if not has and not v.get('rad'): continue
         if ch in KNOWN and not (v["on"] or v["kun"]): v["on"],v["kun"]=KNOWN[ch]
-        v["s"]=strokes(ch) if has else [];v["pg"]=autopg(ch) if has else [[ch,1,1]];v["w"]=[{"r":e["r"],"w":e["jp"],"kana":e["kana"],"ko":e["ko"]} for e in v["ex"]]
+        v["s"]=strokes(ch) if has else [];v["pg"]=(autopg(ch) if not v.get("rad") else [[ch,1,max(1,len(v["s"]))]]) if has else [[ch,1,1]];v["w"]=[{"r":e["r"],"w":e["jp"],"kana":e["kana"],"ko":e["ko"]} for e in v["ex"]]
         C[ch]=v
     for l in LL:
         l["chars"]=[c for c in l["chars"] if c in C]

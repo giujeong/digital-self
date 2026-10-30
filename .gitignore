@@ -3,3 +3,4 @@ dist
 .env*
 tools/kanji/preview/
 tools/kanji/data.json
+__pycache__/

@@ -1,5 +1,5 @@
 // 부수 한자 — 오프라인 캐시. 화면·데이터는 네트워크 먼저(새 버전 반영), 실패하면 캐시.
-const CACHE = 'busu-kanji-v2';
+const CACHE = 'busu-kanji-v3';
 const SHELL = ['./', 'kanji-data.json', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
