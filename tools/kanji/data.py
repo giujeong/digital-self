@@ -85,7 +85,7 @@ def autopg(ch):
             if not o[0]: o[0]='·'
         return out if len(out)>1 else [[ch,1,len(strokes(ch))]]
     except Exception: return [[ch,1,1]]
-files=sorted(glob.glob(os.path.join(REPO,'content','works','kanji-*.md')),key=lambda f:re.search(r'^date: (.*)$',open(f,encoding='utf-8').read(),re.M).group(1),reverse=True)
+files=sorted(glob.glob(os.path.join(REPO,'content','works','kanji-*.md')),key=lambda f:re.search(r'^date: (.*)$',open(f,encoding='utf-8').read(),re.M).group(1))
 for i,l in enumerate(L): l["ord"]=[249,i]
 for l in L:
     l["date"]="2026-10-28";l["src"]="249~251쪽";l["series"]=True
@@ -108,6 +108,9 @@ for f in files:
     for l in LL:
         l["chars"]=[c for c in l["chars"] if c in C]
         if l["chars"]: L.append(l)
+PGX={"器":[["口 口",1,6],["大",7,9],["口 口",10,15]],"爽":[["大",1,1],["㸚",2,9],["大",10,11]],"右":[["ナ",1,2],["口",3,5]],"左":[["ナ",1,2],["工",3,5]],"存":[["ナ 丨",1,3],["子",4,6]],"在":[["ナ 丨",1,3],["土",4,6]]}
+for ch,pg in PGX.items():
+    if ch in C: C[ch]["pg"]=pg
 for l in L:
     if l["head"]=='·': l["head"]=l["chars"][0]
 M=[];byh={}
@@ -147,7 +150,7 @@ HX={"某":[sx("ボウ","某所で会議が開かれました。","ぼうしょ�
 for h,xs in HX.items():
     if h in C and not C[h]["ex"]:
         C[h]["ex"]=[x[0] for x in xs];C[h]["w"]=[x[1] for x in xs]
-ANT={"大":"小","入":"出","天":"地","失":"得","貧":"富","登":"降","発":"着","澄":"濁","太":"細","分":"合","信":"疑","肥":"痩","未":"既"}
+ANT={"大":"小","入":"出","天":"地","失":"得","貧":"富","登":"降","発":"着","澄":"濁","太":"細","分":"合","信":"疑","肥":"痩","未":"既","右":"左"}
 ANTH={"小":"작을 소","地":"땅 지","得":"얻을 득","富":"부자 부","降":"내릴 강","着":"붙을 착","濁":"흐릴 탁","細":"가늘 세","合":"합할 합","疑":"의심할 의","痩":"파리할 수","既":"이미 기"}
 for a,b in list(ANT.items()):
     for x,y in ((a,b),(b,a)):
