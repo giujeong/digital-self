@@ -485,6 +485,21 @@ Object.assign(ILL,{
 '喿':()=>TREE(80,94,52)+[[52,34],[80,16],[108,34]].map(([x,y])=>`<circle class="i" cx="${x}" cy="${y}" r="8"/><path class="a" d="M${x+6} ${y-2} l8 -3 l-6 6 l8 1"/>`).join('')+`<text x="104" y="94">品 + 木</text><text x="4" y="94">조잘조잘</text>`,
 });
 
+
+Object.assign(ILL,{
+'人':()=>P(60,26)+`<path class="i" d="M49 68 L40 92 M71 68 L84 92"/>`+AR(96,60,140,60)+`<text x="96" y="48">걸어가는</text><text x="96" y="84">옆모습</text>`,
+'大':()=>`<circle class="i" cx="80" cy="18" r="8"/><path class="i" d="M80 26 V62 M80 62 L62 94 M80 62 L98 94 M40 40 H120"/>`+AR(52,40,22,40)+AR(108,40,138,40)+`<text x="4" y="94">팔 벌린 다 큰 사람</text>`,
+'亻':()=>P(36,30)+`<rect class="i d" x="62" y="18" width="80" height="64"/><path class="a" d="M74 26 L64 50 M70 40 V76"/><text x="96" y="56">← 왼쪽</text><text x="8" y="96">人이 왼쪽에 서면 亻</text>`,
+'勹':()=>`<path class="i" d="M60 40 Q60 22 78 22 L112 22 Q132 22 130 46 L122 90 Q120 98 110 94"/><circle class="a" cx="96" cy="60" r="14"/><path class="i" d="M64 44 Q76 40 80 52"/><text x="4" y="12">몸을 구부려</text><text x="4" y="28">감싸 안다</text>`,
+});
+
+
+Object.assign(ILL,{
+'巴':()=>`<path class="i" d="M20 60 Q40 56 60 50 M24 70 Q44 66 62 58"/><path class="i" d="M62 50 L76 44 M62 58 L78 56 M60 66 L74 68"/>`+AR(82,52,122,52)+`<circle class="a" cx="134" cy="52" r="10"/><text x="8" y="94">손을 내밀어 잡으려 함</text>`,
+'尸':()=>`<path class="i" d="M20 70 H140 M30 70 V82 M130 70 V82"/><circle class="i" cx="40" cy="56" r="8"/><path class="i" d="M48 58 H122"/><path class="a d" d="M60 44 Q70 26 64 10 M90 44 Q100 26 94 10"/><text x="100" y="98">누운 주검</text>`,
+'卩':()=>`<circle class="i" cx="70" cy="18" r="8"/><path class="i" d="M70 26 V58 L96 58 V88 M70 40 L90 48"/><path class="i" d="M50 88 H110"/><text x="100" y="30">무릎 꿇은</text><text x="100" y="46">사람</text>`,
+});
+
 function illSVG(ch){const f=ILL[ch];return f?`<svg viewBox="0 0 160 100" role="img" aria-label="${ch} 연상 그림">${f()}</svg>`:''}
 
 let selR=null;
