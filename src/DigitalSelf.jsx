@@ -336,6 +336,14 @@ export default function DigitalSelf() {
             </div>
 
             <div className="flex gap-6">
+              <span className="text-stone-400 w-20 shrink-0">2020</span>
+              <div>
+                <p className="font-medium text-stone-800">결혼 — 누니와 가정을 이루다</p>
+                <p className="text-stone-500">4월 26일, 준비하던 선상 결혼식은 코로나로 접고 장모님 댁에서 조촐히 식을 올리다 · <a href="/giunoonywedding26042020/" className="underline underline-offset-4 decoration-stone-400 hover:decoration-stone-800">청첩장 보기</a></p>
+              </div>
+            </div>
+
+            <div className="flex gap-6">
               <span className="text-stone-400 w-20 shrink-0">2025</span>
               <div>
                 <p className="font-medium text-stone-800">세대의 끝</p>
