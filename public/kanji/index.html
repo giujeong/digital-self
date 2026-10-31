@@ -141,7 +141,8 @@ button.rd{background:transparent}
 .ill:empty{display:none}
 .wrow:last-child{border-bottom:0}
 .ww{font-family:var(--f-ja);font-size:22px;font-weight:500}
-.ww.long{font-size:15px}
+.ww.long{font-size:17px}
+.wk,.wko{word-break:keep-all;overflow-wrap:anywhere;min-width:0}
 .ww mark{background:var(--hl);color:inherit;border-radius:2px}
 .wk{font-family:var(--f-ja);font-size:13px;color:var(--muted)}
 .wko{font-size:14px}
@@ -539,7 +540,7 @@ function renderRP(){
   rows.sort((a,b)=>(a.ch===curC?0:1)-(b.ch===curC?0:1));
   const same=kata?Object.keys(D.chars).filter(ch=>D.chars[ch].on.includes(selR)):[curC];
   rp.innerHTML=`<div class="rh">${kata?'音':'訓'} ${selR}${kata?' ('+hira(selR)+')':''} 으로 읽는 단어</div>`+
-    (rows.length?rows.map(w=>{const L=w.w.length>6;const word=`<div class="ww-row"><button class="say" data-say="${esc(w.kana)}" aria-label="${esc(w.w)} 듣기">▶</button><div class="ww${L?' long':''}">${esc(w.w).split(w.ch).join('<mark>'+w.ch+'</mark>')}</div></div>`;const meta=`<div><div class="wk">${esc(w.kana)}</div><div class="wko">${esc(w.ko)}</div></div>`;return `<div class="wrow${L?' long':''}">${L?'<div>'+word+meta+'</div>':word+meta}${w.ch!==curC?`<button class="go" data-go="${w.ch}" aria-label="${w.ch} 익히기">${w.ch} →</button>`:'<span></span>'}</div>`}).join(''):'<div class="hint">아직 이 읽기의 단어가 없어요.</div>')+
+    (rows.length?rows.map(w=>{const L=w.w.length>4||window.innerWidth<=640;const word=`<div class="ww-row"><button class="say" data-say="${esc(w.kana)}" aria-label="${esc(w.w)} 듣기">▶</button><div class="ww${L?' long':''}">${esc(w.w).split(w.ch).join('<mark>'+w.ch+'</mark>')}</div></div>`;const meta=`<div><div class="wk">${esc(w.kana)}</div><div class="wko">${esc(w.ko)}</div></div>`;return `<div class="wrow${L?' long':''}">${L?'<div>'+word+meta+'</div>':word+meta}${w.ch!==curC?`<button class="go" data-go="${w.ch}" aria-label="${w.ch} 익히기">${w.ch} →</button>`:'<span></span>'}</div>`}).join(''):'<div class="hint">아직 이 읽기의 단어가 없어요.</div>')+
     (kata&&same.length>1?`<div class="same">같은 음 글자: ${same.map(ch=>ch===curC?`<b class="go" style="border-color:var(--ink)">${ch}</b>`:`<button class="go" data-go="${ch}">${ch}</button>`).join('')}</div>`:'');
   rp.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goChar(b.dataset.go));
   bindSay(rp);
