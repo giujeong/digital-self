@@ -89,6 +89,8 @@ button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .ex .jp mark{background:var(--hl);color:inherit;padding:0 1px;border-radius:2px}
 .ex .kana{font-family:var(--f-ja);font-size:13px;color:var(--muted)}
 .ex .ko{font-size:14px}
+.topfix{position:sticky;top:var(--hdr,52px);z-index:29;background:var(--paper);display:flex;flex-direction:column;gap:14px;padding-bottom:6px;box-shadow:0 6px 10px -8px rgba(60,45,20,.25)}
+@media (max-width:640px){.topfix{gap:8px;padding-bottom:4px}}
 .sec-h{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em}
 .lv{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:999px;background:var(--ink);color:var(--paper);vertical-align:middle;font-family:var(--f-ko)}
 .lv.n4{background:#5b6b4a}.lv.n3{background:#7a6a3f}.lv.n2{background:#8a5a3f}.lv.n1{background:#7a3f3f}
@@ -263,8 +265,10 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   </header>
 
   <section id="v-learn" class="view">
+    <div class="topfix">
     <button class="pick" id="pick" aria-label="부수 고르기"></button>
     <div class="chars" id="chars"></div>
+    </div>
     <div class="learn">
       <div class="rail" id="rail" aria-label="필순"></div>
       <div class="board">
@@ -524,7 +528,9 @@ function renderRP(){
   rp.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goChar(b.dataset.go));
   bindSay(rp);
 }
-function renderInfo(){
+function setHdr(){const h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hdr',h.offsetHeight+'px')}
+window.addEventListener('resize',setHdr);window.addEventListener('load',setHdr);setTimeout(setHdr,50);
+function renderInfo(){setHdr();
   const c=D.chars[curC];try{localStorage.setItem('busu-kanji-last',curC)}catch(e){}
   const an=c.ant?(D.chars[c.ant]?`<button class="ant" data-go="${c.ant}" title="반의어 ${c.ant} 익히기">↔ <span class="k">${c.ant}</span>${esc(D.chars[c.ant].hun)}</button>`:`<span class="ant off" title="반의어 — 아직 덱에 없어요">↔ <span class="k">${c.ant}</span>${esc(c.anth||'')}</span>`):'';
   const lv=c.jlpt?`<span class="lv n${c.jlpt}">N${c.jlpt}</span>`:'';
