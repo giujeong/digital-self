@@ -13,3 +13,8 @@
 배포 규칙: 미리보기 → 신수 "좋아" → main 푸시 (Vercel 자동, giujeong.me/kanji 와 jpkanji.giujeong.me 동시)
 sw.js 의 CACHE 이름을 버전마다 올리면 폰 캐시가 새로 받음.
 루프: 볼트 「프로토콜_한자공부_루프_v2」
+
+## JLPT 데이터 (tools/kanji/jlpt/)
+- levels.json — 한자별 JLPT(신 기준) 급수. 출처: davidluzgouveia/kanji-data (KANJIDIC2 기반). N5는 통용 80자 목록으로 보정
+- vocab.json — N5~N1 단어 [급수, 표제어, 읽기, 영어 뜻]. 출처: jamsinclair/open-anki-jlpt-decks
+- jlpt_ko.json — 표제어 → 한국어 뜻 (신지 번역). 뜻이 있는 단어만 앱에 실림. `data.py` 실행 시 미번역 수를 출력

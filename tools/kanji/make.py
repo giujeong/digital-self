@@ -5,11 +5,11 @@ d=open(B+'/data.json',encoding='utf-8').read().strip()
 os.makedirs(B+'/preview',exist_ok=True);open(B+'/preview/부수한자_preview.html','w',encoding='utf-8').write(t.replace('__DATA__',d))
 s=t
 for a,b in [("const D = __DATA__;","let D=null;"),
- ("let curL=D.lessons.find(l=>l.chars.includes('分'))||D.lessons[0], curC=curL.chars.includes('分')?'分':curL.chars[0]","let curL=null, curC=null")]:
+ ("let curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0], curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0]","let curL=null, curC=null")]:
     assert a in s,a; s=s.replace(a,b)
 a="\nrenderAll();\n</script>"; assert a in s
 s=s.replace(a,"""
-function boot(d){D=d;curL=D.lessons.find(l=>l.chars.includes('分'))||D.lessons[0];curC=curL.chars[0];renderAll()}
+function boot(d){D=d;curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0];curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0];renderAll()}
 fetch('kanji-data.json',{cache:'no-cache'}).then(r=>r.json()).then(boot).catch(()=>{document.getElementById('v-learn').innerHTML='<p class="note">글자 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.</p>'});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>""")
