@@ -111,6 +111,7 @@ button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .learned{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .note{font-size:13px;color:var(--muted)}
 .rd small{font-size:12px;opacity:.75;margin-left:3px}
+.rd i{font-style:normal;font-family:var(--f-ko);font-size:12px;opacity:.8;margin-left:5px}
 .ex .r small{display:block;font-weight:500;opacity:.75}
 .mn{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:3px;background:var(--paper)}
 .mn-img{width:84px;flex:none;aspect-ratio:1}
@@ -441,7 +442,7 @@ function play(){
   step();
 }
 function readsHTML(c,btn){const t='button';const sp=r=>isKata(r)?hira(r):r.replace(/[()]/g,'');const a=r=>btn?` data-r="${r}" aria-pressed="${r===selR}"`:` data-say="${sp(r)}"`;
-  return c.on.map(r=>`<${t} class="rd on"${a(r)}><em>音</em>${r}<small>${hira(r)}</small></${t}>`).join('')+c.kun.map(r=>`<${t} class="rd kun"${a(r)}><em>訓</em>${r}</${t}>`).join('')}
+  return c.on.map(r=>`<${t} class="rd on"${a(r)}><em>音</em>${r}<small>${hira(r)}</small></${t}>`).join('')+c.kun.map(r=>{const ko=(c.kunko||{})[r]||'';return `<${t} class="rd kun"${a(r)}><em>訓</em>${r}${ko?`<i>${esc(ko)}</i>`:''}</${t}>`}).join('')}
 
 const P=(x,y=34,cls='i')=>`<circle class="${cls}" cx="${x}" cy="${y}" r="7"/><path class="${cls}" d="M${x-11} ${y+42} Q${x} ${y+4} ${x+11} ${y+42}"/>`;
 const W=(x,y=34,cls='i')=>`<circle class="${cls}" cx="${x}" cy="${y}" r="7"/><path class="${cls}" d="M${x} ${y+9} L${x-13} ${y+42} H${x+13} Z"/>`;
