@@ -532,7 +532,7 @@ function renderChars(){
   const b=$('chars');b.innerHTML='';
   curL.chars.forEach(ch=>{const c=D.chars[ch];const x=document.createElement('button');x.className='chip'+(curL.series&&ch===curL.head?' rad':'');x.setAttribute('aria-pressed',ch===curC);
     x.innerHTML=`<span class="k">${ch}</span><small>${c.s.length?c.s.length+'획':'부수'}</small><span class="dot ${KN[ch]==='u'?'u':(S[ch]?'on':'')}"></span>`;
-    x.onclick=()=>{curC=ch;renderAll()};b.appendChild(x)});
+    x.onclick=()=>{curC=ch;renderAll();window.scrollTo({top:0,behavior:'smooth'})};b.appendChild(x)});
 }
 function renderRail(){
   const r=$('rail');r.innerHTML='<div class="rail-h">필순 ↓</div>';
