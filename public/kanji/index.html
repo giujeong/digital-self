@@ -70,7 +70,7 @@ button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .rail-h{font-size:12px;color:var(--muted);text-align:center;font-weight:600}
 .frame{position:relative;border:1px solid var(--line);background:var(--sheet);border-radius:2px;padding:0;aspect-ratio:1;width:100%}
 .frame[aria-pressed="true"]{border-color:var(--shu);box-shadow:0 0 0 2px var(--shu)}
-.frame i{position:absolute;right:4px;top:1px;font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.frame i{display:none}
 .frame svg{width:100%;height:100%;display:block}
 .board{background:var(--sheet);border:1px solid var(--rule);outline:1px solid var(--rule);outline-offset:-6px;border-radius:3px;padding:18px;display:flex;flex-direction:column;gap:16px;min-width:0;overflow-wrap:anywhere}
 .top>div{min-width:0}
@@ -82,7 +82,9 @@ button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--sheet);border-radius:2px;padding:6px 12px;font-weight:600}
 .btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.btn.shu{background:var(--shu);color:#fff;border-color:var(--shu)}
+.btn.shu{background:var(--hot);color:#fff;border-color:var(--hot)}
+.btn.ok{background:var(--koke);color:#fff;border-color:var(--koke)}
+.btn[aria-pressed="true"]{background:var(--ai);color:#fff;border-color:var(--ai)}
 .count{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
 .hun{font-size:28px;font-weight:700;line-height:1.2}
 .hun small{font-size:14px;font-weight:400;color:var(--muted);margin-left:6px}
@@ -200,7 +202,7 @@ button.rd{background:transparent}
 .draft{font-style:normal;font-size:11px;color:var(--shu);border:1px solid var(--shu);border-radius:2px;padding:0 4px;margin-left:4px;white-space:nowrap}
 /* 카드 */
 .cmode{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.cmode .btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cmode .btn[aria-pressed="true"]{background:var(--ai);color:#fff;border-color:var(--ai)}
 .fcard{cursor:pointer;width:min(380px,100%);min-height:420px;margin:0 auto;border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;box-shadow:0 6px 0 var(--ghost);transition:transform .15s}
 .fcard:active{transform:translateY(2px)}
 .fcard .fk{font-family:var(--f-kanji);font-size:150px;line-height:1.05}
@@ -245,10 +247,20 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 /* 한판 */
 .bd-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .bd-top .seg{display:flex;gap:4px;flex-wrap:wrap}
-.bd-top .seg .btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bd-top .seg .btn[aria-pressed="true"]{background:var(--ai);color:#fff;border-color:var(--ai)}
 .bd-top .sp{margin-left:auto;font-size:12px;color:var(--muted)}
 .bgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 @media (max-width:640px){.bgrid{grid-template-columns:repeat(5,1fr);gap:5px}}
+.bdwrap{touch-action:pan-y;overflow:hidden}
+.bgrid.sl{animation:bdsl .22s ease-out}.bgrid.sr{animation:bdsr .22s ease-out}
+@keyframes bdsl{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes bdsr{from{transform:translateX(-40px);opacity:.4}to{transform:none;opacity:1}}
+.bd-top select{border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:2px;padding:6px 8px;font:inherit;font-weight:600}
+.bd-top .ico{border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:2px;width:34px;height:34px;font-size:16px;padding:0;margin-left:2px}
+.bd-top .pg{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.bddots{display:flex;justify-content:center;gap:6px;margin-top:8px;min-height:7px}
+.bddots i{width:7px;height:7px;border-radius:50%;background:var(--line)}.bddots i.on{background:var(--ink)}
+.bddots .bar{width:120px;height:4px;border-radius:2px;background:var(--line);position:relative}.bddots .bar b{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--ink)}
 .bt{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:var(--sheet);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;font-family:var(--f-kanji);font-size:clamp(30px,7.5vw,44px);line-height:1;color:var(--ink)}
 .bt.u{border-color:var(--hot);background:var(--rad);box-shadow:inset 0 0 0 1px var(--hot);color:var(--hotd)}
 .bt.sel{box-shadow:0 0 0 2px var(--ink)}
@@ -261,7 +273,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .bdcard .r{font-family:var(--f-ja);font-size:14px;color:var(--muted);margin-top:4px;min-height:1.3em}
 .bdcard .acts{display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .bdcard .acts .btn{padding:8px 12px}
-.bdcard .btn.hot{background:var(--hot);color:#fff;border-color:var(--hot)}
+
 .bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
 .bdcard .nav button{border:0;background:none;color:var(--muted);font:inherit;padding:4px 2px;cursor:pointer}
 .bdcard .nav button:disabled{opacity:.3}
@@ -290,12 +302,11 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   .view{gap:8px}
   .rail{gap:4px;max-height:none;overflow:visible}
   .rail-h{display:none}
-  .frame i{font-size:10px;right:2px;top:0}
   .ctl{margin-top:6px}
   .ctl .btn{padding:4px 10px;font-size:13px}
   .hun2{display:block;font-size:24px;margin-top:6px}
   .top>div:nth-child(2) .hun{display:none}
-  .learn{grid-template-columns:64px minmax(0,1fr);gap:10px}
+  .learn{grid-template-columns:42px minmax(0,1fr);gap:8px}
   .top{grid-template-columns:minmax(0,1fr)}
   .big{width:min(240px,100%);margin:0 auto}
   .board{padding:10px;gap:12px}
@@ -351,7 +362,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
         <div class="sec-h" id="jwh" hidden>급수 단어 <small class="jwn"></small></div>
         <div class="jw" id="jw" hidden></div>
         <div class="learned">
-          <button class="btn shu" id="learnbtn">익혔어요 → 오늘 복습에 넣기</button>
+          <button class="btn ok" id="learnbtn">익혔어요 → 오늘 복습에 넣기</button>
           <span class="note" id="learnnote"></span>
         </div>
       </div>
@@ -370,8 +381,8 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
     <div class="fcard" id="fcard" role="button" tabindex="0" aria-label="카드 뒤집기"></div>
     <div class="cnav">
       <button class="btn" id="cprev">← 이전</button>
-      <button class="btn" id="cno">몰라요</button>
-      <button class="btn shu" id="cyes">알아요</button>
+      <button class="btn shu" id="cno">몰라요</button>
+      <button class="btn ok" id="cyes">알아요</button>
       <button class="btn" id="cnext">다음 →</button>
     </div>
     <div class="note" style="text-align:center">부수 색: 하나도 안 익힘 = 짙은 빨강 → 다 익힘 = 연한 초록 · 카드를 누르면 뒤집혀요 · 키보드: 스페이스 뒤집기, ← → 이동</div>
@@ -391,17 +402,19 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
         <button class="btn" data-s="due">복습분</button>
         <button class="btn" data-s="unk">모름만</button>
       </div>
-      <span class="sp" id="bdcnt"></span>
+      <button class="ico" id="bdshuf" title="판 순서 섞기" aria-label="섞기">⇄</button>
+      <span class="sp"><span id="bdcnt"></span> · <span class="pg" id="bdpg"></span></span>
     </div>
-    <div class="bgrid" id="board"></div>
+    <div class="bdwrap" id="bdwrap"><div class="bgrid" id="board"></div></div>
+    <div class="bddots" id="bddots"></div>
     <div class="bd-foot">
-      <span id="bdnote">모르는 글자만 눌러 붉게 표시해요(다시 누르면 해제). 길게 누르면 뜻을 살짝 볼 수 있어요.</span>
-      <span class="ctl" style="margin:0"><button class="btn" id="bdshuf">섞기</button><button class="btn" id="bdcards" hidden>모름 카드로 보기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
+      <span id="bdnote">모르는 글자만 눌러 붉게 표시해요(다시 누르면 해제). 좌우로 쓸어 판을 넘기고, 길게 누르면 뜻을 살짝 봐요.</span>
+      <span class="ctl" style="margin:0"><button class="btn" id="bdcards" hidden>모름 카드로 보기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
     </div>
     <div class="bdov" id="bdov" hidden>
       <div class="bdcard" id="bdcard" role="dialog" aria-modal="true">
         <div class="k" id="bcK"></div><div class="h" id="bcH"></div><div class="r" id="bcR"></div>
-        <div class="acts"><button class="btn hot" id="bcU">몰라요</button><button class="btn" id="bcGo">익히기</button><button class="btn" id="bcNext">다음 ▶</button></div>
+        <div class="acts"><button class="btn shu" id="bcU">몰라요</button><button class="btn" id="bcGo">익히기</button><button class="btn" id="bcNext">다음 ▶</button></div>
         <div class="nav"><button id="bcPrev">◀ 이전</button><span id="bcPos"></span><button id="bcClose">닫기 ✕</button></div>
       </div>
     </div>
@@ -707,7 +720,7 @@ function renderReview(){
         <div>${due.length?`오늘 복습할 글자 ${due.length}개`:'오늘 복습할 글자가 없어요.'}</div>
         <div class="note">익히기에서 「익혔어요」를 누른 글자가 간격에 맞춰 여기로 와요.</div>
         <div class="ctl" style="justify-content:center">
-          ${due.length?'<button class="btn shu" id="go">복습 시작</button>':''}
+          ${due.length?'<button class="btn pri" id="go">복습 시작</button>':''}
           <button class="btn" id="prac">${curL.head} 계열로 연습하기 (기록 안 남음)</button></div></div>
       ${rows?`<div style="overflow-x:auto"><table class="sched"><thead><tr><th>글자</th><th>뜻</th><th>단계</th><th>다음 복습</th></tr></thead><tbody>${rows}</tbody></table></div>`:''}`;
     if($('go'))$('go').onclick=()=>startReview(false);
@@ -720,7 +733,7 @@ function renderReview(){
   if(Q.type==='paper'){
     rv.innerHTML=head+`<div class="q"><div class="ql">종이에 안 보고 써 보세요</div><div class="qt">${esc(c.hun)}</div><div class="qs">${[...c.on.map(rdTxt),...c.kun].join(' · ')}</div></div>
       <div class="paper" id="pp"><button class="btn pri" id="reveal">정답 보기</button></div>`;
-    $('reveal').onclick=()=>{$('pp').innerHTML=`<div class="big"></div><div class="ctl"><button class="btn" id="pno">틀렸어요</button><button class="btn shu" id="pok">맞았어요</button></div>`;
+    $('reveal').onclick=()=>{$('pp').innerHTML=`<div class="big"></div><div class="ctl"><button class="btn shu" id="pno">틀렸어요</button><button class="btn ok" id="pok">맞았어요</button></div>`;
       if(c.s.length)$('pp').querySelector('.big').appendChild(svgOf(c.s,c.s.length-1,{sw:3.6,mark:false}));else $('pp').querySelector('.big').innerHTML=`<div class="glyph">${Q.ch}</div>`;
       $('pok').onclick=()=>{grade(true);next()};$('pno').onclick=()=>{grade(false);next()}};
     return;
@@ -746,33 +759,42 @@ let view='learn';
 function show(v){view=v;['learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
   if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
 /* ---------- 한판 ---------- */
-let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1;
+let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1,bdPage=0,bdAnim='';const BD_PG=30;
 function bdChars(){refreshToday();
   if(bdScope==='unk')return Object.keys(D.chars).filter(c=>KN[c]==='u');
   if(bdScope==='due')return dueList();
   return Object.keys(D.chars)}
 function bdBuild(keep){const n=bdChars();if(!keep||n.length!==bdList.length||n.some(c=>!bdList.includes(c)))bdList=n}
 function bdUnk(){return bdList.filter(c=>KN[c]==='u')}
+function bdPages(){return Math.max(1,Math.ceil(bdList.length/BD_PG))}
 function renderBoard(keep=true){bdBuild(keep);
-  $('bdscope').querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===bdScope));
-  const unkN=bdUnk().length;
-  $('bdcnt').textContent=`${bdList.length}자${unkN?' · 모름 '+unkN:''}`;
+  $('bdscope').querySelectorAll('.btn').forEach(x=>x.setAttribute('aria-pressed',x.dataset.s===bdScope));
+  const unkN=bdUnk().length,np=bdPages();if(bdPage>=np)bdPage=np-1;if(bdPage<0)bdPage=0;
+  $('bdcnt').textContent=`${bdList.length}자${unkN?' · 모름 '+unkN:''}`;$('bdpg').textContent=np>1?`판 ${bdPage+1} / ${np}`:'';
   $('bdstudy').hidden=!unkN;$('bdcards').hidden=!unkN;
-  const b=$('board');b.innerHTML='';
+  const b=$('board');b.innerHTML='';b.className='bgrid'+(bdAnim?' '+bdAnim:'');bdAnim='';
+  const d=$('bddots');d.innerHTML=np<=1?'':np<=12?Array.from({length:np},(_,i)=>`<i class="${i===bdPage?'on':''}"></i>`).join(''):`<span class="bar"><b style="width:${(bdPage+1)/np*100}%"></b></span>`;
   if(!bdList.length){b.innerHTML=`<div class="note" style="grid-column:1/-1">${bdScope==='unk'?'모른다고 표시한 글자가 없어요.':bdScope==='due'?'오늘 복습할 글자가 없어요.':'글자가 없어요.'}</div>`;return}
   const due=new Set(dueList()),open=!$('bdov').hidden&&bdQ[bdI];
-  bdList.forEach(ch=>{const x=document.createElement('button');x.className='bt'+(KN[ch]==='u'?' u':'')+(due.has(ch)?' d':'')+(open===ch?' sel':'');
+  bdList.slice(bdPage*BD_PG,(bdPage+1)*BD_PG).forEach(ch=>{const x=document.createElement('button');x.className='bt'+(KN[ch]==='u'?' u':'')+(due.has(ch)?' d':'')+(open===ch?' sel':'');
     x.textContent=ch;x.setAttribute('aria-label',ch);let lp=null,held=false;
     const dn=e=>{held=false;lp=setTimeout(()=>{held=true;bdPeek(ch)},450)};const up=()=>{clearTimeout(lp)};
     x.onpointerdown=dn;x.onpointerup=up;x.onpointerleave=up;x.onpointercancel=up;x.oncontextmenu=e=>e.preventDefault();
     x.onclick=()=>{if(held){held=false;return}if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);renderBoard()};
     b.appendChild(x)})}
+function bdFlip(dir){const np=bdPages();const n=bdPage+dir;if(n<0||n>=np)return;bdPage=n;bdAnim=dir>0?'sl':'sr';renderBoard()}
+(()=>{let sx=0,sy=0,on=false;const w=$('bdwrap');
+  w.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;on=true},{passive:true});
+  w.addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)bdFlip(dx<0?1:-1)},{passive:true});
+  w.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>30&&Math.abs(e.deltaX)>Math.abs(e.deltaY)){e.preventDefault();bdFlip(e.deltaX>0?1:-1)}},{passive:false})})();
+document.addEventListener('keydown',e=>{if(view!=='board'||!$('bdov').hidden)return;if(e.key==='ArrowRight')bdFlip(1);else if(e.key==='ArrowLeft')bdFlip(-1)});
+
 function bdUnmark(ch){if(KN[ch]==='u'){KN[ch]='k';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(_){}push()}}
 function bdFill(ch){const c=D.chars[ch];$('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').textContent=[...c.on,...c.kun].join(' · ');
   $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';$('bdov').hidden=false}
 let bdPeekT=0;
 function bdPeek(ch){bdPeekT=Date.now();bdQ=[ch];bdI=0;bdFill(ch);$('bcNext').hidden=true;$('bcPrev').hidden=true;$('bcPos').textContent='살짝 보기';renderBoard()}
-function bdOpen(i){if(!bdQ.length||i<0||i>=bdQ.length){bdClose();return}bdI=i;const ch=bdQ[i];bdFill(ch);
+function bdOpen(i){if(!bdQ.length||i<0||i>=bdQ.length){bdClose();return}bdI=i;const ch=bdQ[i];bdFill(ch);bdPage=Math.floor(Math.max(0,bdList.indexOf(ch))/BD_PG);
   $('bcNext').hidden=false;$('bcPrev').hidden=false;$('bcPrev').disabled=i===0;$('bcNext').textContent=i<bdQ.length-1?'다음 ▶':'마침 ✓';$('bcPos').textContent=`모름 ${i+1} / ${bdQ.length}`;renderBoard();
   const t=[...$('board').children].find(x=>x.textContent===ch);if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest'})}
 function bdClose(){$('bdov').hidden=true;bdQ=[];bdI=-1;renderBoard()}
@@ -786,8 +808,8 @@ document.addEventListener('keydown',e=>{if($('bdov').hidden)return;if(e.key==='E
 function bdGo(ch){bdFrom=true;bdCur=ch;const u=bdUnk();const i=u.indexOf(ch);
   $('bbinfo').textContent=`${ch} ${D.chars[ch].hun}`+(u.length>1&&i>=0?` (모름 ${i+1}/${u.length})`:'');$('bbnext').hidden=!(u.length>1&&i>=0&&i<u.length-1);
   goChar(ch);show('learn')}
-$('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;renderBoard(false)};
-$('bdshuf').onclick=()=>{bdList=shuffle(bdList);renderBoard()};
+$('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;bdPage=0;renderBoard(false)};
+$('bdshuf').onclick=()=>{bdList=shuffle(bdList);bdPage=0;bdAnim='sl';renderBoard()};
 $('bdcards').onclick=()=>{bdQ=bdUnk();if(bdQ.length)bdOpen(0)};
 $('bdstudy').onclick=()=>{const u=bdUnk();if(u.length)bdGo(u[0])};
 $('bdreview').onclick=()=>show('review');
