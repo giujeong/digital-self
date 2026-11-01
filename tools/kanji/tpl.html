@@ -261,10 +261,12 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
 .bdcard .nav button{border:0;background:none;color:var(--muted);font:inherit;padding:4px 2px;cursor:pointer}
 .bdcard .nav button:disabled{opacity:.3}
+.bdcard.peek #bcNext,.bdcard.peek #bcPrev{display:none}
 .bt.d .fa::after{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--shu)}
 .bd-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
-.backbar{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--radl);background:var(--rad);border-radius:3px;padding:6px 10px;font-size:13px}
-.backbar b{color:var(--hotd)}
+.fab{position:fixed;right:14px;bottom:18px;z-index:40;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.fab .btn{box-shadow:0 6px 18px rgba(0,0,0,.22);padding:11px 16px;font-size:15px;border-radius:999px}
+.fab .btn.pri{border:1px solid var(--paper)}
 .acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--ink)}
 .kakao{background:#FEE500;color:#191600;border:0;border-radius:6px;padding:8px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .kakao svg{width:16px;height:16px}
@@ -312,7 +314,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   </header>
 
   <section id="v-learn" class="view">
-    <div class="backbar" id="backbar" hidden><span>한판에서 왔어요 — <b id="bbinfo"></b></span><span><button class="btn" id="bbnext" hidden>다음 모르는 글자 →</button> <button class="btn pri" id="bbback">← 한판으로</button></span></div>
+    <div class="fab" id="backbar" hidden><button class="btn" id="bbnext" hidden>다음 모름 ▶</button><button class="btn pri" id="bbback">← 한판</button></div>
     <div class="topfix">
     <button class="pick" id="pick" aria-label="부수 고르기"></button>
     <div class="chars" id="chars"></div>
@@ -764,7 +766,7 @@ function renderBoard(keep=true){bdBuild(keep);
     x.textContent=ch;x.setAttribute('aria-label',ch);let lp=null,held=false;
     const dn=e=>{held=false;lp=setTimeout(()=>{held=true;bdPeek(ch)},450)};const up=()=>{clearTimeout(lp)};
     x.onpointerdown=dn;x.onpointerup=up;x.onpointerleave=up;x.onpointercancel=up;x.oncontextmenu=e=>e.preventDefault();
-    x.onclick=()=>{if(held){held=false;return}if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);renderBoard()};
+    x.onclick=()=>{if(held||Date.now()-bdPeekT<500){held=false;return}if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);renderBoard()};
     b.appendChild(x)})}
 function bdFlip(dir){const np=bdPages();const n=bdPage+dir;if(n<0||n>=np)return;bdPage=n;bdAnim=dir>0?'sl':'sr';renderBoard()}
 (()=>{let sx=0,sy=0,on=false;const w=$('bdwrap');
@@ -777,20 +779,21 @@ function bdUnmark(ch){if(KN[ch]==='u'){KN[ch]='k';try{localStorage.setItem('busu
 function bdFill(ch){const c=D.chars[ch];$('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').innerHTML=readsHTML(c,false);bindSay($('bcR'));
   $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';$('bdov').hidden=false}
 let bdPeekT=0;
-function bdPeek(ch){bdPeekT=Date.now();bdQ=[ch];bdI=0;bdFill(ch);$('bcNext').hidden=true;$('bcPrev').hidden=true;$('bcPos').textContent='살짝 보기';renderBoard()}
-function bdOpen(i){if(!bdQ.length||i<0||i>=bdQ.length){bdClose();return}bdI=i;const ch=bdQ[i];bdFill(ch);bdPage=Math.floor(Math.max(0,bdList.indexOf(ch))/BD_PG);
+function bdPeek(ch){bdPeekT=Date.now();bdQ=[ch];bdI=0;bdFill(ch);$('bdcard').classList.add('peek');$('bcPos').textContent='살짝 보기';renderBoard()}
+function bdOpen(i){if(!bdQ.length||i<0||i>=bdQ.length){bdClose();return}bdI=i;const ch=bdQ[i];bdFill(ch);$('bdcard').classList.remove('peek');bdPage=Math.floor(Math.max(0,bdList.indexOf(ch))/BD_PG);
   $('bcNext').hidden=false;$('bcPrev').hidden=false;$('bcPrev').disabled=i===0;$('bcNext').textContent=i<bdQ.length-1?'다음 ▶':'마침 ✓';$('bcPos').textContent=`모름 ${i+1} / ${bdQ.length}`;renderBoard();
   const t=[...$('board').children].find(x=>x.textContent===ch);if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest'})}
-function bdClose(){$('bdov').hidden=true;bdQ=[];bdI=-1;renderBoard()}
-$('bcU').onclick=()=>{const ch=bdQ[bdI];if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);bdFill(ch);renderBoard()};
+function bdClose(){$('bdov').hidden=true;if($('bdcard').classList.contains('peek'))bdPeekT=Date.now();$('bdcard').classList.remove('peek');bdQ=[];bdI=-1;renderBoard()}
+$('bcU').onclick=()=>{const ch=bdQ[bdI];if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);if($('bdcard').classList.contains('peek')){bdClose();return}bdFill(ch);renderBoard()};
 $('bcNext').onclick=()=>bdOpen(bdI+1);
 $('bcPrev').onclick=()=>bdOpen(bdI-1);
 $('bcClose').onclick=bdClose;
+
 $('bdov').onclick=e=>{if(e.target===$('bdov')&&Date.now()-bdPeekT>600)bdClose()};
 $('bcGo').onclick=()=>{const ch=bdQ[bdI];$('bdov').hidden=true;bdGo(ch)};
 document.addEventListener('keydown',e=>{if($('bdov').hidden)return;if(e.key==='Escape')bdClose();else if(e.key==='ArrowRight')$('bcNext').click();else if(e.key==='ArrowLeft')$('bcPrev').click()});
 function bdGo(ch){bdFrom=true;bdCur=ch;const u=bdUnk();const i=u.indexOf(ch);
-  $('bbinfo').textContent=`${ch} ${D.chars[ch].hun}`+(u.length>1&&i>=0?` (모름 ${i+1}/${u.length})`:'');$('bbnext').hidden=!(u.length>1&&i>=0&&i<u.length-1);
+  $('bbnext').hidden=!(u.length>1&&i>=0&&i<u.length-1);
   goChar(ch);show('learn')}
 $('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;bdPage=0;renderBoard(false)};
 $('bdshuf').onclick=()=>{bdList=shuffle(bdList);bdPage=0;bdAnim='sl';renderBoard()};
