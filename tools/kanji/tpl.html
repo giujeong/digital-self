@@ -231,11 +231,9 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .bd-top .seg{display:flex;gap:4px;flex-wrap:wrap}
 .bd-top .seg .btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .bd-top .sp{margin-left:auto;font-size:12px;color:var(--muted)}
-.board{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-@media (max-width:640px){.board{grid-template-columns:repeat(5,1fr);gap:5px}}
+.bgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+@media (max-width:640px){.bgrid{grid-template-columns:repeat(5,1fr);gap:5px}}
 .bt{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:var(--sheet);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;font-family:var(--f-kanji);font-size:clamp(30px,7.5vw,44px);line-height:1;color:var(--ink)}
-.bt.s{color:#b5ad9f;background:#f3eee2}
-.bt.s::after{content:'✓';position:absolute;top:2px;right:4px;font-size:11px;color:#9a917f;font-family:inherit}
 .bt.u{border-color:var(--hot);background:var(--rad);box-shadow:inset 0 0 0 1px var(--hot);color:var(--hotd)}
 .bt.sel{box-shadow:0 0 0 2px var(--ink)}
 .bt.d::before{content:'';position:absolute;top:5px;left:5px;width:6px;height:6px;border-radius:50%;background:var(--shu)}
@@ -379,15 +377,15 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
       </div>
       <span class="sp" id="bdcnt"></span>
     </div>
-    <div class="board" id="board"></div>
+    <div class="bgrid" id="board"></div>
     <div class="bd-foot">
-      <span id="bdnote">글자를 누르면 큰 카드가 떠요. ▶로 넘기며 한 바퀴 돌고, 모르는 글자는 붉게 남아요.</span>
-      <span class="ctl" style="margin:0"><button class="btn" id="bdcover">처음부터</button><button class="btn" id="bdshuf">섞기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
+      <span id="bdnote">모르는 글자만 눌러 붉게 표시해요(다시 누르면 해제). 길게 누르면 뜻을 살짝 볼 수 있어요.</span>
+      <span class="ctl" style="margin:0"><button class="btn" id="bdshuf">섞기</button><button class="btn" id="bdcards" hidden>모름 카드로 보기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
     </div>
     <div class="bdov" id="bdov" hidden>
       <div class="bdcard" id="bdcard" role="dialog" aria-modal="true">
         <div class="k" id="bcK"></div><div class="h" id="bcH"></div><div class="r" id="bcR"></div>
-        <div class="acts"><button class="btn hot" id="bcU">몰라요</button><button class="btn" id="bcOk">알아요 ▶</button><button class="btn" id="bcGo">익히기</button></div>
+        <div class="acts"><button class="btn hot" id="bcU">몰라요</button><button class="btn" id="bcGo">익히기</button><button class="btn" id="bcNext">다음 ▶</button></div>
         <div class="nav"><button id="bcPrev">◀ 이전</button><span id="bcPos"></span><button id="bcClose">닫기 ✕</button></div>
       </div>
     </div>
@@ -732,47 +730,53 @@ let view='learn';
 function show(v){view=v;['learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
   if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
 /* ---------- 한판 ---------- */
-let bdScope='all',bdList=[],bdSeen=new Set(),bdFrom=false,bdCur=null,bdI=-1;
+let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1;
 function bdChars(){refreshToday();
   if(bdScope==='unk')return Object.keys(D.chars).filter(c=>KN[c]==='u');
   if(bdScope==='due')return dueList();
   return Object.keys(D.chars)}
-function bdBuild(keep){const n=bdChars();if(!keep||n.length!==bdList.length||n.some(c=>!bdList.includes(c)))bdList=n;bdSeen=new Set([...bdSeen].filter(c=>bdList.includes(c)))}
+function bdBuild(keep){const n=bdChars();if(!keep||n.length!==bdList.length||n.some(c=>!bdList.includes(c)))bdList=n}
+function bdUnk(){return bdList.filter(c=>KN[c]==='u')}
 function renderBoard(keep=true){bdBuild(keep);
   $('bdscope').querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===bdScope));
-  const unkN=bdList.filter(c=>KN[c]==='u').length,seenN=bdSeen.size;
-  $('bdcnt').textContent=`${bdList.length}자${seenN?' · 본 '+seenN:''}${unkN?' · 모름 '+unkN:''}`;
-  $('bdstudy').hidden=!unkN;
+  const unkN=bdUnk().length;
+  $('bdcnt').textContent=`${bdList.length}자${unkN?' · 모름 '+unkN:''}`;
+  $('bdstudy').hidden=!unkN;$('bdcards').hidden=!unkN;
   const b=$('board');b.innerHTML='';
   if(!bdList.length){b.innerHTML=`<div class="note" style="grid-column:1/-1">${bdScope==='unk'?'모른다고 표시한 글자가 없어요.':bdScope==='due'?'오늘 복습할 글자가 없어요.':'글자가 없어요.'}</div>`;return}
-  const due=new Set(dueList());
-  bdList.forEach((ch,i)=>{const x=document.createElement('button');x.className='bt'+(bdSeen.has(ch)?' s':'')+(KN[ch]==='u'?' u':'')+(due.has(ch)?' d':'')+(bdI===i&&!$('bdov').hidden?' sel':'');
-    x.textContent=ch;x.setAttribute('aria-label',ch);x.onclick=()=>bdOpen(i);b.appendChild(x)})}
-function bdOpen(i){if(i<0||i>=bdList.length){bdClose();return}bdI=i;const ch=bdList[i],c=D.chars[ch];bdSeen.add(ch);
-  $('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').textContent=[...c.on,...c.kun].join(' · ');
-  $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';
-  $('bcOk').textContent=i<bdList.length-1?'알아요 ▶':'알아요 ✓';$('bcPrev').disabled=i===0;$('bcPos').textContent=`${i+1} / ${bdList.length}`;
-  $('bdov').hidden=false;renderBoard();
-  const t=$('board').children[i];if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest'})}
-function bdClose(){$('bdov').hidden=true;bdI=-1;renderBoard()}
+  const due=new Set(dueList()),open=!$('bdov').hidden&&bdQ[bdI];
+  bdList.forEach(ch=>{const x=document.createElement('button');x.className='bt'+(KN[ch]==='u'?' u':'')+(due.has(ch)?' d':'')+(open===ch?' sel':'');
+    x.textContent=ch;x.setAttribute('aria-label',ch);let lp=null,held=false;
+    const dn=e=>{held=false;lp=setTimeout(()=>{held=true;bdPeek(ch)},450)};const up=()=>{clearTimeout(lp)};
+    x.onpointerdown=dn;x.onpointerup=up;x.onpointerleave=up;x.onpointercancel=up;x.oncontextmenu=e=>e.preventDefault();
+    x.onclick=()=>{if(held){held=false;return}if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);renderBoard()};
+    b.appendChild(x)})}
 function bdUnmark(ch){if(KN[ch]==='u'){KN[ch]='k';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(_){}push()}}
-$('bcU').onclick=()=>{const ch=bdList[bdI];if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);bdOpen(bdI+1)};
-$('bcOk').onclick=()=>{const ch=bdList[bdI];bdUnmark(ch);bdOpen(bdI+1)};
+function bdFill(ch){const c=D.chars[ch];$('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').textContent=[...c.on,...c.kun].join(' · ');
+  $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';$('bdov').hidden=false}
+let bdPeekT=0;
+function bdPeek(ch){bdPeekT=Date.now();bdQ=[ch];bdI=0;bdFill(ch);$('bcNext').hidden=true;$('bcPrev').hidden=true;$('bcPos').textContent='살짝 보기';renderBoard()}
+function bdOpen(i){if(!bdQ.length||i<0||i>=bdQ.length){bdClose();return}bdI=i;const ch=bdQ[i];bdFill(ch);
+  $('bcNext').hidden=false;$('bcPrev').hidden=false;$('bcPrev').disabled=i===0;$('bcNext').textContent=i<bdQ.length-1?'다음 ▶':'마침 ✓';$('bcPos').textContent=`모름 ${i+1} / ${bdQ.length}`;renderBoard();
+  const t=[...$('board').children].find(x=>x.textContent===ch);if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest'})}
+function bdClose(){$('bdov').hidden=true;bdQ=[];bdI=-1;renderBoard()}
+$('bcU').onclick=()=>{const ch=bdQ[bdI];if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);bdFill(ch);renderBoard()};
+$('bcNext').onclick=()=>bdOpen(bdI+1);
 $('bcPrev').onclick=()=>bdOpen(bdI-1);
 $('bcClose').onclick=bdClose;
-$('bdov').onclick=e=>{if(e.target===$('bdov'))bdClose()};
-$('bcGo').onclick=()=>{const ch=bdList[bdI];$('bdov').hidden=true;bdGo(ch)};
-document.addEventListener('keydown',e=>{if($('bdov').hidden)return;if(e.key==='Escape')bdClose();else if(e.key==='ArrowRight')$('bcOk').click();else if(e.key==='ArrowLeft')$('bcPrev').click()});
-function bdGo(ch){bdFrom=true;bdCur=ch;const u=bdList.filter(c=>KN[c]==='u');const i=u.indexOf(ch);
+$('bdov').onclick=e=>{if(e.target===$('bdov')&&Date.now()-bdPeekT>600)bdClose()};
+$('bcGo').onclick=()=>{const ch=bdQ[bdI];$('bdov').hidden=true;bdGo(ch)};
+document.addEventListener('keydown',e=>{if($('bdov').hidden)return;if(e.key==='Escape')bdClose();else if(e.key==='ArrowRight')$('bcNext').click();else if(e.key==='ArrowLeft')$('bcPrev').click()});
+function bdGo(ch){bdFrom=true;bdCur=ch;const u=bdUnk();const i=u.indexOf(ch);
   $('bbinfo').textContent=`${ch} ${D.chars[ch].hun}`+(u.length>1&&i>=0?` (모름 ${i+1}/${u.length})`:'');$('bbnext').hidden=!(u.length>1&&i>=0&&i<u.length-1);
   goChar(ch);show('learn')}
-$('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;bdSeen=new Set();bdI=-1;renderBoard(false)};
-$('bdcover').onclick=()=>{bdSeen=new Set();bdI=-1;renderBoard()};
-$('bdshuf').onclick=()=>{bdList=shuffle(bdList);bdI=-1;renderBoard()};
-$('bdstudy').onclick=()=>{const u=bdList.filter(c=>KN[c]==='u');if(u.length)bdGo(u[0])};
+$('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;renderBoard(false)};
+$('bdshuf').onclick=()=>{bdList=shuffle(bdList);renderBoard()};
+$('bdcards').onclick=()=>{bdQ=bdUnk();if(bdQ.length)bdOpen(0)};
+$('bdstudy').onclick=()=>{const u=bdUnk();if(u.length)bdGo(u[0])};
 $('bdreview').onclick=()=>show('review');
 $('bbback').onclick=()=>{bdFrom=false;show('board');window.scrollTo({top:0})};
-$('bbnext').onclick=()=>{const u=bdList.filter(c=>KN[c]==='u');const i=u.indexOf(bdCur);if(i>=0&&i<u.length-1)bdGo(u[i+1])};
+$('bbnext').onclick=()=>{const u=bdUnk();const i=u.indexOf(bdCur);if(i>=0&&i<u.length-1)bdGo(u[i+1])};
 $('tab-board').onclick=()=>show('board');
 /* ---------- 카드 ---------- */
 let cL=null,deck=[],ci=0,flip=false,cmode='k',unk=new Set(),seen=new Set();
