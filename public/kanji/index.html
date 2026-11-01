@@ -241,6 +241,12 @@ button.rd{background:transparent}
 .sched td,.sched th{font-variant-numeric:tabular-nums}
 .empty{text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center;padding:20px 0}
 footer{font-size:12px;color:var(--muted);line-height:1.6}
+.acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--ink)}
+.kakao{background:#FEE500;color:#191600;border:0;border-radius:6px;padding:8px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.kakao svg{width:16px;height:16px}
+.acct .sync{color:var(--muted);font-size:12px}
+.acct .lo{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
+
 @media (max-width:640px){
   .wrap{gap:8px;padding-block:6px 32px}
   header{margin-top:-6px;padding-top:max(6px,env(safe-area-inset-top,0px))}
@@ -354,10 +360,11 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 
   <footer>
     필순·부품: KanjiVG (Ulrich Apel, CC BY-SA 3.0) · 내용: 『통쾌한 한자』를 참고해 공부하며 적은 노트 (55~67, 249~251, 353~355쪽) · <a href="https://giujeong.me/projects/japanese-retry" style="color:inherit">일본어 재도전</a><br>
-    복습 기록은 이 브라우저에만 저장돼요.
+    <div class="acct" id="acct">복습 기록은 이 브라우저에만 저장돼요.</div>
   </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 let D=null;
 const IVL=[0,1,3,7,30], IVL_L=['오늘','1일','3일','7일','1달'];
@@ -365,7 +372,7 @@ const KEY='busu-kanji-v1';
 let S={};
 try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
 let KN={};try{KN=JSON.parse(localStorage.getItem('busu-kanji-know-v1')||'{}')||{}}catch(e){KN={}}
-function setKnow(ch,ok){KN[ch]=ok?'k':'u';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){}}
+function setKnow(ch,ok){KN[ch]=ok?'k':'u';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){};push()}
 const unkCount=l=>l.chars.filter(c=>KN[c]==='u').length;
 const learned=ch=>KN[ch]==='k'||(!!S[ch]&&KN[ch]!=='u');
 const learnedCount=l=>l.chars.filter(learned).length;
@@ -373,10 +380,42 @@ function heat(l){const r=learnedCount(l)/l.chars.length;
   const bg=r<.5?`color-mix(in srgb,var(--rad) ${Math.round(r*200)}%,var(--hotd))`:`color-mix(in srgb,var(--okg) ${Math.round((r-.5)*200)}%,var(--rad))`;
   const bd=r>=1?'var(--okgl)':(r<.5?'var(--hotd)':'var(--radl)');
   return `background:${bg};border-color:${bd}${r<.35?';color:#FFF8F0':''}`}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};push()}
+/* ---------- 계정·동기화 (Supabase + 카카오) ---------- */
+const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
+let sb=null,user=null,pushT=null,syncMsg='';
+const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
+function renderAcct(){const a=$('acct');if(!a)return;
+  if(!sb){a.innerHTML='복습 기록은 이 브라우저에만 저장돼요.';return}
+  if(!user){a.innerHTML=`<button class="kakao" id="kk">${KK}카카오로 로그인</button><span>로그인하면 폰·PC 어디서나 복습 기록이 이어져요. 지금 이 기기의 기록도 그대로 옮겨져요.</span>`;$('kk').onclick=login;return}
+  const m=user.user_metadata||{};const nm=m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자';
+  a.innerHTML=`<span><b>${esc(nm)}</b> 님 · 기록이 계정에 저장돼요</span><span class="sync" id="sync">${esc(syncMsg)}</span><button class="lo" id="lo">로그아웃</button>`;
+  $('lo').onclick=async()=>{await sb.auth.signOut();user=null;renderAcct()}}
+function setSync(m){syncMsg=m;const s=$('sync');if(s)s.textContent=m}
+function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
+const recT=r=>r?(r.last||r.start||''):'';
+function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
+let pulling=false;
+async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
+  const {data,error}=await sb.from('progress').select('srs,know').eq('user_id',user.id).maybeSingle();
+  pulling=false;if(error){setSync('불러오기 실패');return}
+  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN}}
+  try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){}
+  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='review'&&!Q)renderReview()}
+function push(now){if(!sb||!user)return;clearTimeout(pushT);
+  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,updated_at:new Date().toISOString()});
+    setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
+  if(now)return go();pushT=setTimeout(go,1200)}
+function sbInit(){try{if(!window.supabase)return;
+  sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+  sb.auth.onAuthStateChange((ev,ses)=>{const had=!!user;user=ses?ses.user:null;renderAcct();
+    if(user&&(!had||ev==='SIGNED_IN'))setTimeout(pull,0);
+    if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search))history.replaceState(null,'',location.pathname)});
+  renderAcct()}catch(e){sb=null}}
 const day=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x};
 const iso=d=>{const x=day(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
-const TODAY=iso(new Date());
+let TODAY=iso(new Date());
+function refreshToday(){TODAY=iso(new Date())}
 const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
 const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
@@ -575,10 +614,11 @@ $('play').onclick=play;
 $('learnbtn').onclick=()=>{S[curC]={stage:0,start:TODAY,due:TODAY};save();renderAll()};
 
 /* ---------- 복습 ---------- */
-function dueList(){return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}
+function dueList(){refreshToday();return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}
 function updBadge(){const n=dueList().length;const b=$('due-badge');b.hidden=!n;b.textContent=n}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function pool(ch){const l=lessonOf(ch);const same=l.chars.filter(x=>x!==ch);const other=Object.keys(D.chars).filter(x=>x!==ch&&!same.includes(x));return shuffle(same).concat(shuffle(other))}
+function pool(ch){const h=D.chars[ch].hun,seenH=new Set([h]);const l=lessonOf(ch);const same=l.chars.filter(x=>x!==ch);const other=Object.keys(D.chars).filter(x=>x!==ch&&!same.includes(x));
+  return shuffle(same).concat(shuffle(other)).filter(x=>{const hx=D.chars[x].hun;if(seenH.has(hx))return false;seenH.add(hx);return true})}
 function makeQ(ch,stage){
   const c=D.chars[ch];
   if(stage>=4)return{type:'paper',ch};
@@ -599,8 +639,8 @@ function next(){Q=queue.length?makeQ(queue[0],practice?Math.floor(Math.random()*
 function grade(ok){
   const ch=queue.shift();done++;setKnow(ch,ok);
   if(!practice){const s=S[ch];
-    if(ok){s.stage++;if(s.stage>=5){s.due=null}else{s.due=addDays(s.start,IVL[s.stage])}}
-    else{s.stage=0;s.start=TODAY;s.due=TODAY;queue.push(ch)}
+    if(ok){s.stage++;s.last=TODAY;if(s.stage>=5){s.due=null}else{s.due=addDays(TODAY,IVL[s.stage])}}
+    else{s.stage=0;s.start=TODAY;s.last=TODAY;s.due=TODAY;queue.push(ch)}
     save();updBadge()}
   else if(!ok)queue.push(ch);
 }
@@ -685,6 +725,7 @@ $('cm-k').onclick=()=>{cmode='k';flip=false;renderCards()};$('cm-m').onclick=()=
 document.addEventListener('keydown',e=>{if(view!=='cards')return;if(e.key===' '){e.preventDefault();cardFlip()}if(e.key==='ArrowRight')cardMove(1);if(e.key==='ArrowLeft')cardMove(-1)});
 $('tab-cards').onclick=()=>show('cards');
 $('tab-learn').onclick=()=>show('learn');$('tab-review').onclick=()=>show('review');
+sbInit();
 function boot(d){D=d;curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0];curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0];renderAll()}
 fetch('kanji-data.json',{cache:'no-cache'}).then(r=>r.json()).then(boot).catch(()=>{document.getElementById('v-learn').innerHTML='<p class="note">글자 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.</p>'});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
