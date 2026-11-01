@@ -225,6 +225,36 @@ button.rd{background:transparent}
 .sched td,.sched th{font-variant-numeric:tabular-nums}
 .empty{text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center;padding:20px 0}
 footer{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* 한판 */
+.bd-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bd-top .seg{display:flex;gap:4px;flex-wrap:wrap}
+.bd-top .seg .btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bd-top .sp{margin-left:auto;font-size:12px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+@media (max-width:640px){.board{grid-template-columns:repeat(5,1fr);gap:5px}}
+.bt{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:var(--sheet);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;font-family:var(--f-kanji);font-size:clamp(30px,7.5vw,44px);line-height:1;color:var(--ink)}
+.bt.s{color:#b5ad9f;background:#f3eee2}
+.bt.s::after{content:'✓';position:absolute;top:2px;right:4px;font-size:11px;color:#9a917f;font-family:inherit}
+.bt.u{border-color:var(--hot);background:var(--rad);box-shadow:inset 0 0 0 1px var(--hot);color:var(--hotd)}
+.bt.sel{box-shadow:0 0 0 2px var(--ink)}
+.bt.d::before{content:'';position:absolute;top:5px;left:5px;width:6px;height:6px;border-radius:50%;background:var(--shu)}
+.bdov{position:fixed;inset:0;z-index:50;background:rgba(42,38,34,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.bdcard{width:min(300px,100%);background:var(--sheet);border:1px solid var(--rule);outline:1px solid var(--rule);outline-offset:-5px;border-radius:3px;padding:24px 18px 14px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.bdcard .k{font-family:var(--f-kanji);font-size:96px;line-height:1;color:var(--ink)}
+.bdcard.u .k{color:var(--hotd)}
+.bdcard .h{font-size:20px;font-weight:700;margin-top:10px;color:var(--ink)}
+.bdcard .r{font-family:var(--f-ja);font-size:14px;color:var(--muted);margin-top:4px;min-height:1.3em}
+.bdcard .acts{display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.bdcard .acts .btn{padding:8px 12px}
+.bdcard .btn.hot{background:var(--hot);color:#fff;border-color:var(--hot)}
+.bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.bdcard .nav button{border:0;background:none;color:var(--muted);font:inherit;padding:4px 2px;cursor:pointer}
+.bdcard .nav button:disabled{opacity:.3}
+.bt.d .fa::after{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--shu)}
+.bd-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
+.backbar{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--radl);background:var(--rad);border-radius:3px;padding:6px 10px;font-size:13px}
+.backbar b{color:var(--hotd)}
 .acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--ink)}
 .kakao{background:#FEE500;color:#191600;border:0;border-radius:6px;padding:8px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .kakao svg{width:16px;height:16px}
@@ -268,10 +298,12 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
       <button class="tab" id="tab-learn" role="tab" aria-selected="true">익히기</button>
       <button class="tab" id="tab-cards" role="tab" aria-selected="false">카드</button>
       <button class="tab" id="tab-review" role="tab" aria-selected="false">복습<span class="badge" id="due-badge" hidden>0</span></button>
+      <button class="tab" id="tab-board" role="tab" aria-selected="false">한판</button>
     </div>
   </header>
 
   <section id="v-learn" class="view">
+    <div class="backbar" id="backbar" hidden><span>한판에서 왔어요 — <b id="bbinfo"></b></span><span><button class="btn" id="bbnext" hidden>다음 모르는 글자 →</button> <button class="btn pri" id="bbback">← 한판으로</button></span></div>
     <div class="topfix">
     <button class="pick" id="pick" aria-label="부수 고르기"></button>
     <div class="chars" id="chars"></div>
@@ -336,6 +368,29 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
     <div class="radgrid" id="radgrid"></div>
     <div class="sec-h" id="otherh">그 밖의 묶음</div>
     <div class="radgrid" id="othergrid"></div>
+  </section>
+
+  <section id="v-board" class="view" hidden>
+    <div class="bd-top">
+      <div class="seg" id="bdscope">
+        <button class="btn" data-s="all">전체</button>
+        <button class="btn" data-s="due">복습분</button>
+        <button class="btn" data-s="unk">모름만</button>
+      </div>
+      <span class="sp" id="bdcnt"></span>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="bd-foot">
+      <span id="bdnote">글자를 누르면 큰 카드가 떠요. ▶로 넘기며 한 바퀴 돌고, 모르는 글자는 붉게 남아요.</span>
+      <span class="ctl" style="margin:0"><button class="btn" id="bdcover">처음부터</button><button class="btn" id="bdshuf">섞기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
+    </div>
+    <div class="bdov" id="bdov" hidden>
+      <div class="bdcard" id="bdcard" role="dialog" aria-modal="true">
+        <div class="k" id="bcK"></div><div class="h" id="bcH"></div><div class="r" id="bcR"></div>
+        <div class="acts"><button class="btn hot" id="bcU">몰라요</button><button class="btn" id="bcOk">알아요 ▶</button><button class="btn" id="bcGo">익히기</button></div>
+        <div class="nav"><button id="bcPrev">◀ 이전</button><span id="bcPos"></span><button id="bcClose">닫기 ✕</button></div>
+      </div>
+    </div>
   </section>
 
   <section id="v-review" class="view" hidden>
@@ -674,8 +729,51 @@ function renderReview(){
   });
 }
 let view='learn';
-function show(v){view=v;['learn','cards','review','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
-  if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}}
+function show(v){view=v;['learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
+  if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
+/* ---------- 한판 ---------- */
+let bdScope='all',bdList=[],bdSeen=new Set(),bdFrom=false,bdCur=null,bdI=-1;
+function bdChars(){refreshToday();
+  if(bdScope==='unk')return Object.keys(D.chars).filter(c=>KN[c]==='u');
+  if(bdScope==='due')return dueList();
+  return Object.keys(D.chars)}
+function bdBuild(keep){const n=bdChars();if(!keep||n.length!==bdList.length||n.some(c=>!bdList.includes(c)))bdList=n;bdSeen=new Set([...bdSeen].filter(c=>bdList.includes(c)))}
+function renderBoard(keep=true){bdBuild(keep);
+  $('bdscope').querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===bdScope));
+  const unkN=bdList.filter(c=>KN[c]==='u').length,seenN=bdSeen.size;
+  $('bdcnt').textContent=`${bdList.length}자${seenN?' · 본 '+seenN:''}${unkN?' · 모름 '+unkN:''}`;
+  $('bdstudy').hidden=!unkN;
+  const b=$('board');b.innerHTML='';
+  if(!bdList.length){b.innerHTML=`<div class="note" style="grid-column:1/-1">${bdScope==='unk'?'모른다고 표시한 글자가 없어요.':bdScope==='due'?'오늘 복습할 글자가 없어요.':'글자가 없어요.'}</div>`;return}
+  const due=new Set(dueList());
+  bdList.forEach((ch,i)=>{const x=document.createElement('button');x.className='bt'+(bdSeen.has(ch)?' s':'')+(KN[ch]==='u'?' u':'')+(due.has(ch)?' d':'')+(bdI===i&&!$('bdov').hidden?' sel':'');
+    x.textContent=ch;x.setAttribute('aria-label',ch);x.onclick=()=>bdOpen(i);b.appendChild(x)})}
+function bdOpen(i){if(i<0||i>=bdList.length){bdClose();return}bdI=i;const ch=bdList[i],c=D.chars[ch];bdSeen.add(ch);
+  $('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').textContent=[...c.on,...c.kun].join(' · ');
+  $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';
+  $('bcOk').textContent=i<bdList.length-1?'알아요 ▶':'알아요 ✓';$('bcPrev').disabled=i===0;$('bcPos').textContent=`${i+1} / ${bdList.length}`;
+  $('bdov').hidden=false;renderBoard();
+  const t=$('board').children[i];if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest'})}
+function bdClose(){$('bdov').hidden=true;bdI=-1;renderBoard()}
+function bdUnmark(ch){if(KN[ch]==='u'){KN[ch]='k';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(_){}push()}}
+$('bcU').onclick=()=>{const ch=bdList[bdI];if(KN[ch]==='u')bdUnmark(ch);else setKnow(ch,false);bdOpen(bdI+1)};
+$('bcOk').onclick=()=>{const ch=bdList[bdI];bdUnmark(ch);bdOpen(bdI+1)};
+$('bcPrev').onclick=()=>bdOpen(bdI-1);
+$('bcClose').onclick=bdClose;
+$('bdov').onclick=e=>{if(e.target===$('bdov'))bdClose()};
+$('bcGo').onclick=()=>{const ch=bdList[bdI];$('bdov').hidden=true;bdGo(ch)};
+document.addEventListener('keydown',e=>{if($('bdov').hidden)return;if(e.key==='Escape')bdClose();else if(e.key==='ArrowRight')$('bcOk').click();else if(e.key==='ArrowLeft')$('bcPrev').click()});
+function bdGo(ch){bdFrom=true;bdCur=ch;const u=bdList.filter(c=>KN[c]==='u');const i=u.indexOf(ch);
+  $('bbinfo').textContent=`${ch} ${D.chars[ch].hun}`+(u.length>1&&i>=0?` (모름 ${i+1}/${u.length})`:'');$('bbnext').hidden=!(u.length>1&&i>=0&&i<u.length-1);
+  goChar(ch);show('learn')}
+$('bdscope').onclick=e=>{const s=e.target.dataset.s;if(!s)return;bdScope=s;bdSeen=new Set();bdI=-1;renderBoard(false)};
+$('bdcover').onclick=()=>{bdSeen=new Set();bdI=-1;renderBoard()};
+$('bdshuf').onclick=()=>{bdList=shuffle(bdList);bdI=-1;renderBoard()};
+$('bdstudy').onclick=()=>{const u=bdList.filter(c=>KN[c]==='u');if(u.length)bdGo(u[0])};
+$('bdreview').onclick=()=>show('review');
+$('bbback').onclick=()=>{bdFrom=false;show('board');window.scrollTo({top:0})};
+$('bbnext').onclick=()=>{const u=bdList.filter(c=>KN[c]==='u');const i=u.indexOf(bdCur);if(i>=0&&i<u.length-1)bdGo(u[i+1])};
+$('tab-board').onclick=()=>show('board');
 /* ---------- 카드 ---------- */
 let cL=null,deck=[],ci=0,flip=false,cmode='k',unk=new Set(),seen=new Set();
 const allChars=()=>[...new Set(D.lessons.flatMap(l=>l.chars))];
