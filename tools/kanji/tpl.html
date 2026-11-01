@@ -254,7 +254,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .bdcard .k{font-family:var(--f-kanji);font-size:96px;line-height:1;color:var(--ink)}
 .bdcard.u .k{color:var(--hotd)}
 .bdcard .h{font-size:20px;font-weight:700;margin-top:10px;color:var(--ink)}
-.bdcard .r{font-family:var(--f-ja);font-size:14px;color:var(--muted);margin-top:4px;min-height:1.3em}
+.bdcard .reads{justify-content:center;margin-top:8px;gap:5px}.bdcard .rd{font-size:14px;padding:2px 9px}
 .bdcard .acts{display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .bdcard .acts .btn{padding:8px 12px}
 
@@ -392,12 +392,12 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
     <div class="bdwrap" id="bdwrap"><div class="bgrid" id="board"></div></div>
     <div class="bddots" id="bddots"></div>
     <div class="bd-foot">
-      <span id="bdnote">모르는 글자만 눌러 붉게 표시해요(다시 누르면 해제). 좌우로 쓸어 판을 넘기고, 길게 누르면 뜻을 살짝 봐요.</span>
-      <span class="ctl" style="margin:0"><button class="btn" id="bdcards" hidden>모름 카드로 보기</button><button class="btn shu" id="bdstudy" hidden>모르는 것만 익히기</button><button class="btn pri" id="bdreview">복습 이어하기 →</button></span>
+      <span class="ctl" style="margin:0"><button class="btn" id="bdcards" hidden>모름 카드</button><button class="btn pri" id="bdreview">복습 →</button><button class="btn shu" id="bdstudy" hidden>모름 익히기</button></span>
+      <span id="bdnote" style="flex-basis:100%">모르는 글자만 눌러 붉게 표시해요(다시 누르면 해제). 좌우로 쓸어 판을 넘기고, 길게 누르면 뜻을 살짝 봐요.</span>
     </div>
     <div class="bdov" id="bdov" hidden>
       <div class="bdcard" id="bdcard" role="dialog" aria-modal="true">
-        <div class="k" id="bcK"></div><div class="h" id="bcH"></div><div class="r" id="bcR"></div>
+        <div class="k" id="bcK"></div><div class="h" id="bcH"></div><div class="reads bcr" id="bcR"></div>
         <div class="acts"><button class="btn shu" id="bcU">몰라요</button><button class="btn" id="bcGo">익히기</button><button class="btn" id="bcNext">다음 ▶</button></div>
         <div class="nav"><button id="bcPrev">◀ 이전</button><span id="bcPos"></span><button id="bcClose">닫기 ✕</button></div>
       </div>
@@ -774,7 +774,7 @@ function bdFlip(dir){const np=bdPages();const n=bdPage+dir;if(n<0||n>=np)return;
 document.addEventListener('keydown',e=>{if(view!=='board'||!$('bdov').hidden)return;if(e.key==='ArrowRight')bdFlip(1);else if(e.key==='ArrowLeft')bdFlip(-1)});
 
 function bdUnmark(ch){if(KN[ch]==='u'){KN[ch]='k';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(_){}push()}}
-function bdFill(ch){const c=D.chars[ch];$('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').textContent=[...c.on,...c.kun].join(' · ');
+function bdFill(ch){const c=D.chars[ch];$('bcK').textContent=ch;$('bcH').textContent=c.hun;$('bcR').innerHTML=readsHTML(c,false);bindSay($('bcR'));
   $('bdcard').classList.toggle('u',KN[ch]==='u');$('bcU').textContent=KN[ch]==='u'?'✓ 몰라요':'몰라요';$('bdov').hidden=false}
 let bdPeekT=0;
 function bdPeek(ch){bdPeekT=Date.now();bdQ=[ch];bdI=0;bdFill(ch);$('bcNext').hidden=true;$('bcPrev').hidden=true;$('bcPos').textContent='살짝 보기';renderBoard()}
