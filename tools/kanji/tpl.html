@@ -360,6 +360,28 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .fb-sub{font-size:12px;color:var(--muted);margin:6px 0 0 14px}
 .fb-st{font-size:12px;color:var(--koke);margin:4px 0 0 14px;min-height:1em}
 .fb-in textarea::placeholder{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt.kt{border:2px solid var(--ai)}.rt.kt .h{background:var(--sheet);border-color:var(--ai);color:var(--ink)}
+.kn-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.kn-top .ttl{font-weight:700;font-size:17px;margin-right:auto}
+.kn-seg{display:flex;gap:6px;width:100%}.kn-seg .btn{flex:1}
+.kn-card{display:grid;grid-template-columns:48px minmax(0,1fr);gap:10px;border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:12px}
+.kn-rail{display:flex;flex-direction:column;gap:6px}.kn-rail svg{width:48px;height:48px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
+.kn-main{text-align:center}.kn-big{width:min(180px,48vw);height:min(180px,48vw);margin:0 auto;cursor:pointer}.kn-big svg{width:100%;height:100%}
+.kn-snd{font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}.kn-snd small{font-size:15px;color:var(--muted);font-weight:400}
+.kn-pair{font-size:13px;color:var(--muted)}.kn-pair b{font-family:var(--f-kanji);font-size:18px;color:var(--ink);font-weight:400}
+.kn-w{border-top:1px solid var(--line);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.kn-w .jp{font-family:var(--f-ja);font-size:24px}.kn-w mark{background:var(--hl);color:inherit;border-radius:2px}.kn-w .ko{width:100%;font-size:14px}
+.kn-act{margin-top:12px}.kn-act .btn{width:100%;padding:12px}
+.kn-hint{font-size:12px;color:var(--muted);margin-top:6px}
+.kn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px}
+.kn-grid button,.kn-grid i{aspect-ratio:1.15;border:1px solid var(--line);background:var(--sheet);border-radius:2px;font-family:var(--f-kanji);font-size:22px;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;line-height:1.1;position:relative}
+.kn-grid button small{font-family:var(--f-ui,inherit);font-size:10px;color:var(--muted)}
+.kn-grid i{border:0;background:none}
+.kn-grid button.on{box-shadow:inset 0 -3px 0 var(--koke)}.kn-grid button.cur{background:var(--ink);color:var(--paper)}.kn-grid button.cur small{color:var(--paper)}
+.kn-q{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:12px;text-align:center}.kn-q .pos{text-align:right;font-size:12px;color:var(--muted)}
+.kn-q .g{font-family:var(--f-kanji);font-size:min(130px,34vw);line-height:1.15}
+.kn-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.kn-opts .btn{padding:14px 0;font-size:20px}
+.kn-opts .btn.right{background:var(--koke);color:#fff;border-color:var(--koke)}.kn-opts .btn.wrong{background:var(--hot);color:#fff;border-color:var(--hot)}
+.kn-empty{border:1px solid var(--line);background:var(--sheet);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
 </style>
 
 <div class="tour" id="tour" hidden></div>
@@ -447,10 +469,15 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 
   <section id="v-rad" class="view" hidden>
     <div class="radh"><b>부수 고르기</b><button class="btn" id="radclose">닫기</button></div>
+    <div class="sec-h" id="kanah">가나 <span style="font-weight:400;letter-spacing:0">— 히라가나·가타카나를 함께 부르는 말 (仮名, 임시 글자)</span></div>
+    <div class="radgrid" id="kanagrid" style="margin-top:6px"></div>
+    <div class="sec-h" id="radh2" style="margin-top:14px">부수</div>
     <div class="radgrid" id="radgrid"></div>
     <div class="sec-h" id="otherh">그 밖의 묶음</div>
     <div class="radgrid" id="othergrid"></div>
   </section>
+
+  <section id="v-kana" class="view" hidden><div id="kana"></div></section>
 
   <section id="v-board" class="view" hidden>
     <div class="bd-top">
@@ -502,6 +529,7 @@ function heat(l){const r=learnedCount(l)/l.chars.length;
   const bg=r<.5?`color-mix(in srgb,var(--rad) ${Math.round(r*200)}%,var(--hotd))`:`color-mix(in srgb,var(--okg) ${Math.round((r-.5)*200)}%,var(--rad))`;
   const bd=r>=1?'var(--okgl)':(r<.5?'var(--hotd)':'var(--radl)');
   return `background:${bg};border-color:${bd}${r<.35?';color:#FFF8F0':''}`}
+let KSR={};try{KSR=JSON.parse(localStorage.getItem('busu-kana-v1')||'{}')||{}}catch(e){KSR={}}
 let LOG={};try{LOG=JSON.parse(localStorage.getItem('busu-kanji-log-v1')||'{}')||{}}catch(e){LOG={}}
 function act(){const d=(typeof iso==='function')?iso(new Date()):new Date().toISOString().slice(0,10);LOG[d]=(LOG[d]||0)+1;LOG.at=new Date().toISOString();try{localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}}
 function save(){act();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};push()}
@@ -526,13 +554,13 @@ const recT=r=>r?(r.last||r.start||''):'';
 function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
 let pulling=false,pulledOnce=false;
 async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
-  const {data,error}=await sb.from('progress').select('srs,know,log').eq('user_id',user.id).maybeSingle();
+  const {data,error}=await sb.from('progress').select('srs,know,log,kana').eq('user_id',user.id).maybeSingle();
   pulling=false;pulledOnce=true;if(error){setSync('불러오기 실패');return}
-  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
+  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};KSR=mergeS(data.kana||{},KSR);try{localStorage.setItem('busu-kana-v1',JSON.stringify(KSR))}catch(e){};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
   try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN));localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}
-  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='review'&&!Q)renderReview();if(typeof tourMaybe==='function')tourMaybe(view)}
+  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='kana')renderKana();if(view==='review'&&!Q)renderReview();if(typeof tourMaybe==='function')tourMaybe(view)}
 function push(now){if(!sb||!user)return;clearTimeout(pushT);
-  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,updated_at:new Date().toISOString()});
+  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,kana:KSR,updated_at:new Date().toISOString()});
     setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
   if(now)return go();pushT=setTimeout(go,1200)}
 function sbInit(){try{if(!window.supabase)return;
@@ -582,7 +610,8 @@ function openPicker(target){pickFor=target;backTo=target;
   const tile=(l,all)=>{const x=document.createElement('button');x.className='rt'+(l&&!l.series?' plain':'');x.setAttribute('aria-pressed',all?!sel:l===sel);
     x.innerHTML=all?`<span class="h">全</span><span class="n">전체</span><small>${Object.keys(D.chars).length}자</small>`:`<span class="h" style="${heat(l)}">${l.head}</span><span class="n">${esc(l.name)}</span><small>${l.chars.length}자 · ${esc(l.src||'')}</small><small class="${learnedCount(l)===l.chars.length?'ok':'unk'}">익힘 ${learnedCount(l)}/${l.chars.length}${unkCount(l)?' · 모름 '+unkCount(l):''}</small>`;
     x.onclick=()=>{if(target==='cards'){cL=all?null:l;buildDeck();show('cards')}else{curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})}};return x};
-  const g=$('radgrid'),o=$('othergrid');g.innerHTML='';o.innerHTML='';
+  const g=$('radgrid'),o=$('othergrid');g.innerHTML='';o.innerHTML='';const kg=$('kanagrid');kg.innerHTML='';kg.hidden=$('radh2').hidden=$('kanah').hidden=target==='cards';
+  if(target!=='cards')['hira','kata'].forEach(set=>{const L=D.kana[set],n=L.filter(c=>KSR[c]).length,du=kDue(set).length,x=document.createElement('button');x.className='rt kt';x.setAttribute('aria-pressed',view==='kana'&&kSet===set);x.innerHTML=`<span class="h">${L[0]}</span><span class="n">${set==='hira'?'히라가나':'가타카나'}</span><small>46자 · 한자 전 준비</small><small class="${n===L.length?'ok':'unk'}">익힘 ${n}/46${du?' · 복습 '+du:''}</small>`;x.onclick=()=>openKana(set);kg.appendChild(x)});
   if(target==='cards')g.appendChild(tile(null,true));
   D.lessons.filter(l=>l.series).forEach(l=>g.appendChild(tile(l)));
   const others=D.lessons.filter(l=>!l.series);others.forEach(l=>o.appendChild(tile(l)));$('otherh').hidden=!others.length;
@@ -731,7 +760,7 @@ function renderInfo(){setHdr();
   $('jw').innerHTML=jw.map(w=>`<div class="w"><span class="lv n${w.n}">N${w.n}</span><div><div class="t"><button class="say" data-say="${esc(w.kana.split(';')[0].trim())}" aria-label="${esc(w.w)} 듣기">▶</button>${esc(w.w).split(curC).join('<mark>'+curC+'</mark>')}</div><div class="k">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`).join('');bindSay($('jw'));
   $('exs').innerHTML=c.ex.filter(e=>!selR||e.r===selR).map(e=>`<div class="ex"><div class="r ${isKata(e.r)?'on':'kun'}">${e.r}${isKata(e.r)?'<small>'+hira(e.r)+'</small>':''}</div><div><div class="jprow"><button class="say" data-say="${esc(e.kana)}" aria-label="예문 듣기">▶</button><div class="jp">${esc(e.jp).split(curC).join('<mark>'+curC+'</mark>')}</div></div><div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}${e.by?' <em class="draft">신지 예문</em>':''}</div></div></div>`).join('');
   if(!c.ex.length){const mem=(lessonOf(curC)||curL).chars.filter(x=>x!==curC&&D.chars[x].w&&D.chars[x].w.length);
-    $('exs').innerHTML=mem.length?`<div class="note" style="padding:8px 0">단독으로 읽지 않는 부수예요 — 이 부수가 들어간 단어</div>`+mem.map(x=>{const w=D.chars[x].w[0];return `<div class="ex"><div class="r ${isKata(w.r)?'on':'kun'}">${x}<small>${w.r}</small></div><div><div class="jprow"><button class="say" data-say="${esc(w.kana)}" aria-label="듣기">▶</button><div class="jp">${esc(w.w).split(x).join('<mark>'+x+'</mark>')}</div></div><div class="kana">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`}).join(''):'';}
+    $('exs').innerHTML=mem.length?`<div class="note" style="padding:8px 0">단독으로 읽지 않는 부수예요 — 이 부수가 들어간 단어</div>`+mem.map(x=>{const w=D.chars[x].w[0];return `<div class="ex"><div class="r ${isKata(w.r)?'on':'kun'}">${x}<small>${w.r}${isKata(w.r)?' · '+hira(w.r):''}</small></div><div><div class="jprow"><button class="say" data-say="${esc(w.kana)}" aria-label="듣기">▶</button><div class="jp">${esc(w.w).split(x).join('<mark>'+x+'</mark>')}</div></div><div class="kana">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`}).join(''):'';}
   bindSay($('exs'));
   $('point').hidden=!curL.point;$('point').innerHTML=`<b>${curL.head}</b> 계열 포인트 — ${esc(curL.point||'')}`;
   const s=S[curC];
@@ -819,7 +848,7 @@ function renderReview(){
   });
 }
 let view='learn';
-function show(v){view=v;['home','learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
+function show(v){view=v;['home','learn','cards','review','board','rad','kana'].forEach(x=>{if(x!=='rad'&&x!=='kana')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo)||(v==='kana'&&x==='learn'));$('v-'+x).hidden=v!==x});if(v==='kana')renderKana();
   if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom);setTimeout(()=>tourMaybe(v),250)}
 /* ---------- 한판 ---------- */
 let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1,bdPage=0,bdAnim='';const BD_PG=30;
@@ -945,6 +974,45 @@ $('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').onclick=()=>{if(sb)lo
 $('gguest').onclick=()=>{try{localStorage.setItem('busu-guest','1')}catch(e){};$('gate').hidden=true;show('home')};
 sbInit();
 function start(){$('gcount').textContent=Object.keys(D.chars).length+'자 · '+D.lessons.length+'계열 · JLPT 급수 단어';renderAll();started=true;show('home')}
+/* ---------- 가나 (한자와 따로) ---------- */
+let kSet='hira',kCur=null,kMode='learn',kQ=null,kQueue=[],kDone=0,kPrac=false,kAnim=null;
+const kDue=set=>D.kana[set].filter(c=>KSR[c]&&KSR[c].due&&KSR[c].due<=TODAY);
+function kSave(){try{localStorage.setItem('busu-kana-v1',JSON.stringify(KSR))}catch(e){};act();push()}
+function openKana(set){kSet=set;const L=D.kana[set];if(!kCur||!L.includes(kCur))kCur=L.find(c=>!KSR[c])||L[0];kMode='learn';kQ=null;show('kana');window.scrollTo({top:0})}
+function kLayout(L){return [...L.slice(0,36),null,L[36],null,L[37],...L.slice(38,44),null,null,null,L[44],L[45]]}
+function renderKana(){if(!D||!D.kana)return;refreshToday();const K=D.kana,L=K[kSet],el=$('kana'),du=kDue(kSet).length,nm=kSet==='hira'?'히라가나':'가타카나';
+  let h=`<div class="kn-top"><span class="ttl">${nm} <small style="color:var(--muted);font-weight:400;font-size:13px">익힘 ${L.filter(c=>KSR[c]).length}/46</small></span><button class="btn" id="knother">${kSet==='hira'?'가타카나로':'히라가나로'}</button><button class="btn" id="knback">부수 고르기</button>
+    <div class="kn-seg"><button class="btn" id="knm1" aria-pressed="${kMode==='learn'}">익히기</button><button class="btn" id="knm2" aria-pressed="${kMode==='review'}">가나 복습${du?' '+du:''}</button></div></div>`;
+  if(kMode==='learn'){const c=K.c[kCur];const w=c.w?`<button class="say" data-say="${esc(c.w)}" aria-label="단어 듣기">▶</button><span class="jp">${esc(c.w).split(kCur).join('<mark>'+kCur+'</mark>')}</span>`:'';
+    h+=`<div class="kn-card"><div class="kn-rail" id="knrail"></div><div class="kn-main"><div class="kn-big" id="knbig" title="누르면 필순을 그려요"></div>
+      <div class="kn-snd">${c.snd} <small>${c.ro}</small><button class="say" data-say="${kCur}" aria-label="소리 듣기">▶</button></div>
+      <div class="kn-pair">${kSet==='hira'?'가타카나':'히라가나'} 짝 <b>${c.pair}</b></div>
+      <div class="kn-w">${w}<div class="ko">${esc(c.wko)}${c.wkj?' ('+c.wkj+')':''}</div></div>
+      <div class="kn-act"><button class="btn ok" id="knok">${KSR[kCur]?'익힘 ✓ · 다음 글자 →':'익혔어요 → 다음 글자'}</button><div class="kn-hint">익힌 글자는 '가나 복습'에만 들어가요 — 한자 복습과 섞이지 않아요</div></div></div></div>
+      <div class="kn-grid">${kLayout(L).map(ch=>ch?`<button data-k="${ch}" class="${ch===kCur?'cur':''} ${KSR[ch]?'on':''}">${ch}<small>${K.c[ch].snd}</small></button>`:'<i></i>').join('')}</div>`;
+    el.innerHTML=h;const c2=K.c[kCur];const rail=$('knrail');c2.s.forEach((_,i)=>rail.appendChild(svgOf(c2.s,i,{sw:5})));
+    const big=$('knbig');const drawK=u=>{big.innerHTML='';big.appendChild(svgOf(c2.s,u,{sw:5,mark:u<c2.s.length-1}))};drawK(c2.s.length-1);
+    big.onclick=()=>{clearInterval(kAnim);let u=0;drawK(0);kAnim=setInterval(()=>{u++;if(u>=c2.s.length){clearInterval(kAnim);return}drawK(u)},550)};
+    el.querySelectorAll('.kn-grid button').forEach(b=>b.onclick=()=>{kCur=b.dataset.k;renderKana();window.scrollTo({top:0,behavior:'smooth'})});
+    $('knok').onclick=()=>{if(!KSR[kCur]){KSR[kCur]={stage:0,start:TODAY,last:TODAY,due:TODAY};kSave()}const i=L.indexOf(kCur);kCur=L[(i+1)%L.length];renderKana();window.scrollTo({top:0,behavior:'smooth'})};
+  }else if(!kQ){const learned=L.filter(c=>KSR[c]);
+    h+=`<div class="kn-empty">${kDone?`<b>${kDone}문제 끝!</b>`:''}<div>${du?`오늘 복습할 ${nm} ${du}개`:'오늘 복습할 가나가 없어요.'}</div>
+      ${du?'<button class="btn pri" id="kngo">복습 시작</button>':''}
+      <button class="btn" id="knprac">${learned.length?'익힌 '+learned.length+'자로':'46자 전체로'} 연습 (기록 안 남음)</button>
+      <div class="note">맞히면 다음 복습이 1일 → 3일 → 7일 → 1달로 늘고, 틀리면 오늘 다시 나와요.</div></div>`;
+    el.innerHTML=h;if($('kngo'))$('kngo').onclick=()=>{kPrac=false;kQueue=shuffle(kDue(kSet));kDone=0;kNext()};
+    $('knprac').onclick=()=>{kPrac=true;kQueue=shuffle(learned.length?learned:L);kDone=0;kNext()};
+  }else{h+=`<div class="kn-q"><div class="pos">${kDone+1} / ${kDone+kQueue.length}</div><div class="g">${kQ.ch}</div><div class="note">무슨 소리일까요?</div></div><div class="kn-opts">${kQ.opts.map(o=>`<button class="btn" data-o="${o}">${o}</button>`).join('')}</div>`;
+    el.innerHTML=h;el.querySelectorAll('.kn-opts .btn').forEach(b=>b.onclick=()=>{if(kQ.picked)return;kQ.picked=1;const ok=b.dataset.o===kQ.ans;
+      el.querySelectorAll('.kn-opts .btn').forEach(x=>{if(x.dataset.o===kQ.ans)x.classList.add('right');else if(x===b)x.classList.add('wrong')});say(kQ.ch);setTimeout(()=>kGrade(ok),ok?650:1300)})}
+  bindSay(el);$('knback').onclick=()=>openPicker('learn');$('knother').onclick=()=>{kCur=null;openKana(kSet==='hira'?'kata':'hira')};
+  $('knm1').onclick=()=>{kMode='learn';kQ=null;renderKana()};$('knm2').onclick=()=>{kMode='review';kQ=null;kDone=0;renderKana()}}
+function kNext(){kQ=kQueue.length?kMake(kQueue[0]):null;renderKana()}
+function kMake(ch){const K=D.kana,c=K.c[ch];const look=(K.look[ch]||'').split('').filter(x=>K.c[x]).map(x=>K.c[x].snd);
+  const pool=shuffle(K[kSet].map(x=>K.c[x].snd));const ds=[...new Set([...look,...pool])].filter(s=>s!==c.snd).slice(0,3);return{ch,ans:c.snd,opts:shuffle([c.snd,...ds]),picked:0}}
+function kGrade(ok){const ch=kQueue.shift();kDone++;
+  if(!kPrac){const s=KSR[ch];if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?null:addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;kQueue.push(ch)}kSave()}
+  else if(!ok)kQueue.push(ch);kNext()}
 /* ---------- 의견 보내기 ---------- */
 function renderFB(){const el=$('fb');if(!el)return;
   el.innerHTML=`<div class="hm-h">의견 보내기</div><div class="fb-in"><textarea id="fbtx" rows="1" maxlength="1000" placeholder="편하게 입력하세요"></textarea><button class="btn pri" id="fbgo">보내기</button></div><div class="fb-sub">불편한 점, 바라는 기능, 틀린 풀이 — 무엇이든 좋아요</div><div class="fb-st" id="fbst"></div>`;
@@ -961,6 +1029,7 @@ const TOUR={
  learn:[{t:'부품으로 쪼개 보고, 따라 쓰기',p:'한자를 부수·부품으로 나눠 뜻을 연결해요. 왼쪽 필순은 위에서 아래로 따라 써요.',i:`<div class="tbig"><span class="k">休</span><span>= 亻(사람) + 木(나무)<br>나무 곁에서 쉬는 사람</span></div>`}],
  cards:[{t:'앞면 보고 떠올리기',p:'한자를 보고 뜻·읽기를 떠올린 뒤 뒤집어 확인하고, 알아요/몰라요를 골라요.',i:`<div class="tbig"><span class="k">山</span><span class="pill ok">알아요</span><span class="pill hot">몰라요</span></div>`}],
  review:[{t:'간격을 두고 다시 꺼내기',p:'알아요를 누르면 다음 복습이 1일 → 3일 → 7일 → 1달로 늘고, 몰라요는 오늘 다시 나와요.',i:`<div class="tbig"><span class="pill">1일</span>→<span class="pill">3일</span>→<span class="pill">7일</span>→<span class="pill">1달</span></div>`}],
+ kana:[{t:'가나는 한자와 따로 익혀요',p:'가나(仮名)는 히라가나·가타카나를 함께 부르는 말이에요. 큰 글자를 누르면 필순을 그려요. 「익혔어요」를 누른 가나는 위의 \'가나 복습\'에서만 다시 나와요.',i:`<div class="tbig"><span class="k">あ</span><span>아 · a</span><span class="pill">가나 복습</span></div>`}],
  board:[
   {t:'모르는 글자만 톡',p:'아는 글자는 그냥 지나가고, 모르는 글자만 눌러 붉게 표시해요. 다시 누르면 풀려요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="rg" style="left:41%;top:12px"></div><div class="fg" style="left:47%;top:38px">👆</div>')},
   {t:'헷갈리면 길게 꾹',p:'길게 누르면 뜻·읽기를 살짝 봐요. 거기서 \'몰라요\'를 누르면 표시되고 바로 닫혀요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="pk"><i>山</i>やま · 메 산</div><div class="fg" style="left:48%;top:96px">👇</div>')},
