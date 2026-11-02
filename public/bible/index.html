@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2B2620">
+<title>일본어 성경 읽기</title>
+<meta name="credits" content="Stroke order data: KanjiVG (c) Ulrich Apel, CC BY-SA 3.0. Kanji readings: KANJIDIC (EDRDG, CC BY-SA 4.0).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Shippori+Mincho:wght@500;700&family=Gowun+Batang:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#EFE8D8; --sheet:#F8F3E7; --ink:#2B2620; --muted:#6E6455; --line:#CDBFA3; --ghost:#E3D9C4;
+  --shu:#A9342A; --ai:#2E4A72; --koke:#4C6435; --hl:#EBD58F; --rule:#8C7A5C; --hot:#B8473F;
+  --f-kanji:'Klee One','Shippori Mincho',serif;
+  --f-ko:'Gowun Batang','Noto Serif KR','AppleMyungjo',serif;
+  --f-ja:'Shippori Mincho','Hiragino Mincho ProN','Noto Serif JP',serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#1A1713;--sheet:#221E18;--ink:#EAE1CE;--muted:#A89B84;--line:#3F372B;--ghost:#332C22;--shu:#E0705F;--ai:#9DB2D6;--koke:#A9C08A;--hl:#5E4E1E;--rule:#7A6A50;--hot:#C2564C;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#1A1713;--sheet:#221E18;--ink:#EAE1CE;--muted:#A89B84;--line:#3F372B;--ghost:#332C22;--shu:#E0705F;--ai:#9DB2D6;--koke:#A9C08A;--hl:#5E4E1E;--rule:#7A6A50;--hot:#C2564C;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-ko);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+.top{position:sticky;top:0;z-index:20;background:var(--paper);padding:10px 0 8px;box-shadow:0 6px 10px -10px rgba(0,0,0,.4)}
+.tabs{display:flex;gap:6px}
+.tab{flex:1;border:1px solid var(--line);background:var(--sheet);padding:8px 0;border-radius:2px;font-weight:700;position:relative}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab .dot{position:absolute;top:5px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--shu)}
+.btn{border:1px solid var(--line);background:var(--sheet);padding:9px 14px;border-radius:2px;font-weight:700}
+.btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.ok{background:var(--koke);color:#fff;border-color:var(--koke)}
+.btn.shu{background:var(--hot);color:#fff;border-color:var(--hot)}
+.btn[aria-pressed="true"]{background:var(--ai);color:#fff;border-color:var(--ai)}
+.note{font-size:13px;color:var(--muted)}
+.seg{display:flex;gap:6px;margin:12px 0}.seg .btn{flex:1;padding:8px 4px}
+.view[hidden]{display:none}
+/* 읽기 */
+.rhd{display:flex;align-items:center;gap:8px;margin:14px 0 8px}
+.rhd b{font-size:19px;margin-right:auto}
+.rhd select{font:inherit;border:1px solid var(--line);background:var(--sheet);color:var(--ink);padding:6px 8px;border-radius:2px}
+.prog{height:4px;background:var(--ghost);border-radius:2px;overflow:hidden;margin-bottom:10px}.prog i{display:block;height:100%;background:var(--koke)}
+.vcard{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:16px}
+.vno{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.jp{font-family:var(--f-ja);font-size:23px;line-height:2.25;margin:8px 0 4px;word-break:break-all}
+.jp ruby rt{font-size:10.5px;color:var(--muted);font-family:var(--f-ja);letter-spacing:0}
+.jp.nofuri rt{visibility:hidden}
+.jp .w{cursor:pointer;border-radius:2px}
+.jp .w:hover,.jp .w.on{background:var(--hl)}
+.jp .k{border-bottom:2px solid var(--ai)}
+.jp .k.n{border-bottom-color:var(--shu)}
+.jp .k.d{border-bottom-style:dotted}
+.ko{border-top:1px dashed var(--line);margin-top:8px;padding-top:10px;font-size:15.5px;line-height:1.7}
+.ko.empty{color:var(--muted);font-size:13px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.ctl .btn{flex:1}
+.leg{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7}
+.leg i{display:inline-block;width:14px;border-bottom:2px solid var(--ai);margin:0 3px 3px 0}.leg i.n{border-color:var(--shu)}
+.leg s{text-decoration:none;background:var(--hl);padding:0 4px;border-radius:2px}
+.copy{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6}
+.copy a{color:inherit}
+.done{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--koke);color:#fff}
+/* 팝업 */
+.pop{position:fixed;inset:0;z-index:50;background:rgba(30,25,20,.45);display:flex;align-items:flex-end;justify-content:center}
+.pop[hidden]{display:none}
+.pcard{background:var(--sheet);width:100%;max-width:560px;max-height:82vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px 22px;box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+.pk{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px}
+.rail{display:flex;flex-direction:column;gap:5px}.rail svg{width:44px;height:44px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
+.big{width:150px;height:150px;margin:0 auto;cursor:pointer}.big svg{width:100%;height:100%}
+.glyph{font-family:var(--f-kanji);font-size:110px;line-height:150px;text-align:center}
+.hun{text-align:center;font-size:20px;font-weight:700}.hun small{font-size:12px;color:var(--muted);font-weight:400}
+.parts{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 10px;margin-top:10px;font-size:14px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 10px;font-size:13px;font-family:var(--f-ja)}
+.chip b{font-family:var(--f-ko);font-weight:400;color:var(--muted);margin-right:4px;font-size:11px}
+.wtop{text-align:center}.wtop .ww{font-family:var(--f-ja);font-size:36px;font-weight:700}.wtop .wr{color:var(--muted)}.wtop .wk{font-size:19px;margin-top:6px}
+.refs{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+.say{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--rule);background:var(--sheet);font-size:11px;padding:0 0 0 2px;vertical-align:middle}
+/* 홈 */
+.hi{font-size:21px;font-weight:700;margin:16px 0 4px}.hi small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:3px}
+.card{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:14px;margin-top:12px}
+.card h3{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.st3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.st{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:12px 6px;text-align:center}
+.st b{display:block;font-size:26px}.st span{font-size:12px;color:var(--muted)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:5px}
+.vgrid button{border:1px solid var(--line);background:var(--paper);border-radius:2px;padding:7px 0;font-size:12px}
+.vgrid button.r{background:var(--koke);color:#fff;border-color:var(--koke)}
+.vgrid button.cur{outline:2px solid var(--ink)}
+/* 복습 */
+.ivl{display:flex;gap:6px;flex-wrap:wrap;font-size:12.5px;align-items:center}
+.ivl span{border:1px solid var(--line);border-radius:999px;padding:1px 10px}.ivl span.cur{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.q{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:16px;margin-top:10px;text-align:center}
+.ql{font-size:13px;color:var(--muted)}
+.qk{font-family:var(--f-kanji);font-size:96px;line-height:1.2}
+.qw{font-family:var(--f-ja);font-size:40px;font-weight:700}
+.qs{font-family:var(--f-ja);font-size:20px;line-height:1.9;margin:6px 0}
+.qs mark{background:var(--hl);color:inherit;padding:0 2px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.opt{border:1px solid var(--line);background:var(--sheet);border-radius:3px;padding:14px 6px;font-size:18px}
+.opt.ja{font-family:var(--f-ja)}.opt.k{font-family:var(--f-kanji);font-size:30px}
+.opt.ok{background:var(--koke);color:#fff;border-color:var(--koke)}.opt.no{background:var(--hot);color:#fff;border-color:var(--hot)}
+.fb{margin-top:10px;font-size:14px;line-height:1.6}
+.empty{text-align:center;color:var(--muted);padding:24px 8px;display:flex;flex-direction:column;gap:12px;align-items:center}
+/* 게이트 */
+.gate{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px}
+.gate[hidden]{display:none}
+.gate .logo{font-family:var(--f-ja);font-size:58px;border:1px solid var(--rule);outline:1px solid var(--rule);outline-offset:-6px;background:var(--sheet);width:120px;height:120px;display:flex;align-items:center;justify-content:center}
+.gate h1{margin:10px 0 0;font-size:26px}.gate .sub{color:var(--muted);font-family:var(--f-ja)}
+.kakao{background:#FEE500;color:#191600;border:0;border-radius:12px;padding:14px 22px;font-weight:700;font-size:17px;display:inline-flex;gap:8px;align-items:center;margin-top:14px;min-width:260px;justify-content:center}
+.kakao svg{width:20px;height:20px}
+.foot{font-size:12px;color:var(--muted);margin-top:24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.foot .lo{margin-left:auto;border:1px solid var(--line);background:var(--ghost);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="logo">言</div>
+  <h1 id="gtitle">일본어 성경 읽기</h1>
+  <div class="sub" id="gsub">日韓対訳で読む聖書</div>
+  <div class="note" id="gmsg"></div>
+  <button class="kakao" id="gkk"></button>
+  <div class="note" id="gfine" style="margin-top:18px"></div>
+  <button class="btn" id="glang" style="margin-top:6px;padding:5px 12px;font-size:13px"></button>
+</div>
+<div class="wrap">
+  <div class="top"><div class="tabs">
+    <button class="tab" id="t-home"></button>
+    <button class="tab" id="t-read" aria-selected="true"></button>
+    <button class="tab" id="t-rev"><span id="t-rev-l"></span><i class="dot" id="rdot" hidden></i></button>
+  </div></div>
+
+  <section class="view" id="v-home" hidden><div id="home"></div></section>
+
+  <section class="view" id="v-read">
+    <div class="rhd"><b id="rtitle"></b><button class="btn" id="lang" style="padding:6px 10px" aria-label="언어 / 言語"></button><select id="vsel" aria-label="절 고르기"></select></div>
+    <div class="prog"><i id="rprog"></i></div>
+    <div class="vcard" id="vcard"></div>
+    <div class="leg" id="leg"></div>
+    <div class="copy" id="copy"></div>
+  </section>
+
+  <section class="view" id="v-rev" hidden>
+    <div class="seg"><button class="btn" id="rm-k" aria-pressed="true"></button><button class="btn" id="rm-w" aria-pressed="false"></button><button class="btn" id="rm-s" aria-pressed="false"></button></div>
+    <div id="rev"></div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+<div class="pop" id="pop" hidden><div class="pcard" id="pcard"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
+const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
+const BOOKS={jhn:{ko:'요한복음',ja:'ヨハネの福音書',yv:'JHN'}};
+const bname=b=>LANG==='ja'?b.ja:b.ko;
+const chs=n=>L(n+'장','第'+n+'章');
+const IVL=[0,1,3,7,30];const IVLK=['오늘','1일','3일','7일','1달'],IVLJ=['今日','1日','3日','7日','1か月'];let IVL_L=IVLK;
+const CJK=/[㐀-鿿々]/;
+const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
+let TODAY=iso(new Date());const refreshToday=()=>{TODAY=iso(new Date())};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+let LANG='ko';try{LANG=localStorage.getItem('jpbible-lang')||((navigator.language||'').startsWith('ja')?'ja':'ko')}catch(e){}
+const L=(ko,ja)=>LANG==='ja'?ja:ko;
+let sb=null,user=null,KJ={},U=[],WD=[],book='jhn',ch=1,cur=0,furi=true;
+let P={rd:{},srs:{},words:{},sent:{},log:{}};
+try{const s=JSON.parse(localStorage.getItem('jpbible-pref')||'{}');furi=s.furi!==false;cur=s.cur||0}catch(e){}
+const savePref=()=>{try{localStorage.setItem('jpbible-pref',JSON.stringify({furi,cur}))}catch(e){}};
+
+/* ---------- 토큰 ---------- */
+const tk=t=>typeof t==='string'?{s:t}:{s:t[0],r:t[1]||'',b:t[2]||'',br:t[3]||''};
+function rubyOf(s,r){ // 표면형 s(한자+오쿠리가나)에 읽기 r을 한자 부분에만 붙인다
+  if(!r||!CJK.test(s))return [[s,'']];
+  const m=s.match(/^(.*?)([ぁ-ゖ]*)$/);const head=m[1],tail=m[2];
+  let rr=r;if(tail&&rr.endsWith(tail))rr=rr.slice(0,-tail.length);
+  const out=[[head,rr]];if(tail)out.push([tail,'']);return out}
+function kspan(c){if(!CJK.test(c)||c==='々')return esc(c);const k=KJ[c];return `<span class="k ${k&&k.busu?'':'n'}" data-k="${c}">${c}</span>`}
+function verseHTML(u){return u.toks.map(t0=>{const t=tk(t0);
+    const inner=rubyOf(t.s,t.r).map(([a,b])=>b?`<ruby>${[...a].map(kspan).join('')}<rt>${esc(b)}</rt></ruby>`:[...a].map(kspan).join('')).join('');
+    return t.b?`<span class="w" data-w="${esc(t.b)}">${inner}</span>`:inner}).join('')}
+const uid=u=>u.id;
+const vlabel=u=>u.v1===u.v2?`${u.ch}:${u.v1}`:`${u.ch}:${u.v1}-${u.v2}`;
+const kanjiOf=u=>[...new Set([...u.jp].filter(c=>CJK.test(c)&&c!=='々'&&KJ[c]))];
+const wordsOf=u=>[...new Set(u.toks.map(tk).filter(t=>t.b).map(t=>t.b))].filter(w=>WD.find(x=>x.w===w));
+
+function applyLang(){document.documentElement.lang=LANG;IVL_L=LANG==='ja'?IVLJ:IVLK;
+  $('t-home').textContent=L('홈','ホーム');$('t-read').textContent=L('읽기','読む');$('t-rev-l').textContent=L('복습','復習');
+  $('rm-k').textContent=L('한자','漢字');$('rm-w').textContent=L('단어','単語');$('rm-s').textContent=L('문장','文');
+  $('lang').textContent=L('日本語','한국어');$('glang').textContent=L('日本語で表示','한국어로 보기');
+  $('gtitle').textContent=L('일본어 성경 읽기','日韓対訳で読む聖書');$('gsub').textContent=L('日韓対訳で読む聖書','일본어 성경 읽기');
+  if(!user)$('gmsg').textContent=L('말씀을 한 절씩 읽으며 한자와 단어를 익혀요','みことばを一節ずつ読みながら、漢字と韓国語を学びます');
+  $('gfine').textContent=L('지금은 개인 학습용이에요 · 허락받은 계정만 열려요','現在は個人学習用です · 許可されたアカウントのみ利用できます');
+  if(!user||$('gkk').dataset.mode!=='other')$('gkk').innerHTML=KK+L('카카오로 시작하기','カカオでログイン');
+  $('leg').innerHTML=L('<i></i>부수한자에 있는 한자 <i class="n"></i>새 한자 — 한자를 누르면 카드 · <s>단어</s>를 누르면 뜻','<i></i>部首漢字アプリにある漢字 <i class="n"></i>新しい漢字 — 漢字をタップでカード · <s>単語</s>をタップで韓国語の意味')}
+function setLang(l){LANG=l;try{localStorage.setItem('jpbible-lang',l)}catch(e){};applyLang();if(user&&U.length){renderFoot();show(view)}}
+/* ---------- 읽기 ---------- */
+function renderRead(){if(!U.length)return;const u=U[cur],b=BOOKS[book];
+  $('rtitle').textContent=`${bname(b)} ${chs(ch)}`;$('lang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');
+  $('vsel').innerHTML=U.map((x,i)=>`<option value="${i}" ${i===cur?'selected':''}>${vlabel(x)}${P.rd[uid(x)]?' ✓':''}</option>`).join('');
+  $('rprog').style.width=(U.filter(x=>P.rd[uid(x)]).length/U.length*100)+'%';
+  const rd=P.rd[uid(u)];
+  $('vcard').innerHTML=`<div class="vno"><span>${b.ja} ${vlabel(u)}</span>${rd?'<span class="done">'+L('읽음','読了')+'</span>':''}</div>
+    <div class="jp ${furi?'':'nofuri'}" id="jp">${verseHTML(u)}</div>
+    <div class="ko ${u.ko?'':'empty'}">${u.ko?(LANG==='ja'?'<span class="note" style="display:block;font-size:11px">韓国語訳</span>':'')+esc(u.ko)+(LANG==='ja'?' <button class="say" id="kosay">▶</button>':''):L('한국어 번역 준비 중이에요','韓国語訳は準備中です')}</div>
+    <div class="ctl"><button class="btn" id="vsay">▶ ${L('듣기','聞く')}</button><button class="btn" id="vfuri">${furi?L('ふりがな 끄기','ふりがなを隠す'):L('ふりがな 켜기','ふりがなを表示')}</button></div>
+    <div class="ctl"><button class="btn" id="vprev" ${cur?'':'disabled'}>← ${L('이전','前へ')}</button><button class="btn ok" id="vread">${rd?L('다음 절 →','次の節 →'):L('읽었어요 → 다음 절','読みました → 次の節')}</button></div>`;
+  $('copy').innerHTML=`本文：リビングバイブル（Japanese Contemporary Bible）Copyright © 1978, 2011, 2016 by Biblica, Inc.® Used by permission. All rights reserved worldwide. · <a href="https://www.bible.com/bible/83/${b.yv}.${ch}.${u.v1}${u.v2!==u.v1?'-'+u.v2:''}.JCB" target="_blank" rel="noopener">${L('bible.com에서 보기','bible.comで見る')}</a>`;
+  $('jp').onclick=e=>{const k=e.target.closest('[data-k]'),w=e.target.closest('[data-w]');
+    document.querySelectorAll('.w.on').forEach(x=>x.classList.remove('on'));
+    if(k)openKanji(k.dataset.k,w&&w.dataset.w);else if(w){w.classList.add('on');openWord(w.dataset.w)}};
+  $('vsay').onclick=()=>say(u.jp);if($('kosay'))$('kosay').onclick=()=>say(u.ko,'ko-KR');
+  $('vfuri').onclick=()=>{furi=!furi;savePref();renderRead()};
+  $('vprev').onclick=()=>{cur--;savePref();renderRead();scrollTo({top:0})};
+  $('vread').onclick=()=>{if(!P.rd[uid(u)])markRead(u);if(cur<U.length-1){cur++;savePref()}renderRead();scrollTo({top:0})};
+  $('vsel').onchange=e=>{cur=+e.target.value;savePref();renderRead()}}
+function srsAdd(store,key){if(!store[key])store[key]={stage:0,start:TODAY,last:TODAY,due:TODAY}}
+function markRead(u){P.rd[uid(u)]=TODAY;kanjiOf(u).forEach(c=>srsAdd(P.srs,c));wordsOf(u).forEach(w=>srsAdd(P.words,w));srsAdd(P.sent,uid(u));act();save();updDot()}
+
+/* ---------- 카드 ---------- */
+const NS='http://www.w3.org/2000/svg';
+function svgOf(st,upto,mark=true){const s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 109 109');
+  st.forEach((d,i)=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',i>upto?'var(--ghost)':(i===upto&&mark?'var(--shu)':'var(--ink)'));p.setAttribute('stroke-width',4.5);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');s.appendChild(p)});return s}
+const hira=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+function openKanji(c,w){const k=KJ[c];if(!k)return;const el=$('pcard');
+  const wd=w&&WD.find(x=>x.w===w);
+  const refs=U.filter(u=>u.jp.includes(c)).map(vlabel);
+  el.innerHTML=`${wd?`<div class="note" style="text-align:center;margin-bottom:8px">${L('단어','単語')} <b style="font-family:var(--f-ja);font-size:16px;color:var(--ink)">${esc(wd.w)}</b> ${esc(wd.r)} — ${esc(wd.ko)}</div>`:''}
+    <div class="pk"><div class="rail" id="krail"></div><div><div class="big" id="kbig" title="${L('누르면 필순을 그려요','タップで筆順')}"></div>
+    <div class="hun">${LANG==='ja'?'<small style="display:block">韓国語の音訓</small>':''}${esc(k.hun)} <small>${k.s.length?k.s.length+L('획','画'):''}${k.busu?L(' · 부수한자',' · 部首漢字'):L(' · 새 한자',' · 新しい漢字')}</small></div></div></div>
+    ${k.parts||k.memo?`<div class="parts">${k.parts&&k.parts!==k.hun?`<b style="font-family:var(--f-kanji);font-size:18px;color:var(--ai)">${esc(k.parts)}</b><br>`:''}${esc(k.memo||'')}</div>`:''}
+    <div class="chips">${k.on.map(r=>`<span class="chip"><b>音</b>${esc(r)} ${hira(r)}</span>`).join('')}${k.kun.map(r=>`<span class="chip"><b>訓</b>${esc(r)}</span>`).join('')}</div>
+    <div class="refs">${L('이 장에서 '+refs.length+'곳','この章で'+refs.length+'か所')} · ${refs.slice(0,8).join(', ')}${refs.length>8?' …':''}</div>
+    <div class="ctl"><button class="btn pri" id="pclose">${L('닫기','閉じる')}</button></div>`;
+  if(k.s.length){const r=$('krail');k.s.forEach((_,i)=>r.appendChild(svgOf(k.s,i)));const big=$('kbig');const draw=u=>{big.innerHTML='';big.appendChild(svgOf(k.s,u,u<k.s.length-1))};draw(k.s.length-1);
+    let t=null;big.onclick=()=>{clearInterval(t);let u=0;draw(0);t=setInterval(()=>{u++;if(u>=k.s.length){clearInterval(t);return}draw(u)},500)}}
+  else $('kbig').innerHTML=`<div class="glyph">${c}</div>`;
+  showPop()}
+function openWord(w){const d=WD.find(x=>x.w===w);if(!d)return;
+  $('pcard').innerHTML=`<div class="wtop"><div class="ww">${esc(d.w)}</div><div class="wr">${esc(d.r)} <button class="say" id="wsay">▶</button></div><div class="wk">${LANG==='ja'?'<span class="note" style="font-size:11px">韓国語 </span>':''}${esc(d.ko)}${LANG==='ja'?' <button class="say" id="wksay">▶</button>':''}</div></div>
+    <div class="refs">${L('이 장에서 '+d.refs.length+'곳','この章で'+d.refs.length+'か所')} · ${d.refs.map(v=>ch+':'+v).join(', ')}</div>
+    <div class="chips" style="justify-content:center">${[...d.w].filter(c=>KJ[c]).map(c=>`<button class="chip" data-k="${c}" style="font-size:18px">${c} <b>${esc(KJ[c].hun)}</b></button>`).join('')}</div>
+    <div class="ctl"><button class="btn pri" id="pclose">${L('닫기','閉じる')}</button></div>`;
+  if($('wksay'))$('wksay').onclick=()=>say(d.ko.split('·')[0].replace(/\(.*?\)/g,'').trim(),'ko-KR');
+  $('wsay').onclick=()=>say(/[ァ-ヶ]/.test(d.r)?d.r:d.r);
+  $('pcard').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>openKanji(b.dataset.k,w));showPop()}
+function showPop(){$('pop').hidden=false;$('pclose').onclick=hidePop}
+function hidePop(){$('pop').hidden=true;document.querySelectorAll('.w.on').forEach(x=>x.classList.remove('on'))}
+$('pop').onclick=e=>{if(e.target.id==='pop')hidePop()};
+
+/* ---------- 듣기 ---------- */
+const synth=window.speechSynthesis;let jv=null;
+function pickV(){try{const v=synth.getVoices();jv=v.find(x=>/^ja/i.test(x.lang)&&/google|kyoko|o-ren|nanami/i.test(x.name))||v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
+if(synth){pickV();synth.onvoiceschanged=pickV}
+function say(t,lg='ja-JP'){if(!synth)return;try{synth.cancel()}catch(e){}setTimeout(()=>{const u=new SpeechSynthesisUtterance(t);u.lang=lg;if(lg==='ja-JP'&&jv)u.voice=jv;else{try{const v=synth.getVoices().find(x=>/^ko/i.test(x.lang));if(v)u.voice=v}catch(e){}}u.rate=.85;synth.speak(u)},60)}
+
+/* ---------- 복습 ---------- */
+let rm='k',Q=null,queue=[],done=0;
+const store=()=>rm==='k'?P.srs:rm==='w'?P.words:P.sent;
+const dueOf=s=>Object.keys(s).filter(k=>s[k].stage<5&&s[k].due<=TODAY);
+function updDot(){refreshToday();$('rdot').hidden=!(dueOf(P.srs).length+dueOf(P.words).length+dueOf(P.sent).length)}
+function makeQ(key){const st=store()[key].stage;
+  if(rm==='k'){const k=KJ[key];const chk=[...new Set(U.flatMap(kanjiOf))];const pool=shuffle(chk.filter(x=>x!==key)).concat(shuffle(Object.keys(KJ).filter(x=>x!==key&&!chk.includes(x))));
+    const u=U.find(u=>u.jp.includes(key));
+    if(st>=1&&u&&Math.random()<.6){const t=u.toks.map(tk).find(t=>t.s.includes(key)&&t.r);if(t){const ans=t.r;const ds=shuffle(U.flatMap(x=>x.toks.map(tk)).filter(x=>x.r&&x.r!==ans&&x.s.length===t.s.length).map(x=>x.r)).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3);
+      if(ds.length===3)return{type:'read',key,u,t,ans,opts:shuffle([ans,...ds])}}}
+    if(Math.random()<.5)return{type:'kmean',key,ans:k.hun,opts:shuffle([k.hun,...pool.slice(0,3).map(x=>KJ[x].hun)])};
+    return{type:'kchar',key,ans:key,opts:shuffle([key,...pool.slice(0,3)])}}
+  if(rm==='w'){const w=WD.find(x=>x.w===key);const oth=shuffle(WD.filter(x=>x!==w));
+    if(st>=1&&Math.random()<.5){const u=U.find(u=>u.toks.map(tk).some(t=>t.b===key));const t=u&&u.toks.map(tk).find(t=>t.b===key);
+      if(t)return{type:'cloze',key,u,surf:t.s,ans:t.s,opts:shuffle([t.s,...oth.slice(0,3).map(x=>x.w)])}}
+    if(Math.random()<.5)return{type:'wread',key,w,ans:w.r,opts:shuffle([w.r,...oth.slice(0,3).map(x=>x.r)])};
+    return{type:'wmean',key,w,ans:w.ko,opts:shuffle([w.ko,...oth.slice(0,3).map(x=>x.ko)])}}
+  const u=U.find(x=>uid(x)===key);
+  if(st>=3)return{type:'sread',key,u};
+  const cand=u.toks.map(tk).filter(t=>t.b&&CJK.test(t.s));const t=cand[Math.floor(Math.random()*cand.length)]||u.toks.map(tk).find(t=>t.b);
+  const oth=shuffle(WD.filter(x=>x.w!==t.b)).slice(0,3).map(x=>x.w);
+  return{type:'scloze',key,u,surf:t.s,ans:t.b,opts:shuffle([t.b,...oth])}}
+function start(prac){const s=store();queue=prac?shuffle(Object.keys(s)).slice(0,15):shuffle(dueOf(s));Q=null;done=0;window.__prac=prac;next()}
+function next(){Q=queue.length?makeQ(queue[0]):null;renderRev()}
+function grade(ok){const key=queue.shift();done++;if(!window.__prac){const s=store()[key];
+    if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?'9999-12-31':addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;queue.push(key)}act();save();updDot()}
+  else if(!ok)queue.push(key);next()}
+function blankSent(u,surf){let html=u.jp;const i=html.indexOf(surf);return esc(html.slice(0,i))+'<mark>＿＿</mark>'+esc(html.slice(i+surf.length))}
+function renderRev(){refreshToday();const el=$('rev'),s=store(),nm=LANG==='ja'?{k:'漢字',w:'単語',s:'文'}[rm]:{k:'한자',w:'단어',s:'문장'}[rm];
+  if(!Q){const d=dueOf(s),all=Object.keys(s);
+    el.innerHTML=`<div class="ivl">${IVL_L.map(x=>`<span>${x}</span>`).join('')}</div><div class="empty">${done?`<b>${L(done+'문제 끝!','全'+done+'問 終了!')}</b>`:''}
+      <div>${d.length?L(`오늘 복습할 ${nm} ${d.length}개`,`今日の復習：${nm} ${d.length}`):all.length?L(`오늘 복습할 ${nm}이 없어요.`,`今日復習する${nm}はありません。`):L('읽기에서 「읽었어요」를 누르면 그 절의 '+nm+'이 여기로 와요.','「読む」で「読みました」を押すと、その節の'+nm+'がここに入ります。')}</div>
+      ${d.length?'<button class="btn pri" id="rgo">'+L('복습 시작','復習を始める')+'</button>':''}${all.length?'<button class="btn" id="rprac">'+L('연습하기 (기록 안 남음)','練習する（記録なし）')+'</button>':''}
+      <div class="note">${rm==='s'?L('1~7일 단계는 절 빈칸, 1달 단계부터는 ふりがな 없이 통째로 읽고 스스로 채점해요.','1〜7日の段階は節の穴埋め、1か月の段階からはふりがななしで通読し、自分で採点します。'):L('맞히면 1일 → 3일 → 7일 → 1달로 간격이 늘고, 틀리면 오늘 다시 나와요.','正解すると間隔が1日 → 3日 → 7日 → 1か月と延び、間違えると今日もう一度出ます。')}</div></div>`;
+    if($('rgo'))$('rgo').onclick=()=>start(false);if($('rprac'))$('rprac').onclick=()=>start(true);return}
+  const st=window.__prac?null:s[Q.key].stage;
+  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${window.__prac?L('연습','練習'):L('남은 ','残り ')+queue.length}</span></div>`;
+  if(Q.type==='sread'){el.innerHTML=head+`<div class="q"><div class="ql">${L('ふりがな 없이 소리 내어 읽어 보세요','ふりがななしで声に出して読んでみましょう')} (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp)}</div><div id="sans"></div>
+      <div class="ctl"><button class="btn pri" id="sshow">${L('읽기 확인','読みを確認')}</button></div></div>`;
+    $('sshow').onclick=()=>{$('sans').innerHTML=`<div class="jp" style="font-size:19px">${verseHTML(Q.u)}</div>${Q.u.ko?`<div class="ko">${esc(Q.u.ko)}</div>`:''}`;
+      $('sshow').parentNode.innerHTML='<button class="btn shu" id="sno">'+L('막혔어요','つまった')+'</button><button class="btn ok" id="sok">'+L('읽었어요','読めた')+'</button>';$('sno').onclick=()=>grade(false);$('sok').onclick=()=>grade(true)};return}
+  let q='',cls='';
+  if(Q.type==='kmean'){q=`<div class="ql">${L('이 한자의 뜻은?','この漢字の韓国語の意味は？')}</div><div class="qk">${Q.key}</div>`}
+  if(Q.type==='kchar'){q=`<div class="ql">${L('이 뜻의 한자는?','この意味の漢字は？')}</div><div class="qw" style="font-family:var(--f-ko)">${esc(KJ[Q.key].hun)}</div>`;cls='k'}
+  if(Q.type==='read'){q=`<div class="ql">${L('표시한 말을 어떻게 읽을까요?','印の言葉の読みは？')} (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp).split(esc(Q.t.s)).join('<mark>'+esc(Q.t.s)+'</mark>')}</div>`;cls='ja'}
+  if(Q.type==='wmean'){q=`<div class="ql">${L('이 단어의 뜻은?','この単語の韓国語は？')}</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.r)}</div>`}
+  if(Q.type==='wread'){q=`<div class="ql">${L('이 단어를 어떻게 읽을까요?','この単語の読みは？')}</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.ko)}</div>`;cls='ja'}
+  if(Q.type==='cloze'||Q.type==='scloze'){q=`<div class="ql">${L('빈칸에 들어갈 말은?','空欄に入る言葉は？')} (${vlabel(Q.u)})</div><div class="qs">${blankSent(Q.u,Q.surf)}</div>${Q.u.ko?`<div class="ql">${esc(Q.u.ko)}</div>`:''}`;cls='ja'}
+  el.innerHTML=head+`<div class="q">${q}</div><div class="opts">${Q.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="fb"></div>`;
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;el.dataset.lock=1;const ok=Q.opts[+b.dataset.i]===Q.ans;
+    el.querySelectorAll('.opt').forEach(x=>{if(Q.opts[+x.dataset.i]===Q.ans)x.classList.add('ok')});if(!ok)b.classList.add('no');
+    const u=Q.u||U.find(u=>u.jp.includes(Q.key)||u.toks.map(tk).some(t=>t.b===Q.key));
+    $('fb').innerHTML=`<b>${ok?L('맞았어요','正解'):L('다시 볼게요','もう一度')}</b>${u?`<div class="jp" style="font-size:18px;line-height:2.1">${verseHTML(u)}</div><div class="note">${vlabel(u)}${u.ko?' · '+esc(u.ko):''}</div>`:''}<div class="ctl"><button class="btn pri" id="nx">${L('다음 →','次へ →')}</button></div>`;
+    $('nx').onclick=()=>{el.dataset.lock='';grade(ok)}})}
+['k','w','s'].forEach(m=>$('rm-'+m).onclick=()=>{rm=m;['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===m));Q=null;done=0;renderRev()});
+
+/* ---------- 홈 ---------- */
+function streak(){let n=0;const d=new Date();if(!P.log[iso(d)])d.setDate(d.getDate()-1);while(P.log[iso(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function renderHome(){refreshToday();const m=user?(user.user_metadata||{}):{};const nm=m.name||m.nickname||'';
+  const rd=U.filter(u=>P.rd[uid(u)]).length,due=dueOf(P.srs).length+dueOf(P.words).length+dueOf(P.sent).length;
+  const nxt=U.findIndex(u=>!P.rd[uid(u)]);
+  $('home').innerHTML=`<div class="hi">${nm?esc(nm)+L(' 님, ','さん、'):''}${L('오늘도 말씀과 함께','今日もみことばと共に')}<small>${bname(BOOKS[book])} ${chs(ch)} · ${rd}/${U.length} ${L('읽음','読了')}</small></div>
+    <div class="st3"><div class="st"><b>${rd}</b><span>${L('읽은 절','読んだ節')}</span></div><div class="st"><b style="color:var(--shu)">${due}</b><span>${L('오늘 복습','今日の復習')}</span></div><div class="st"><b style="color:var(--ai)">${streak()}</b><span>${L('연속일','連続日数')}</span></div></div>
+    <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?L(ch+'장 다 읽었어요 — 처음부터','第'+ch+'章を読み終えました — 最初から'):L('이어서 읽기 · ','続きを読む · ')+vlabel(U[nxt])}</button>${due?'<button class="btn" id="hrv">'+L('복습','復習')+' ('+due+')</button>':''}</div>
+    <div class="card"><h3>${bname(BOOKS[book])} ${chs(ch)}</h3><div class="vgrid">${U.map((u,i)=>`<button class="${P.rd[uid(u)]?'r':''} ${i===cur?'cur':''}" data-i="${i}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}</button>`).join('')}</div></div>
+    <div class="card"><h3>${L('익힌 것','学んだもの')}</h3><div>${L('한자','漢字')} ${Object.keys(P.srs).length} · ${L('단어','単語')} ${Object.keys(P.words).length} · ${L('문장','文')} ${Object.keys(P.sent).length}</div></div>`;
+  $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
+  $('home').querySelectorAll('.vgrid button').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;savePref();show('read')})}
+
+/* ---------- 화면 ---------- */
+let view='read';
+function show(v){view=v;['home','read','rev'].forEach(x=>{$('t-'+x).setAttribute('aria-selected',x===v);$('v-'+x).hidden=x!==v});
+  if(v==='home')renderHome();if(v==='read')renderRead();if(v==='rev'){Q=null;renderRev()};scrollTo({top:0})}
+$('t-home').onclick=()=>show('home');$('t-read').onclick=()=>show('read');$('t-rev').onclick=()=>show('rev');
+
+/* ---------- 저장 ---------- */
+function act(){P.log[TODAY]=(P.log[TODAY]||0)+1}
+let pushT=null;
+function save(){try{localStorage.setItem('jpbible-p-'+(user?user.id:'x'),JSON.stringify(P))}catch(e){}
+  if(!sb||!user)return;clearTimeout(pushT);pushT=setTimeout(async()=>{await sb.from('bible_progress').upsert({user_id:user.id,...P,updated_at:new Date().toISOString()})},1000)}
+async function loadAll(){
+  const [k,u,w,p]=await Promise.all([fetch('bible-kanji.json',{cache:'no-cache'}).then(r=>r.json()),
+    sb.from('bible_units').select('id,book,ch,v1,v2,ord,jp,toks,ko').eq('book',book).eq('ch',ch).order('ord'),
+    sb.from('bible_meta').select('data').eq('id',`${book}.${ch}.words`).maybeSingle(),
+    sb.from('bible_progress').select('rd,srs,words,sent,log').eq('user_id',user.id).maybeSingle()]);
+  KJ=k;if(u.error||!u.data||!u.data.length)return false;U=u.data;WD=(w.data&&w.data.data)||[];
+  try{const l=JSON.parse(localStorage.getItem('jpbible-p-'+user.id)||'null');if(l)P=l}catch(e){}
+  if(p.data){for(const f of['rd','srs','words','sent','log'])P[f]={...(p.data[f]||{}),...(P[f]||{})}}
+  if(cur>=U.length)cur=0;return true}
+function renderFoot(){const m=user.user_metadata||{};$('foot').innerHTML=`<span><b>${esc(m.name||m.nickname||'')}</b>${L(' 님 · 기록이 계정에 저장돼요','さん · 記録はアカウントに保存されます')}</span><button class="lo" id="lo">${L('로그아웃','ログアウト')}</button>`;
+  $('lo').onclick=async()=>{await sb.auth.signOut();location.reload()}}
+async function onUser(){const g=$('gate');
+  if(!user){g.hidden=false;$('gkk').hidden=false;applyLang();return}
+  $('gkk').hidden=true;$('gmsg').textContent=L('불러오는 중…','読み込み中…');
+  const ok=await loadAll();
+  if(!ok){$('gmsg').innerHTML=L('이 앱은 아직 개인 학습용이라 허락된 계정만 열려요.','このアプリは現在個人学習用のため、許可されたアカウントのみ利用できます。');$('gkk').hidden=false;$('gkk').dataset.mode='other';$('gkk').innerHTML=L('다른 계정으로 로그인','別のアカウントでログイン');$('gkk').onclick=async()=>{await sb.auth.signOut();login()};return}
+  g.hidden=true;renderFoot();updDot();show('read')}
+function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
+$('gkk').onclick=login;
+try{sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+  let first=true;sb.auth.onAuthStateChange((ev,ses)=>{const was=user&&user.id;user=ses?ses.user:null;
+    if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search))history.replaceState(null,'',location.pathname);
+    if(first||(user&&user.id)!==was){first=false;setTimeout(onUser,0)}})}
+catch(e){$('gmsg').textContent=L('로그인 서버에 연결하지 못했어요. 새로고침해 주세요.','ログインサーバーに接続できません。再読み込みしてください。')}
+$('glang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');applyLang();
+</script>
+</body>
+</html>
