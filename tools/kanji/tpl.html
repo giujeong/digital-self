@@ -585,7 +585,7 @@ function pickVoice(){try{const v=synth.getVoices();jaVoice=v.find(x=>/^ja/i.test
 if(synth){pickVoice();try{synth.addEventListener('voiceschanged',pickVoice)}catch(e){synth.onvoiceschanged=pickVoice}}
 function say(t){if(!synth){ttsWarn();return}
   try{if(synth.speaking||synth.pending)synth.cancel()}catch(e){}
-  setTimeout(()=>{try{pickVoice();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=.85;u.onerror=ev=>{if(ev.error!=='interrupted'&&ev.error!=='canceled')ttsWarn()};synth.speak(u);try{synth.resume()}catch(e){}
+  setTimeout(()=>{try{pickVoice();const one=/^[\u3041-\u30ff]$/.test(t);const u=new SpeechSynthesisUtterance(one?t+'。':t);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=one?1.05:.85;u.onerror=ev=>{if(ev.error!=='interrupted'&&ev.error!=='canceled')ttsWarn()};synth.speak(u);try{synth.resume()}catch(e){}
     setTimeout(()=>{if(!jaVoice&&!synth.speaking)ttsWarn()},900)}catch(e){ttsWarn()}},80)}
 function ttsWarn(){const n=$('ttsn');if(n)n.hidden=false}
 function bindSay(root){root.querySelectorAll('[data-say]').forEach(b=>b.onclick=e=>{e.stopPropagation();say(b.dataset.say)})}
