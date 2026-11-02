@@ -212,3 +212,18 @@ KANA={"hira":HIRA,"kata":KATA,"c":KC,"look":{"ぬ":"め","め":"ぬ","ね":"れ�
 d=json.load(open(os.path.join(HERE,"data.json"),encoding="utf-8"));d["kana"]=KANA
 open(os.path.join(HERE,"data.json"),"w",encoding="utf-8").write(json.dumps(d,ensure_ascii=False))
 print("kana",len(KC))
+# ---------- 예문 단어 (words.py가 만든 words.json + exvocab_ko.json) ----------
+try:
+    WJ=json.load(open(os.path.join(HERE,"words.json"),encoding="utf-8"))
+    EXK=json.load(open(os.path.join(HERE,"exvocab_ko.json"),encoding="utf-8"))
+    JLV={e:n for n,e,rd,en in JV}
+    words=[]
+    for w in WJ:
+        if w["w"] not in EXK or not EXK[w["w"]]: continue
+        w2={"w":w["w"],"r":w["r"],"ko":EXK[w["w"]],"pos":w["pos"][:1],"in":[x for x in w["in"] if x[0] in C and x[1]<len(C[x[0]]["ex"])]}
+        if w["w"] in JLV: w2["n"]=JLV[w["w"]]
+        if w2["in"]: words.append(w2)
+    d=json.load(open(os.path.join(HERE,"data.json"),encoding="utf-8"));d["words"]=words
+    open(os.path.join(HERE,"data.json"),"w",encoding="utf-8").write(json.dumps(d,ensure_ascii=False))
+    print("words",len(words))
+except FileNotFoundError: print("words.json 없음 — words.py 먼저")

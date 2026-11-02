@@ -398,6 +398,10 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .kn-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.kn-opts .btn{padding:14px 0;font-size:20px}
 .kn-opts .btn.right{background:var(--koke);color:#fff;border-color:var(--koke)}.kn-opts .btn.wrong{background:var(--hot);color:#fff;border-color:var(--hot)}
 .kn-empty{border:1px solid var(--line);background:var(--sheet);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.qw{font-family:var(--f-ja);font-size:44px;font-weight:700;line-height:1.1}.qw small{display:block;font-size:16px;font-weight:400;color:var(--muted);margin-top:4px}
+.sched td.w b{font-family:var(--f-ja);font-size:17px;font-weight:700}.sched td.w small{display:block;font-size:11px;color:var(--muted)}
+.wt th,.wt td{white-space:nowrap}.wt td:nth-child(2){white-space:normal}
+.fb .kana{font-size:12px;color:var(--muted)}.fb .ko{font-size:13px;font-weight:400}
 </style>
 
 <div class="tour" id="tour" hidden></div>
@@ -521,7 +525,9 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   </section>
 
   <section id="v-review" class="view" hidden>
+    <div class="kn-seg" style="margin-bottom:12px"><button class="btn" id="rvm1" aria-pressed="true">한자 복습</button><button class="btn" id="rvm2" aria-pressed="false">단어 복습</button></div>
     <div class="rv" id="rv"></div>
+    <div class="rv" id="wv" hidden></div>
   </section>
 
   <footer>
@@ -536,6 +542,7 @@ const IVL=[0,1,3,7,30], IVL_L=['오늘','1일','3일','7일','1달'];
 const KEY='busu-kanji-v1';
 let S={};
 try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
+let WS={};try{WS=JSON.parse(localStorage.getItem('busu-kanji-words-v1')||'{}')||{}}catch(e){WS={}}
 let KN={};try{KN=JSON.parse(localStorage.getItem('busu-kanji-know-v1')||'{}')||{}}catch(e){KN={}}
 function setKnow(ch,ok){KN[ch]=ok?'k':'u';act();try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){};push()}
 const unkCount=l=>l.chars.filter(c=>KN[c]==='u').length;
@@ -570,13 +577,13 @@ const recT=r=>r?(r.last||r.start||''):'';
 function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
 let pulling=false,pulledOnce=false;
 async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
-  const {data,error}=await sb.from('progress').select('srs,know,log,kana').eq('user_id',user.id).maybeSingle();
+  const {data,error}=await sb.from('progress').select('srs,know,log,kana,words').eq('user_id',user.id).maybeSingle();
   pulling=false;pulledOnce=true;if(error){setSync('불러오기 실패');return}
-  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};KSR=mergeS(data.kana||{},KSR);try{localStorage.setItem('busu-kana-v1',JSON.stringify(KSR))}catch(e){};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
+  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};KSR=mergeS(data.kana||{},KSR);WS=mergeS(data.words||{},WS);try{localStorage.setItem('busu-kanji-words-v1',JSON.stringify(WS))}catch(e){};try{localStorage.setItem('busu-kana-v1',JSON.stringify(KSR))}catch(e){};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
   try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN));localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}
   await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='kana')renderKana();if(view==='review'&&!Q)renderReview();if(typeof tourMaybe==='function')tourMaybe(view)}
 function push(now){if(!sb||!user)return;clearTimeout(pushT);
-  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,kana:KSR,updated_at:new Date().toISOString()});
+  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,kana:KSR,words:WS,updated_at:new Date().toISOString()});
     setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
   if(now)return go();pushT=setTimeout(go,1200)}
 function sbInit(){try{if(!window.supabase)return;
@@ -789,14 +796,14 @@ $('learnbtn').onclick=()=>{S[curC]={stage:0,start:TODAY,due:TODAY};save();render
 
 /* ---------- 복습 ---------- */
 function dueList(){refreshToday();return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}
-function updBadge(){const n=dueList().length;const b=$('due-badge');b.hidden=!n;b.textContent=n;b.title='오늘 복습 '+n}
+function updBadge(){const n=dueList().length+(typeof wDue==='function'?wDue().length:0);const b=$('due-badge');b.hidden=!n;b.textContent=n;b.title='오늘 복습 '+n}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function pool(ch){const h=D.chars[ch].hun,seenH=new Set([h]);const l=lessonOf(ch);const same=l.chars.filter(x=>x!==ch);const other=Object.keys(D.chars).filter(x=>x!==ch&&!same.includes(x));
   return shuffle(same).concat(shuffle(other)).filter(x=>{const hx=D.chars[x].hun;if(seenH.has(hx))return false;seenH.add(hx);return true})}
 function makeQ(ch,stage){
   const c=D.chars[ch];
   if(stage>=4)return{type:'paper',ch};
-  const kinds=stage<=1?['meaning','char']:['reading','char','reading'];
+  const kinds=stage<=1?['meaning','reading','char','reading']:['reading','reading','char','reading'];
   const k=kinds[Math.floor(Math.random()*kinds.length)];
   if(k==='meaning'){const ds=pool(ch).slice(0,3).map(x=>D.chars[x].hun);return{type:k,ch,ans:c.hun,opts:shuffle([c.hun,...ds])}}
   if(k==='char'){const ds=pool(ch).slice(0,3);return{type:k,ch,ans:ch,opts:shuffle([ch,...ds])}}
@@ -865,7 +872,7 @@ function renderReview(){
 }
 let view='learn';
 function show(v){view=v;['home','learn','cards','review','board','rad','kana'].forEach(x=>{if(x!=='rad'&&x!=='kana')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo)||(v==='kana'&&x==='learn'));$('v-'+x).hidden=v!==x});if(v==='kana')renderKana();
-  if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom);setTimeout(()=>tourMaybe(v),250)}
+  if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){$('rvm1').setAttribute('aria-pressed',rvMode!=='words');$('rvm2').setAttribute('aria-pressed',rvMode==='words');$('rv').hidden=rvMode==='words';$('wv').hidden=rvMode!=='words';rvMode==='words'?renderWords():(!Q&&renderReview())}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom);setTimeout(()=>tourMaybe(v),250)}
 /* ---------- 한판 ---------- */
 let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1,bdPage=0,bdAnim='';const BD_PG=30;
 function bdChars(){refreshToday();
@@ -962,7 +969,7 @@ $('tab-learn').onclick=()=>show('learn');$('tab-review').onclick=()=>show('revie
 function streak(){let n=0;const d=new Date();d.setHours(0,0,0,0);if(!LOG[iso(d)])d.setDate(d.getDate()-1);while(LOG[iso(d)]){n++;d.setDate(d.getDate()-1)}return n}
 function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=Object.keys(D.chars),N=all.length;
   const learned=all.filter(c=>S[c]),st=[0,0,0,0,0,0];learned.forEach(c=>{st[Math.min(5,S[c].stage||0)]++});
-  const due=dueList().length,unk=all.filter(c=>KN[c]==='u').length,sk=streak();
+  const due=dueList().length,wd=wDue().length+wNew().length,unk=all.filter(c=>KN[c]==='u').length,sk=streak();
   const m=user?(user.user_metadata||{}):{};const nm=user?(m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자'):'';
   const h=new Date().getHours(),gr=h<5?'늦은 밤이에요':h<11?'좋은 아침이에요':h<17?'좋은 오후예요':h<22?'좋은 저녁이에요':'늦은 밤이에요';
   const lastCh=_last&&D.chars[_last]?_last:null;let lastAt='';
@@ -976,12 +983,12 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   const ls=[...D.lessons].sort((a,b)=>(b.ord[0]-a.ord[0])||(b.ord[1]-a.ord[1])).slice(0,10);
   el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div style="display:flex;align-items:center"><button class="hm-q" id="hmq" title="사용 안내 다시 보기">?</button><div class="hm-av">${av}</div></div></div>
   <div class="hm-card"><div class="hm-h">익힌 글자</div><div class="hm-big"><b>${learned.length}</b><span>/ ${N}자 · ${Math.round(learned.length/N*100)}%</span></div><div class="hm-bar">${bar}</div><div class="hm-leg">${leg}</div></div>
-  <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
-  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${lastCh?'이어서 익히기 · '+lastCh:'익히기 시작'}</button><button class="btn" id="hmbd">한판</button></div>
+  <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습${wd?' · 단어 '+wd:''}</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
+  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${lastCh?'이어서 익히기 · '+lastCh:'익히기 시작'}</button><button class="btn" id="hmbd">한판</button></div>
   <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
   <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>
   <div class="hm-card fb" id="fb"></div>`;renderFB();
-  $('hmrv').onclick=()=>show(due?'review':'board');
+  $('hmrv').onclick=()=>{if(due){rvMode='kanji';show('review')}else if(wd){rvMode='words';show('review')}else show('board')};
   $('hmgo').onclick=()=>{show('learn');if(lastCh)goChar(lastCh)};
   $('hmbd').onclick=()=>show('board');
   el.querySelectorAll('.hm-ls button').forEach(b=>b.onclick=()=>{const l=D.lessons[+b.dataset.i];curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})})}
@@ -990,6 +997,55 @@ $('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').onclick=()=>{if(sb)lo
 $('gguest').onclick=()=>{try{localStorage.setItem('busu-guest','1')}catch(e){};$('gate').hidden=true;show('home')};
 sbInit();
 function start(){$('gcount').textContent=Object.keys(D.chars).length+'자 · '+D.lessons.length+'계열 · JLPT 급수 단어';renderAll();started=true;show('home')}
+/* ---------- 단어 복습 (예문 단어) ---------- */
+let rvMode='kanji',wQ=null,wQueue=[],wDone=0,wPrac=false;const W_NEW=10;
+const wKey=w=>w.w;
+function wActive(){return (D.words||[]).filter(w=>w.in.some(x=>S[x[0]]))}
+function wDue(){refreshToday();return wActive().filter(w=>WS[wKey(w)]&&WS[wKey(w)].stage<5&&WS[wKey(w)].due<=TODAY)}
+function wNew(){return wActive().filter(w=>!WS[wKey(w)]).slice(0,W_NEW)}
+function wSave(){try{localStorage.setItem('busu-kanji-words-v1',JSON.stringify(WS))}catch(e){};act();push();updBadge()}
+function wSent(w){const [ch,ei]=w.in[0];const e=D.chars[ch].ex[ei];return e}
+function wMake(w){const st=WS[wKey(w)]?WS[wKey(w)].stage:0;const all=D.words.filter(x=>x!==w);
+  const kinds=st<=1?['mean','read']:['cloze','read','mean'];let k=kinds[Math.floor(Math.random()*kinds.length)];
+  const e=wSent(w);if(k==='cloze'&&!e.jp.includes(w.w))k='mean';
+  const near=all.filter(x=>[...w.w].some(c=>/[㐀-鿿]/.test(c)&&x.w.includes(c)));
+  const pick=(f)=>{const seen=new Set([f(w)]);const o=[];for(const x of shuffle(near).concat(shuffle(all))){const v=f(x);if(!seen.has(v)){seen.add(v);o.push(v)}if(o.length===3)break}return o};
+  if(k==='mean')return{type:'mean',w,e,ans:w.ko,opts:shuffle([w.ko,...pick(x=>x.ko)])};
+  if(k==='read')return{type:'read',w,e,ans:w.r,opts:shuffle([w.r,...pick(x=>x.r)])};
+  return{type:'cloze',w,e,ans:w.w,opts:shuffle([w.w,...pick(x=>x.w)])}}
+function wStart(prac){wPrac=prac;const d=wDue(),n=wNew();wQueue=prac?shuffle(wActive()).slice(0,20):shuffle(d.concat(n));wDone=0;wNext()}
+function wNext(){wQ=wQueue.length?wMake(wQueue[0]):null;renderWords()}
+function wGrade(ok){const w=wQueue.shift();wDone++;
+  if(!wPrac){const k=wKey(w);const s=WS[k]||(WS[k]={stage:0,start:TODAY,last:TODAY,due:TODAY});
+    if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?null:addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;wQueue.push(w)}wSave()}
+  else if(!ok)wQueue.push(w);wNext()}
+function renderWords(){const el=$('wv');refreshToday();
+  if(!wQ){const act=wActive(),d=wDue(),n=wNew(),learned=act.filter(w=>WS[wKey(w)]);
+    const sk=w=>{const x=WS[wKey(w)];return x?(x.stage>=5?'9':x.due):'0'};const rows=act.slice().sort((a,b)=>sk(a).localeCompare(sk(b))).map(w=>{const x=WS[wKey(w)];return`<tr><td class="w"><b>${esc(w.w)}</b><small>${esc(w.r)}</small></td><td>${esc(w.ko)}</td><td>${x?(x.stage>=5?'완료':IVL_L[x.stage]):'새 단어'}</td><td>${x?(x.stage>=5?'—':(x.due===TODAY?'오늘':x.due)):'—'}</td></tr>`}).join('');
+    el.innerHTML=`<div class="ivl">${IVL_L.map(x=>`<span>${x}</span>`).join('')}</div>
+      <div class="empty">${wDone?`<b>${wDone}문제 끝!</b>`:''}
+        <div>${d.length||n.length?`오늘 복습할 단어 ${d.length}개${n.length?` · 새 단어 ${n.length}개`:''}`:(act.length?'오늘 복습할 단어가 없어요.':'익힌 한자가 생기면 그 예문의 단어가 여기로 와요.')}</div>
+        <div class="note">익힌 한자의 예문에 나온 단어예요 — 뜻 · 읽기 · 문장 빈칸으로 번갈아 물어요. 새 단어는 하루 ${W_NEW}개까지.</div>
+        <div class="ctl" style="justify-content:center">
+          ${d.length||n.length?'<button class="btn pri" id="wgo">단어 복습 시작</button>':''}
+          ${act.length?'<button class="btn" id="wprac">익힌 단어로 연습하기 (기록 안 남음)</button>':''}</div></div>
+      ${rows?`<div class="sec-h" style="margin-top:14px">단어장 · ${act.length}개 (익힌 한자 기준)</div><div style="overflow-x:auto"><table class="sched wt"><thead><tr><th>단어</th><th>뜻</th><th>단계</th><th>다음</th></tr></thead><tbody>${rows}</tbody></table></div>`:''}`;
+    if($('wgo'))$('wgo').onclick=()=>wStart(false);if($('wprac'))$('wprac').onclick=()=>wStart(true);return}
+  const st=wPrac?null:(WS[wKey(wQ.w)]?WS[wKey(wQ.w)].stage:0);
+  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${wPrac?'연습':'남은 '+wQueue.length}</span></div>`;
+  let q='';const e=wQ.e;
+  if(wQ.type==='mean')q=`<div class="ql">이 단어의 뜻은?</div><div class="qw">${esc(wQ.w.w)}<small>${esc(wQ.w.r)}</small></div>`;
+  if(wQ.type==='read')q=`<div class="ql">이 단어를 어떻게 읽을까요?</div><div class="qw">${esc(wQ.w.w)}</div><div class="ql">${esc(wQ.w.ko)}</div>`;
+  if(wQ.type==='cloze')q=`<div class="ql">빈칸에 들어갈 단어는?</div><div class="qs">${esc(e.jp).split(wQ.w.w).join('<mark>＿＿</mark>')}</div><div class="ql">${esc(e.ko)}</div>`;
+  const cls=wQ.type==='cloze'?'ja':(wQ.type==='read'?'ja':'');
+  el.innerHTML=head+`<div class="q">${q}</div><div class="opts">${wQ.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="wfb"></div>`;
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(el.dataset.lock==='1')return;el.dataset.lock='1';const ok=wQ.opts[+b.dataset.i]===wQ.ans;
+    el.querySelectorAll('.opt').forEach(x=>{if(wQ.opts[+x.dataset.i]===wQ.ans)x.classList.add('ok')});if(!ok)b.classList.add('no');
+    const f=$('wfb');f.className='fb '+(ok?'ok':'no');
+    f.innerHTML=`<div>${ok?'맞았어요':'다시 볼게요'} · <b>${esc(wQ.w.w)}</b> ${esc(wQ.w.r)} — ${esc(wQ.w.ko)}</div><div class="qs" style="font-size:17px;margin-top:6px"><button class="say" data-say="${esc(e.kana)}" aria-label="듣기">▶</button> ${esc(e.jp).split(wQ.w.w).join('<mark>'+esc(wQ.w.w)+'</mark>')}<div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}</div></div><button class="btn pri" id="wnx" style="margin-top:10px">다음 →</button>`;
+    bindSay(f);$('wnx').onclick=()=>{el.dataset.lock='';wGrade(ok)}})}
+$('rvm1').onclick=()=>{rvMode='kanji';$('rvm1').setAttribute('aria-pressed',true);$('rvm2').setAttribute('aria-pressed',false);$('wv').hidden=true;$('rv').hidden=false;if(!Q)renderReview()};
+$('rvm2').onclick=()=>{rvMode='words';$('rvm2').setAttribute('aria-pressed',true);$('rvm1').setAttribute('aria-pressed',false);$('rv').hidden=true;$('wv').hidden=false;wQ=null;renderWords()};
 /* ---------- 가나 (한자와 따로) ---------- */
 let kSet='hira',kCur=null,kMode='learn',kQ=null,kQueue=[],kDone=0,kPrac=false,kAnim=null;
 const kDue=set=>D.kana[set].filter(c=>KSR[c]&&KSR[c].due&&KSR[c].due<=TODAY);
@@ -1044,7 +1100,7 @@ const TOUR={
  home:[{t:'오늘 할 일은 여기서',p:'복습 → 익히기 → 한판 순서로 하면 돼요. 기록은 폰·PC 어디서나 이어져요.',i:`<div class="tbig"><span class="pill pri">복습 시작 →</span><span class="pill">이어서 익히기</span><span class="pill">한판</span></div>`}],
  learn:[{t:'부품으로 쪼개 보고, 따라 쓰기',p:'한자를 부수·부품으로 나눠 뜻을 연결해요. 왼쪽 필순은 위에서 아래로 따라 써요.',i:`<div class="tbig"><span class="k">休</span><span>= 亻(사람) + 木(나무)<br>나무 곁에서 쉬는 사람</span></div>`}],
  cards:[{t:'앞면 보고 떠올리기',p:'한자를 보고 뜻·읽기를 떠올린 뒤 뒤집어 확인하고, 알아요/몰라요를 골라요.',i:`<div class="tbig"><span class="k">山</span><span class="pill ok">알아요</span><span class="pill hot">몰라요</span></div>`}],
- review:[{t:'간격을 두고 다시 꺼내기',p:'알아요를 누르면 다음 복습이 1일 → 3일 → 7일 → 1달로 늘고, 몰라요는 오늘 다시 나와요.',i:`<div class="tbig"><span class="pill">1일</span>→<span class="pill">3일</span>→<span class="pill">7일</span>→<span class="pill">1달</span></div>`}],
+ review:[{t:'한자 복습과 단어 복습',p:'한자 복습은 예문 속 읽기 위주로, 단어 복습은 익힌 한자의 예문 단어를 뜻·읽기·빈칸으로 물어요. 맞히면 1일 → 3일 → 7일 → 1달로 늘고, 틀리면 오늘 다시.',i:`<div class="tbig"><span class="pill">1일</span>→<span class="pill">3일</span>→<span class="pill">7일</span>→<span class="pill">1달</span></div>`}],
  kana:[{t:'가나는 한자와 따로 익혀요',p:'가나(仮名)는 히라가나·가타카나를 함께 부르는 말이에요. 큰 글자를 누르면 필순을 그려요. 「익혔어요」를 누른 가나는 위의 \'가나 복습\'에서만 다시 나와요.',i:`<div class="tbig"><span class="k">あ</span><span>아 · a</span><span class="pill">가나 복습</span></div>`}],
  board:[
   {t:'모르는 글자만 톡',p:'아는 글자는 그냥 지나가고, 모르는 글자만 눌러 붉게 표시해요. 다시 누르면 풀려요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="rg" style="left:41%;top:12px"></div><div class="fg" style="left:47%;top:38px">👆</div>')},
