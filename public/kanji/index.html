@@ -15,6 +15,7 @@
 </head>
 <body>
 
+<meta name="credits" content="Stroke order and component data: KanjiVG (c) Ulrich Apel, CC BY-SA 3.0">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Shippori+Mincho:wght@500;700&family=Gowun+Batang:wght@400;700&display=swap">
@@ -48,7 +49,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .tab{border:1px solid var(--line);background:var(--sheet);padding:7px 14px;border-radius:2px;font-weight:700}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--shu);color:#fff;font-size:12px;text-align:center}
+.tab{position:relative}
+.badge{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--shu);font-size:0;overflow:hidden}
 .bar,.chars{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
 .bar::-webkit-scrollbar,.chars::-webkit-scrollbar{display:none}
 .bar>*,.chars>*{flex:none;scroll-snap-align:start}
@@ -287,7 +289,8 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .kakao{background:#FEE500;color:#191600;border:0;border-radius:6px;padding:8px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .kakao svg{width:16px;height:16px}
 .acct .sync{color:var(--muted);font-size:12px}
-.acct .lo{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
+.acct .lo,.acct .cr{border:1px solid var(--line);background:var(--ghost);color:var(--ink);border-radius:999px;cursor:pointer;font-size:12px;padding:4px 12px;font-weight:700}
+.acct .lo{margin-left:auto}
 
 @media (max-width:640px){
   .wrap{gap:8px;padding-block:6px 32px}
@@ -343,14 +346,42 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .hm-ls button{font-family:var(--f-kanji);font-size:20px;width:40px;height:40px;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink);position:relative;padding:0;cursor:pointer;overflow:hidden}
 .hm-ls button i{position:absolute;left:0;bottom:0;height:3px;background:var(--koke)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.tour{position:fixed;inset:0;z-index:70;background:rgba(30,25,20,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+.tour[hidden]{display:none}
+.tcard{background:var(--sheet);border-radius:10px;padding:16px;max-width:380px;width:100%;box-shadow:0 10px 34px rgba(0,0,0,.35)}
+.tcard h3{margin:12px 0 4px;font-size:18px}.tcard p{margin:4px 0 14px;font-size:14.5px;line-height:1.6;color:var(--ink)}
+.till{background:var(--paper);border:1px solid var(--line);border-radius:6px;height:160px;position:relative;overflow:hidden}
+.till .tg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:12px}
+.till .tg b{aspect-ratio:1;background:var(--sheet);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--f-kanji);font-size:22px;font-weight:400}
+.till .tg b.m{background:var(--rad);border-color:var(--shu);color:var(--shu)}
+.till .fg{position:absolute;font-size:34px;line-height:1}
+.till .rg{position:absolute;width:46px;height:46px;border:3px solid var(--shu);border-radius:50%;animation:tpulse 1.4s infinite}
+@keyframes tpulse{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.3);opacity:0}}
+.till .pk{position:absolute;left:14%;top:16px;width:120px;background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12.5px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.till .pk i{display:block;font-style:normal;font-family:var(--f-kanji);font-size:32px}
+.till .ar{position:absolute;font-size:30px;color:var(--shu);font-weight:700}
+.till .tbig{display:flex;align-items:center;justify-content:center;height:100%;gap:10px;font-size:15px;font-weight:700;flex-wrap:wrap;padding:10px;text-align:center}
+.till .tbig .k{font-family:var(--f-kanji);font-size:54px;font-weight:400}
+.till .pill{border:1px solid var(--line);background:var(--sheet);padding:6px 10px;border-radius:4px}
+.till .pill.hot{background:var(--hot);color:#fff;border-color:var(--hot)}.till .pill.ok{background:var(--koke);color:#fff;border-color:var(--koke)}.till .pill.pri{background:var(--ink);color:var(--paper)}
+.tft{display:flex;justify-content:space-between;align-items:center}
+.tdots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--line);margin:0 2px}.tdots span.on{background:var(--ink)}
+.tskip{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:13px;padding:6px 0;min-width:60px;text-align:left}
+.hm-q{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--sheet);font-weight:700;color:var(--muted);margin-right:8px;flex:none}
+.fb{text-align:left}
+.fb-in{display:flex;gap:8px;align-items:flex-end}
+.fb-in textarea{flex:1;min-height:42px;max-height:120px;resize:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:20px;padding:10px 14px;font:inherit;font-size:15px;line-height:1.4}
+.fb-in button{flex:none;border-radius:999px;padding:10px 16px}
+.fb-st{font-size:12px;color:var(--muted);margin-top:6px;min-height:1em}
 </style>
 
+<div class="tour" id="tour" hidden></div>
 <div class="gate" id="gate" hidden>
   <div class="logo">部</div><div class="nm">부수 한자</div><div class="sub">부수로 익히는 일본어 한자</div>
   <div class="feat">부품으로 이해하고 · 간격으로 꺼낸다<br><span id="gcount"></span><br>폰·PC 어디서나 기록이 이어져요</div>
   <button class="kakao" id="gkk"></button>
   <button class="guest" id="gguest">로그인 없이 둘러보기 (기록은 이 기기에만)</button>
-  <div class="fine">닉네임·프로필 사진만 받아요 · 이메일은 받지 않아요</div>
+  <div class="fine">닉네임·프로필 사진으로 시작해요 · 이메일은 선택이에요</div>
 </div>
 <div class="wrap">
   <header>
@@ -377,7 +408,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
       <div class="board">
         <div class="top">
           <div>
-            <div class="big" id="big"></div>
+            <div class="tbig" id="big"></div>
             <div class="ctl">
               <button class="btn pri" id="play">▶ 필순 보기</button>
               <span class="count" id="cnt"></span>
@@ -464,7 +495,6 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   </section>
 
   <footer>
-    필순·부품: KanjiVG (Ulrich Apel, CC BY-SA 3.0) · 내용: 『통쾌한 한자』를 참고해 공부하며 적은 노트 (55~67, 249~251, 353~355쪽) · <a href="https://giujeong.me/projects/japanese-retry" style="color:inherit">일본어 재도전</a><br>
     <div class="acct" id="acct">복습 기록은 이 브라우저에만 저장돼요.</div>
   </footer>
 </div>
@@ -493,7 +523,7 @@ const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_y
 let sb=null,user=null,pushT=null,syncMsg='';
 const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
 function renderAcct(){const a=$('acct');if(!a)return;
-  if(!sb){a.innerHTML='복습 기록은 이 브라우저에만 저장돼요.';return}
+  if(!sb){a.innerHTML='<span>복습 기록은 이 브라우저에만 저장돼요.</span>';return}
   if(!user){a.innerHTML=`<button class="kakao" id="kk">${KK}카카오로 로그인</button><span>로그인하면 폰·PC 어디서나 복습 기록이 이어져요. 지금 이 기기의 기록도 그대로 옮겨져요.</span>`;$('kk').onclick=login;return}
   const m=user.user_metadata||{};const nm=m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자';
   a.innerHTML=`<span><b>${esc(nm)}</b> 님 · 기록이 계정에 저장돼요</span><span class="sync" id="sync">${esc(syncMsg)}</span><button class="lo" id="lo">로그아웃</button>`;
@@ -507,13 +537,13 @@ function setSync(m){syncMsg=m;const s=$('sync');if(s)s.textContent=m}
 function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
 const recT=r=>r?(r.last||r.start||''):'';
 function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
-let pulling=false;
+let pulling=false,pulledOnce=false;
 async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
   const {data,error}=await sb.from('progress').select('srs,know,log').eq('user_id',user.id).maybeSingle();
-  pulling=false;if(error){setSync('불러오기 실패');return}
-  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
+  pulling=false;pulledOnce=true;if(error){setSync('불러오기 실패');return}
+  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
   try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN));localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}
-  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='review'&&!Q)renderReview()}
+  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='review'&&!Q)renderReview();if(typeof tourMaybe==='function')tourMaybe(view)}
 function push(now){if(!sb||!user)return;clearTimeout(pushT);
   const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,updated_at:new Date().toISOString()});
     setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
@@ -727,7 +757,7 @@ $('learnbtn').onclick=()=>{S[curC]={stage:0,start:TODAY,due:TODAY};save();render
 
 /* ---------- 복습 ---------- */
 function dueList(){refreshToday();return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}
-function updBadge(){const n=dueList().length;const b=$('due-badge');b.hidden=!n;b.textContent=n}
+function updBadge(){const n=dueList().length;const b=$('due-badge');b.hidden=!n;b.textContent=n;b.title='오늘 복습 '+n}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function pool(ch){const h=D.chars[ch].hun,seenH=new Set([h]);const l=lessonOf(ch);const same=l.chars.filter(x=>x!==ch);const other=Object.keys(D.chars).filter(x=>x!==ch&&!same.includes(x));
   return shuffle(same).concat(shuffle(other)).filter(x=>{const hx=D.chars[x].hun;if(seenH.has(hx))return false;seenH.add(hx);return true})}
@@ -779,7 +809,7 @@ function renderReview(){
   if(Q.type==='paper'){
     rv.innerHTML=head+`<div class="q"><div class="ql">종이에 안 보고 써 보세요</div><div class="qt">${esc(c.hun)}</div><div class="qs">${[...c.on.map(rdTxt),...c.kun].join(' · ')}</div></div>
       <div class="paper" id="pp"><button class="btn pri" id="reveal">정답 보기</button></div>`;
-    $('reveal').onclick=()=>{$('pp').innerHTML=`<div class="big"></div><div class="ctl"><button class="btn shu" id="pno">틀렸어요</button><button class="btn ok" id="pok">맞았어요</button></div>`;
+    $('reveal').onclick=()=>{$('pp').innerHTML=`<div class="tbig"></div><div class="ctl"><button class="btn shu" id="pno">틀렸어요</button><button class="btn ok" id="pok">맞았어요</button></div>`;
       if(c.s.length)$('pp').querySelector('.big').appendChild(svgOf(c.s,c.s.length-1,{sw:3.6,mark:false}));else $('pp').querySelector('.big').innerHTML=`<div class="glyph">${Q.ch}</div>`;
       $('pok').onclick=()=>{grade(true);next()};$('pno').onclick=()=>{grade(false);next()}};
     return;
@@ -803,7 +833,7 @@ function renderReview(){
 }
 let view='learn';
 function show(v){view=v;['home','learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
-  if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
+  if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom);setTimeout(()=>tourMaybe(v),250)}
 /* ---------- 한판 ---------- */
 let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1,bdPage=0,bdAnim='';const BD_PG=30;
 function bdChars(){refreshToday();
@@ -912,12 +942,13 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   const leg=st.map((n,i)=>`<span><i style="background:${COL[i]}"></i>${LAB[i]} ${n}</span>`).join('');
   const jl=[5,4,3,2,1].map(n=>{const cs=all.filter(c=>D.chars[c].jlpt===n);if(!cs.length)return'';const k=cs.filter(c=>S[c]).length;return `<div class="hm-jl"><b>N${n}</b><div class="t"><i style="width:${k/cs.length*100}%"></i></div><span>${k}/${cs.length}</span></div>`}).join('');
   const ls=[...D.lessons].sort((a,b)=>(b.ord[0]-a.ord[0])||(b.ord[1]-a.ord[1])).slice(0,10);
-  el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div class="hm-av">${av}</div></div>
+  el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div style="display:flex;align-items:center"><button class="hm-q" id="hmq" title="사용 안내 다시 보기">?</button><div class="hm-av">${av}</div></div></div>
   <div class="hm-card"><div class="hm-h">익힌 글자</div><div class="hm-big"><b>${learned.length}</b><span>/ ${N}자 · ${Math.round(learned.length/N*100)}%</span></div><div class="hm-bar">${bar}</div><div class="hm-leg">${leg}</div></div>
   <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
   <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${lastCh?'이어서 익히기 · '+lastCh:'익히기 시작'}</button><button class="btn" id="hmbd">한판</button></div>
   <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
-  <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>`;
+  <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>
+  <div class="hm-card fb" id="fb"></div>`;renderFB();
   $('hmrv').onclick=()=>show(due?'review':'board');
   $('hmgo').onclick=()=>{show('learn');if(lastCh)goChar(lastCh)};
   $('hmbd').onclick=()=>show('board');
@@ -926,7 +957,39 @@ $('tab-home').onclick=()=>show('home');
 $('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').onclick=()=>{if(sb)login()};
 $('gguest').onclick=()=>{try{localStorage.setItem('busu-guest','1')}catch(e){};$('gate').hidden=true;show('home')};
 sbInit();
-function start(){$('gcount').textContent=Object.keys(D.chars).length+'자 · '+D.lessons.length+'계열 · JLPT 급수 단어';renderAll();show('home')}
+function start(){$('gcount').textContent=Object.keys(D.chars).length+'자 · '+D.lessons.length+'계열 · JLPT 급수 단어';renderAll();started=true;show('home')}
+/* ---------- 의견 보내기 ---------- */
+function renderFB(){const el=$('fb');if(!el)return;
+  el.innerHTML=`<div class="hm-h">의견 보내기</div><div class="fb-in"><textarea id="fbtx" rows="1" maxlength="1000" placeholder="불편한 점, 바라는 기능, 틀린 풀이…"></textarea><button class="btn pri" id="fbgo">보내기</button></div><div class="fb-st" id="fbst"></div>`;
+  const tx=$('fbtx');tx.oninput=()=>{tx.style.height='auto';tx.style.height=Math.min(120,tx.scrollHeight)+'px';$('fbst').textContent=''};
+  $('fbgo').onclick=async()=>{const msg=tx.value.trim();if(!msg)return;if(!sb){$('fbst').textContent='지금은 보낼 수 없어요 — 인터넷 연결을 확인해 주세요';return}
+    $('fbgo').disabled=true;$('fbst').textContent='보내는 중…';
+    const m=user?(user.user_metadata||{}):{};const {error}=await sb.from('feedback').insert({msg,view:'home',name:user?(m.name||m.nickname||null):'둘러보기'});$('fbgo').disabled=false;
+    if(error){$('fbst').textContent='보내지 못했어요 — 잠시 뒤 다시 시도해 주세요';return}
+    tx.value='';tx.style.height='auto';$('fbst').textContent='잘 받았어요. 고마워요!'}}
+/* ---------- 첫 안내 ---------- */
+const TG=(cells,extra)=>`<div class="tg">${cells.map(c=>c[0]==='!'?`<b class="m">${c.slice(1)}</b>`:`<b>${c}</b>`).join('')}</div>${extra||''}`;
+const TOUR={
+ home:[{t:'오늘 할 일은 여기서',p:'복습 → 익히기 → 한판 순서로 하면 돼요. 기록은 폰·PC 어디서나 이어져요.',i:`<div class="tbig"><span class="pill pri">복습 시작 →</span><span class="pill">이어서 익히기</span><span class="pill">한판</span></div>`}],
+ learn:[{t:'부품으로 쪼개 보고, 따라 쓰기',p:'한자를 부수·부품으로 나눠 뜻을 연결해요. 왼쪽 필순은 위에서 아래로 따라 써요.',i:`<div class="tbig"><span class="k">休</span><span>= 亻(사람) + 木(나무)<br>나무 곁에서 쉬는 사람</span></div>`}],
+ cards:[{t:'앞면 보고 떠올리기',p:'한자를 보고 뜻·읽기를 떠올린 뒤 뒤집어 확인하고, 알아요/몰라요를 골라요.',i:`<div class="tbig"><span class="k">山</span><span class="pill ok">알아요</span><span class="pill hot">몰라요</span></div>`}],
+ review:[{t:'간격을 두고 다시 꺼내기',p:'알아요를 누르면 다음 복습이 1일 → 3일 → 7일 → 1달로 늘고, 몰라요는 오늘 다시 나와요.',i:`<div class="tbig"><span class="pill">1일</span>→<span class="pill">3일</span>→<span class="pill">7일</span>→<span class="pill">1달</span></div>`}],
+ board:[
+  {t:'모르는 글자만 톡',p:'아는 글자는 그냥 지나가고, 모르는 글자만 눌러 붉게 표시해요. 다시 누르면 풀려요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="rg" style="left:41%;top:12px"></div><div class="fg" style="left:47%;top:38px">👆</div>')},
+  {t:'헷갈리면 길게 꾹',p:'길게 누르면 뜻·읽기를 살짝 봐요. 거기서 \'몰라요\'를 누르면 표시되고 바로 닫혀요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="pk"><i>山</i>やま · 메 산</div><div class="fg" style="left:48%;top:96px">👇</div>')},
+  {t:'쓸어서 다음 판, 끝나면 복습',p:'좌우로 쓸어 판을 넘겨요. 다 보면 아래 \'모름 익히기\'로 붉은 글자만 다시 공부해요.',i:TG(['人','大','!謀','山','水','寺','至','衣','分','某'],'<div class="ar" style="left:22%;top:62px">←</div><div class="fg" style="left:44%;top:58px">👆</div><div class="ar" style="left:68%;top:62px">←</div>')}]
+};
+const tourSeen=()=>new Set((LOG.tour||'').split(',').filter(Boolean));
+function tourMark(v){const s=tourSeen();s.add(v);LOG.tour=[...s].join(',');try{localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){};push()}
+let started=false;
+function tourMaybe(v){if(!started||v!==view||!TOUR[v]||tourSeen().has(v))return;if(!user&&!isGuest())return;if(user&&!pulledOnce)return;const g=$('gate');if(g&&!g.hidden)return;if(!$('tour').hidden)return;tourOpen(v)}
+function tourOpen(v){const L=TOUR[v];let i=0;const el=$('tour');
+  const draw=()=>{const s=L[i],last=i===L.length-1;
+    el.innerHTML=`<div class="tcard" role="dialog" aria-modal="true"><div class="till">${s.i}</div><h3>${s.t}</h3><p>${s.p}</p><div class="tft"><button class="tskip" id="tskip">${last?'':'건너뛰기'}</button><span class="tdots">${L.length>1?L.map((_,k)=>`<span class="${k===i?'on':''}"></span>`).join(''):''}</span><button class="btn pri" id="tnext">${last?(L.length>1?'시작하기':'알겠어요'):'다음'}</button></div></div>`;
+    $('tnext').onclick=()=>{if(last)close();else{i++;draw()}};$('tskip').onclick=()=>{if(!last)close()}};
+  const close=()=>{el.hidden=true;el.innerHTML='';tourMark(v)};
+  el.hidden=false;draw()}
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='hmq'){LOG.tour='';try{localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(_){};push();tourOpen('home')}});
 function boot(d){D=d;curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0];curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0];start()}
 fetch('kanji-data.json',{cache:'no-cache'}).then(r=>r.json()).then(boot).catch(()=>{document.getElementById('v-learn').innerHTML='<p class="note">글자 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.</p>'});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
