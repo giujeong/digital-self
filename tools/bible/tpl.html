@@ -116,31 +116,32 @@ button{font:inherit;color:inherit;cursor:pointer}
 <body>
 <div class="gate" id="gate">
   <div class="logo">言</div>
-  <h1>일본어 성경 읽기</h1>
-  <div class="sub">日韓対訳で読む聖書</div>
-  <div class="note" id="gmsg">말씀을 한 절씩 읽으며 한자와 단어를 익혀요</div>
+  <h1 id="gtitle">일본어 성경 읽기</h1>
+  <div class="sub" id="gsub">日韓対訳で読む聖書</div>
+  <div class="note" id="gmsg"></div>
   <button class="kakao" id="gkk"></button>
-  <div class="note" style="margin-top:18px">지금은 개인 학습용이에요 · 허락받은 계정만 열려요</div>
+  <div class="note" id="gfine" style="margin-top:18px"></div>
+  <button class="btn" id="glang" style="margin-top:6px;padding:5px 12px;font-size:13px"></button>
 </div>
 <div class="wrap">
   <div class="top"><div class="tabs">
-    <button class="tab" id="t-home">홈</button>
-    <button class="tab" id="t-read" aria-selected="true">읽기</button>
-    <button class="tab" id="t-rev">복습<i class="dot" id="rdot" hidden></i></button>
+    <button class="tab" id="t-home"></button>
+    <button class="tab" id="t-read" aria-selected="true"></button>
+    <button class="tab" id="t-rev"><span id="t-rev-l"></span><i class="dot" id="rdot" hidden></i></button>
   </div></div>
 
   <section class="view" id="v-home" hidden><div id="home"></div></section>
 
   <section class="view" id="v-read">
-    <div class="rhd"><b id="rtitle">요한복음 1장</b><select id="vsel" aria-label="절 고르기"></select></div>
+    <div class="rhd"><b id="rtitle"></b><button class="btn" id="lang" style="padding:6px 10px" aria-label="언어 / 言語"></button><select id="vsel" aria-label="절 고르기"></select></div>
     <div class="prog"><i id="rprog"></i></div>
     <div class="vcard" id="vcard"></div>
-    <div class="leg"><i></i>부수한자에 있는 한자 <i class="n"></i>새 한자 — 한자를 누르면 카드 · <s>단어</s>를 누르면 뜻</div>
+    <div class="leg" id="leg"></div>
     <div class="copy" id="copy"></div>
   </section>
 
   <section class="view" id="v-rev" hidden>
-    <div class="seg"><button class="btn" id="rm-k" aria-pressed="true">한자</button><button class="btn" id="rm-w" aria-pressed="false">단어</button><button class="btn" id="rm-s" aria-pressed="false">문장</button></div>
+    <div class="seg"><button class="btn" id="rm-k" aria-pressed="true"></button><button class="btn" id="rm-w" aria-pressed="false"></button><button class="btn" id="rm-s" aria-pressed="false"></button></div>
     <div id="rev"></div>
   </section>
 
@@ -155,13 +156,17 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
 const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
 const BOOKS={jhn:{ko:'요한복음',ja:'ヨハネの福音書',yv:'JHN'}};
-const IVL=[0,1,3,7,30],IVL_L=['오늘','1일','3일','7일','1달'];
+const bname=b=>LANG==='ja'?b.ja:b.ko;
+const chs=n=>L(n+'장','第'+n+'章');
+const IVL=[0,1,3,7,30];const IVLK=['오늘','1일','3일','7일','1달'],IVLJ=['今日','1日','3日','7日','1か月'];let IVL_L=IVLK;
 const CJK=/[㐀-鿿々]/;
 const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
 const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
 let TODAY=iso(new Date());const refreshToday=()=>{TODAY=iso(new Date())};
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 
+let LANG='ko';try{LANG=localStorage.getItem('jpbible-lang')||((navigator.language||'').startsWith('ja')?'ja':'ko')}catch(e){}
+const L=(ko,ja)=>LANG==='ja'?ja:ko;
 let sb=null,user=null,KJ={},U=[],WD=[],book='jhn',ch=1,cur=0,furi=true;
 let P={rd:{},srs:{},words:{},sent:{},log:{}};
 try{const s=JSON.parse(localStorage.getItem('jpbible-pref')||'{}');furi=s.furi!==false;cur=s.cur||0}catch(e){}
@@ -183,22 +188,32 @@ const vlabel=u=>u.v1===u.v2?`${u.ch}:${u.v1}`:`${u.ch}:${u.v1}-${u.v2}`;
 const kanjiOf=u=>[...new Set([...u.jp].filter(c=>CJK.test(c)&&c!=='々'&&KJ[c]))];
 const wordsOf=u=>[...new Set(u.toks.map(tk).filter(t=>t.b).map(t=>t.b))].filter(w=>WD.find(x=>x.w===w));
 
+function applyLang(){document.documentElement.lang=LANG;IVL_L=LANG==='ja'?IVLJ:IVLK;
+  $('t-home').textContent=L('홈','ホーム');$('t-read').textContent=L('읽기','読む');$('t-rev-l').textContent=L('복습','復習');
+  $('rm-k').textContent=L('한자','漢字');$('rm-w').textContent=L('단어','単語');$('rm-s').textContent=L('문장','文');
+  $('lang').textContent=L('日本語','한국어');$('glang').textContent=L('日本語で表示','한국어로 보기');
+  $('gtitle').textContent=L('일본어 성경 읽기','日韓対訳で読む聖書');$('gsub').textContent=L('日韓対訳で読む聖書','일본어 성경 읽기');
+  if(!user)$('gmsg').textContent=L('말씀을 한 절씩 읽으며 한자와 단어를 익혀요','みことばを一節ずつ読みながら、漢字と韓国語を学びます');
+  $('gfine').textContent=L('지금은 개인 학습용이에요 · 허락받은 계정만 열려요','現在は個人学習用です · 許可されたアカウントのみ利用できます');
+  if(!user||$('gkk').dataset.mode!=='other')$('gkk').innerHTML=KK+L('카카오로 시작하기','カカオでログイン');
+  $('leg').innerHTML=L('<i></i>부수한자에 있는 한자 <i class="n"></i>새 한자 — 한자를 누르면 카드 · <s>단어</s>를 누르면 뜻','<i></i>部首漢字アプリにある漢字 <i class="n"></i>新しい漢字 — 漢字をタップでカード · <s>単語</s>をタップで韓国語の意味')}
+function setLang(l){LANG=l;try{localStorage.setItem('jpbible-lang',l)}catch(e){};applyLang();if(user&&U.length){renderFoot();show(view)}}
 /* ---------- 읽기 ---------- */
 function renderRead(){if(!U.length)return;const u=U[cur],b=BOOKS[book];
-  $('rtitle').textContent=`${b.ko} ${ch}장`;
+  $('rtitle').textContent=`${bname(b)} ${chs(ch)}`;$('lang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');
   $('vsel').innerHTML=U.map((x,i)=>`<option value="${i}" ${i===cur?'selected':''}>${vlabel(x)}${P.rd[uid(x)]?' ✓':''}</option>`).join('');
   $('rprog').style.width=(U.filter(x=>P.rd[uid(x)]).length/U.length*100)+'%';
   const rd=P.rd[uid(u)];
-  $('vcard').innerHTML=`<div class="vno"><span>${b.ja} ${vlabel(u)}</span>${rd?'<span class="done">읽음</span>':''}</div>
+  $('vcard').innerHTML=`<div class="vno"><span>${b.ja} ${vlabel(u)}</span>${rd?'<span class="done">'+L('읽음','読了')+'</span>':''}</div>
     <div class="jp ${furi?'':'nofuri'}" id="jp">${verseHTML(u)}</div>
-    <div class="ko ${u.ko?'':'empty'}">${u.ko?esc(u.ko):'한국어 번역 준비 중이에요'}</div>
-    <div class="ctl"><button class="btn" id="vsay">▶ 듣기</button><button class="btn" id="vfuri">${furi?'ふりがな 끄기':'ふりがな 켜기'}</button></div>
-    <div class="ctl"><button class="btn" id="vprev" ${cur?'':'disabled'}>← 이전</button><button class="btn ok" id="vread">${rd?'다음 절 →':'읽었어요 → 다음 절'}</button></div>`;
-  $('copy').innerHTML=`本文：リビングバイブル（Japanese Contemporary Bible）Copyright © 1978, 2011, 2016 by Biblica, Inc.® Used by permission. All rights reserved worldwide. · <a href="https://www.bible.com/bible/83/${b.yv}.${ch}.${u.v1}${u.v2!==u.v1?'-'+u.v2:''}.JCB" target="_blank" rel="noopener">bible.com에서 보기</a>`;
+    <div class="ko ${u.ko?'':'empty'}">${u.ko?(LANG==='ja'?'<span class="note" style="display:block;font-size:11px">韓国語訳</span>':'')+esc(u.ko)+(LANG==='ja'?' <button class="say" id="kosay">▶</button>':''):L('한국어 번역 준비 중이에요','韓国語訳は準備中です')}</div>
+    <div class="ctl"><button class="btn" id="vsay">▶ ${L('듣기','聞く')}</button><button class="btn" id="vfuri">${furi?L('ふりがな 끄기','ふりがなを隠す'):L('ふりがな 켜기','ふりがなを表示')}</button></div>
+    <div class="ctl"><button class="btn" id="vprev" ${cur?'':'disabled'}>← ${L('이전','前へ')}</button><button class="btn ok" id="vread">${rd?L('다음 절 →','次の節 →'):L('읽었어요 → 다음 절','読みました → 次の節')}</button></div>`;
+  $('copy').innerHTML=`本文：リビングバイブル（Japanese Contemporary Bible）Copyright © 1978, 2011, 2016 by Biblica, Inc.® Used by permission. All rights reserved worldwide. · <a href="https://www.bible.com/bible/83/${b.yv}.${ch}.${u.v1}${u.v2!==u.v1?'-'+u.v2:''}.JCB" target="_blank" rel="noopener">${L('bible.com에서 보기','bible.comで見る')}</a>`;
   $('jp').onclick=e=>{const k=e.target.closest('[data-k]'),w=e.target.closest('[data-w]');
     document.querySelectorAll('.w.on').forEach(x=>x.classList.remove('on'));
     if(k)openKanji(k.dataset.k,w&&w.dataset.w);else if(w){w.classList.add('on');openWord(w.dataset.w)}};
-  $('vsay').onclick=()=>say(u.jp);
+  $('vsay').onclick=()=>say(u.jp);if($('kosay'))$('kosay').onclick=()=>say(u.ko,'ko-KR');
   $('vfuri').onclick=()=>{furi=!furi;savePref();renderRead()};
   $('vprev').onclick=()=>{cur--;savePref();renderRead();scrollTo({top:0})};
   $('vread').onclick=()=>{if(!P.rd[uid(u)])markRead(u);if(cur<U.length-1){cur++;savePref()}renderRead();scrollTo({top:0})};
@@ -214,22 +229,23 @@ const hira=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60
 function openKanji(c,w){const k=KJ[c];if(!k)return;const el=$('pcard');
   const wd=w&&WD.find(x=>x.w===w);
   const refs=U.filter(u=>u.jp.includes(c)).map(vlabel);
-  el.innerHTML=`${wd?`<div class="note" style="text-align:center;margin-bottom:8px">단어 <b style="font-family:var(--f-ja);font-size:16px;color:var(--ink)">${esc(wd.w)}</b> ${esc(wd.r)} — ${esc(wd.ko)}</div>`:''}
-    <div class="pk"><div class="rail" id="krail"></div><div><div class="big" id="kbig" title="누르면 필순을 그려요"></div>
-    <div class="hun">${esc(k.hun)} <small>${k.s.length?k.s.length+'획':''}${k.busu?' · 부수한자':' · 새 한자'}</small></div></div></div>
+  el.innerHTML=`${wd?`<div class="note" style="text-align:center;margin-bottom:8px">${L('단어','単語')} <b style="font-family:var(--f-ja);font-size:16px;color:var(--ink)">${esc(wd.w)}</b> ${esc(wd.r)} — ${esc(wd.ko)}</div>`:''}
+    <div class="pk"><div class="rail" id="krail"></div><div><div class="big" id="kbig" title="${L('누르면 필순을 그려요','タップで筆順')}"></div>
+    <div class="hun">${LANG==='ja'?'<small style="display:block">韓国語の音訓</small>':''}${esc(k.hun)} <small>${k.s.length?k.s.length+L('획','画'):''}${k.busu?L(' · 부수한자',' · 部首漢字'):L(' · 새 한자',' · 新しい漢字')}</small></div></div></div>
     ${k.parts||k.memo?`<div class="parts">${k.parts&&k.parts!==k.hun?`<b style="font-family:var(--f-kanji);font-size:18px;color:var(--ai)">${esc(k.parts)}</b><br>`:''}${esc(k.memo||'')}</div>`:''}
     <div class="chips">${k.on.map(r=>`<span class="chip"><b>音</b>${esc(r)} ${hira(r)}</span>`).join('')}${k.kun.map(r=>`<span class="chip"><b>訓</b>${esc(r)}</span>`).join('')}</div>
-    <div class="refs">이 장에서 ${refs.length}곳 · ${refs.slice(0,8).join(', ')}${refs.length>8?' …':''}</div>
-    <div class="ctl"><button class="btn pri" id="pclose">닫기</button></div>`;
+    <div class="refs">${L('이 장에서 '+refs.length+'곳','この章で'+refs.length+'か所')} · ${refs.slice(0,8).join(', ')}${refs.length>8?' …':''}</div>
+    <div class="ctl"><button class="btn pri" id="pclose">${L('닫기','閉じる')}</button></div>`;
   if(k.s.length){const r=$('krail');k.s.forEach((_,i)=>r.appendChild(svgOf(k.s,i)));const big=$('kbig');const draw=u=>{big.innerHTML='';big.appendChild(svgOf(k.s,u,u<k.s.length-1))};draw(k.s.length-1);
     let t=null;big.onclick=()=>{clearInterval(t);let u=0;draw(0);t=setInterval(()=>{u++;if(u>=k.s.length){clearInterval(t);return}draw(u)},500)}}
   else $('kbig').innerHTML=`<div class="glyph">${c}</div>`;
   showPop()}
 function openWord(w){const d=WD.find(x=>x.w===w);if(!d)return;
-  $('pcard').innerHTML=`<div class="wtop"><div class="ww">${esc(d.w)}</div><div class="wr">${esc(d.r)} <button class="say" id="wsay">▶</button></div><div class="wk">${esc(d.ko)}</div></div>
-    <div class="refs">이 장에서 ${d.refs.length}곳 · ${d.refs.map(v=>ch+':'+v).join(', ')}</div>
+  $('pcard').innerHTML=`<div class="wtop"><div class="ww">${esc(d.w)}</div><div class="wr">${esc(d.r)} <button class="say" id="wsay">▶</button></div><div class="wk">${LANG==='ja'?'<span class="note" style="font-size:11px">韓国語 </span>':''}${esc(d.ko)}${LANG==='ja'?' <button class="say" id="wksay">▶</button>':''}</div></div>
+    <div class="refs">${L('이 장에서 '+d.refs.length+'곳','この章で'+d.refs.length+'か所')} · ${d.refs.map(v=>ch+':'+v).join(', ')}</div>
     <div class="chips" style="justify-content:center">${[...d.w].filter(c=>KJ[c]).map(c=>`<button class="chip" data-k="${c}" style="font-size:18px">${c} <b>${esc(KJ[c].hun)}</b></button>`).join('')}</div>
-    <div class="ctl"><button class="btn pri" id="pclose">닫기</button></div>`;
+    <div class="ctl"><button class="btn pri" id="pclose">${L('닫기','閉じる')}</button></div>`;
+  if($('wksay'))$('wksay').onclick=()=>say(d.ko.split('·')[0].replace(/\(.*?\)/g,'').trim(),'ko-KR');
   $('wsay').onclick=()=>say(/[ァ-ヶ]/.test(d.r)?d.r:d.r);
   $('pcard').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>openKanji(b.dataset.k,w));showPop()}
 function showPop(){$('pop').hidden=false;$('pclose').onclick=hidePop}
@@ -240,7 +256,7 @@ $('pop').onclick=e=>{if(e.target.id==='pop')hidePop()};
 const synth=window.speechSynthesis;let jv=null;
 function pickV(){try{const v=synth.getVoices();jv=v.find(x=>/^ja/i.test(x.lang)&&/google|kyoko|o-ren|nanami/i.test(x.name))||v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
 if(synth){pickV();synth.onvoiceschanged=pickV}
-function say(t){if(!synth)return;try{synth.cancel()}catch(e){}setTimeout(()=>{const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';if(jv)u.voice=jv;u.rate=.85;synth.speak(u)},60)}
+function say(t,lg='ja-JP'){if(!synth)return;try{synth.cancel()}catch(e){}setTimeout(()=>{const u=new SpeechSynthesisUtterance(t);u.lang=lg;if(lg==='ja-JP'&&jv)u.voice=jv;else{try{const v=synth.getVoices().find(x=>/^ko/i.test(x.lang));if(v)u.voice=v}catch(e){}}u.rate=.85;synth.speak(u)},60)}
 
 /* ---------- 복습 ---------- */
 let rm='k',Q=null,queue=[],done=0;
@@ -270,31 +286,31 @@ function grade(ok){const key=queue.shift();done++;if(!window.__prac){const s=sto
     if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?'9999-12-31':addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;queue.push(key)}act();save();updDot()}
   else if(!ok)queue.push(key);next()}
 function blankSent(u,surf){let html=u.jp;const i=html.indexOf(surf);return esc(html.slice(0,i))+'<mark>＿＿</mark>'+esc(html.slice(i+surf.length))}
-function renderRev(){refreshToday();const el=$('rev'),s=store(),nm={k:'한자',w:'단어',s:'문장'}[rm];
+function renderRev(){refreshToday();const el=$('rev'),s=store(),nm=LANG==='ja'?{k:'漢字',w:'単語',s:'文'}[rm]:{k:'한자',w:'단어',s:'문장'}[rm];
   if(!Q){const d=dueOf(s),all=Object.keys(s);
-    el.innerHTML=`<div class="ivl">${IVL_L.map(x=>`<span>${x}</span>`).join('')}</div><div class="empty">${done?`<b>${done}문제 끝!</b>`:''}
-      <div>${d.length?`오늘 복습할 ${nm} ${d.length}개`:all.length?`오늘 복습할 ${nm}이 없어요.`:'읽기에서 「읽었어요」를 누르면 그 절의 '+nm+'이 여기로 와요.'}</div>
-      ${d.length?'<button class="btn pri" id="rgo">복습 시작</button>':''}${all.length?'<button class="btn" id="rprac">연습하기 (기록 안 남음)</button>':''}
-      <div class="note">${rm==='s'?'1~7일 단계는 절 빈칸, 1달 단계부터는 ふりがな 없이 통째로 읽고 스스로 채점해요.':'맞히면 1일 → 3일 → 7일 → 1달로 간격이 늘고, 틀리면 오늘 다시 나와요.'}</div></div>`;
+    el.innerHTML=`<div class="ivl">${IVL_L.map(x=>`<span>${x}</span>`).join('')}</div><div class="empty">${done?`<b>${L(done+'문제 끝!','全'+done+'問 終了!')}</b>`:''}
+      <div>${d.length?L(`오늘 복습할 ${nm} ${d.length}개`,`今日の復習：${nm} ${d.length}`):all.length?L(`오늘 복습할 ${nm}이 없어요.`,`今日復習する${nm}はありません。`):L('읽기에서 「읽었어요」를 누르면 그 절의 '+nm+'이 여기로 와요.','「読む」で「読みました」を押すと、その節の'+nm+'がここに入ります。')}</div>
+      ${d.length?'<button class="btn pri" id="rgo">'+L('복습 시작','復習を始める')+'</button>':''}${all.length?'<button class="btn" id="rprac">'+L('연습하기 (기록 안 남음)','練習する（記録なし）')+'</button>':''}
+      <div class="note">${rm==='s'?L('1~7일 단계는 절 빈칸, 1달 단계부터는 ふりがな 없이 통째로 읽고 스스로 채점해요.','1〜7日の段階は節の穴埋め、1か月の段階からはふりがななしで通読し、自分で採点します。'):L('맞히면 1일 → 3일 → 7일 → 1달로 간격이 늘고, 틀리면 오늘 다시 나와요.','正解すると間隔が1日 → 3日 → 7日 → 1か月と延び、間違えると今日もう一度出ます。')}</div></div>`;
     if($('rgo'))$('rgo').onclick=()=>start(false);if($('rprac'))$('rprac').onclick=()=>start(true);return}
   const st=window.__prac?null:s[Q.key].stage;
-  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${window.__prac?'연습':'남은 '+queue.length}</span></div>`;
-  if(Q.type==='sread'){el.innerHTML=head+`<div class="q"><div class="ql">ふりがな 없이 소리 내어 읽어 보세요 (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp)}</div><div id="sans"></div>
-      <div class="ctl"><button class="btn pri" id="sshow">읽기 확인</button></div></div>`;
+  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${window.__prac?L('연습','練習'):L('남은 ','残り ')+queue.length}</span></div>`;
+  if(Q.type==='sread'){el.innerHTML=head+`<div class="q"><div class="ql">${L('ふりがな 없이 소리 내어 읽어 보세요','ふりがななしで声に出して読んでみましょう')} (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp)}</div><div id="sans"></div>
+      <div class="ctl"><button class="btn pri" id="sshow">${L('읽기 확인','読みを確認')}</button></div></div>`;
     $('sshow').onclick=()=>{$('sans').innerHTML=`<div class="jp" style="font-size:19px">${verseHTML(Q.u)}</div>${Q.u.ko?`<div class="ko">${esc(Q.u.ko)}</div>`:''}`;
-      $('sshow').parentNode.innerHTML='<button class="btn shu" id="sno">막혔어요</button><button class="btn ok" id="sok">읽었어요</button>';$('sno').onclick=()=>grade(false);$('sok').onclick=()=>grade(true)};return}
+      $('sshow').parentNode.innerHTML='<button class="btn shu" id="sno">'+L('막혔어요','つまった')+'</button><button class="btn ok" id="sok">'+L('읽었어요','読めた')+'</button>';$('sno').onclick=()=>grade(false);$('sok').onclick=()=>grade(true)};return}
   let q='',cls='';
-  if(Q.type==='kmean'){q=`<div class="ql">이 한자의 뜻은?</div><div class="qk">${Q.key}</div>`}
-  if(Q.type==='kchar'){q=`<div class="ql">이 뜻의 한자는?</div><div class="qw" style="font-family:var(--f-ko)">${esc(KJ[Q.key].hun)}</div>`;cls='k'}
-  if(Q.type==='read'){q=`<div class="ql">표시한 말을 어떻게 읽을까요? (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp).split(esc(Q.t.s)).join('<mark>'+esc(Q.t.s)+'</mark>')}</div>`;cls='ja'}
-  if(Q.type==='wmean'){q=`<div class="ql">이 단어의 뜻은?</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.r)}</div>`}
-  if(Q.type==='wread'){q=`<div class="ql">이 단어를 어떻게 읽을까요?</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.ko)}</div>`;cls='ja'}
-  if(Q.type==='cloze'||Q.type==='scloze'){q=`<div class="ql">빈칸에 들어갈 말은? (${vlabel(Q.u)})</div><div class="qs">${blankSent(Q.u,Q.surf)}</div>${Q.u.ko?`<div class="ql">${esc(Q.u.ko)}</div>`:''}`;cls='ja'}
+  if(Q.type==='kmean'){q=`<div class="ql">${L('이 한자의 뜻은?','この漢字の韓国語の意味は？')}</div><div class="qk">${Q.key}</div>`}
+  if(Q.type==='kchar'){q=`<div class="ql">${L('이 뜻의 한자는?','この意味の漢字は？')}</div><div class="qw" style="font-family:var(--f-ko)">${esc(KJ[Q.key].hun)}</div>`;cls='k'}
+  if(Q.type==='read'){q=`<div class="ql">${L('표시한 말을 어떻게 읽을까요?','印の言葉の読みは？')} (${vlabel(Q.u)})</div><div class="qs">${esc(Q.u.jp).split(esc(Q.t.s)).join('<mark>'+esc(Q.t.s)+'</mark>')}</div>`;cls='ja'}
+  if(Q.type==='wmean'){q=`<div class="ql">${L('이 단어의 뜻은?','この単語の韓国語は？')}</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.r)}</div>`}
+  if(Q.type==='wread'){q=`<div class="ql">${L('이 단어를 어떻게 읽을까요?','この単語の読みは？')}</div><div class="qw">${esc(Q.w.w)}</div><div class="ql">${esc(Q.w.ko)}</div>`;cls='ja'}
+  if(Q.type==='cloze'||Q.type==='scloze'){q=`<div class="ql">${L('빈칸에 들어갈 말은?','空欄に入る言葉は？')} (${vlabel(Q.u)})</div><div class="qs">${blankSent(Q.u,Q.surf)}</div>${Q.u.ko?`<div class="ql">${esc(Q.u.ko)}</div>`:''}`;cls='ja'}
   el.innerHTML=head+`<div class="q">${q}</div><div class="opts">${Q.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="fb"></div>`;
   el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;el.dataset.lock=1;const ok=Q.opts[+b.dataset.i]===Q.ans;
     el.querySelectorAll('.opt').forEach(x=>{if(Q.opts[+x.dataset.i]===Q.ans)x.classList.add('ok')});if(!ok)b.classList.add('no');
     const u=Q.u||U.find(u=>u.jp.includes(Q.key)||u.toks.map(tk).some(t=>t.b===Q.key));
-    $('fb').innerHTML=`<b>${ok?'맞았어요':'다시 볼게요'}</b>${u?`<div class="jp" style="font-size:18px;line-height:2.1">${verseHTML(u)}</div><div class="note">${vlabel(u)}${u.ko?' · '+esc(u.ko):''}</div>`:''}<div class="ctl"><button class="btn pri" id="nx">다음 →</button></div>`;
+    $('fb').innerHTML=`<b>${ok?L('맞았어요','正解'):L('다시 볼게요','もう一度')}</b>${u?`<div class="jp" style="font-size:18px;line-height:2.1">${verseHTML(u)}</div><div class="note">${vlabel(u)}${u.ko?' · '+esc(u.ko):''}</div>`:''}<div class="ctl"><button class="btn pri" id="nx">${L('다음 →','次へ →')}</button></div>`;
     $('nx').onclick=()=>{el.dataset.lock='';grade(ok)}})}
 ['k','w','s'].forEach(m=>$('rm-'+m).onclick=()=>{rm=m;['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===m));Q=null;done=0;renderRev()});
 
@@ -303,11 +319,11 @@ function streak(){let n=0;const d=new Date();if(!P.log[iso(d)])d.setDate(d.getDa
 function renderHome(){refreshToday();const m=user?(user.user_metadata||{}):{};const nm=m.name||m.nickname||'';
   const rd=U.filter(u=>P.rd[uid(u)]).length,due=dueOf(P.srs).length+dueOf(P.words).length+dueOf(P.sent).length;
   const nxt=U.findIndex(u=>!P.rd[uid(u)]);
-  $('home').innerHTML=`<div class="hi">${nm?esc(nm)+' 님, ':''}오늘도 말씀과 함께<small>${BOOKS[book].ko} ${ch}장 · ${rd}/${U.length} 읽음</small></div>
-    <div class="st3"><div class="st"><b>${rd}</b><span>읽은 절</span></div><div class="st"><b style="color:var(--shu)">${due}</b><span>오늘 복습</span></div><div class="st"><b style="color:var(--ai)">${streak()}</b><span>연속일</span></div></div>
-    <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?'1장 다 읽었어요 — 처음부터':'이어서 읽기 · '+vlabel(U[nxt])}</button>${due?'<button class="btn" id="hrv">복습 ('+due+')</button>':''}</div>
-    <div class="card"><h3>${BOOKS[book].ko} ${ch}장</h3><div class="vgrid">${U.map((u,i)=>`<button class="${P.rd[uid(u)]?'r':''} ${i===cur?'cur':''}" data-i="${i}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}</button>`).join('')}</div></div>
-    <div class="card"><h3>익힌 것</h3><div>한자 ${Object.keys(P.srs).length}자 · 단어 ${Object.keys(P.words).length}개 · 문장 ${Object.keys(P.sent).length}절</div></div>`;
+  $('home').innerHTML=`<div class="hi">${nm?esc(nm)+L(' 님, ','さん、'):''}${L('오늘도 말씀과 함께','今日もみことばと共に')}<small>${bname(BOOKS[book])} ${chs(ch)} · ${rd}/${U.length} ${L('읽음','読了')}</small></div>
+    <div class="st3"><div class="st"><b>${rd}</b><span>${L('읽은 절','読んだ節')}</span></div><div class="st"><b style="color:var(--shu)">${due}</b><span>${L('오늘 복습','今日の復習')}</span></div><div class="st"><b style="color:var(--ai)">${streak()}</b><span>${L('연속일','連続日数')}</span></div></div>
+    <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?L(ch+'장 다 읽었어요 — 처음부터','第'+ch+'章を読み終えました — 最初から'):L('이어서 읽기 · ','続きを読む · ')+vlabel(U[nxt])}</button>${due?'<button class="btn" id="hrv">'+L('복습','復習')+' ('+due+')</button>':''}</div>
+    <div class="card"><h3>${bname(BOOKS[book])} ${chs(ch)}</h3><div class="vgrid">${U.map((u,i)=>`<button class="${P.rd[uid(u)]?'r':''} ${i===cur?'cur':''}" data-i="${i}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}</button>`).join('')}</div></div>
+    <div class="card"><h3>${L('익힌 것','学んだもの')}</h3><div>${L('한자','漢字')} ${Object.keys(P.srs).length} · ${L('단어','単語')} ${Object.keys(P.words).length} · ${L('문장','文')} ${Object.keys(P.sent).length}</div></div>`;
   $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
   $('home').querySelectorAll('.vgrid button').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;savePref();show('read')})}
 
@@ -331,13 +347,13 @@ async function loadAll(){
   try{const l=JSON.parse(localStorage.getItem('jpbible-p-'+user.id)||'null');if(l)P=l}catch(e){}
   if(p.data){for(const f of['rd','srs','words','sent','log'])P[f]={...(p.data[f]||{}),...(P[f]||{})}}
   if(cur>=U.length)cur=0;return true}
-function renderFoot(){const m=user.user_metadata||{};$('foot').innerHTML=`<span><b>${esc(m.name||m.nickname||'')}</b> 님 · 기록이 계정에 저장돼요</span><button class="lo" id="lo">로그아웃</button>`;
+function renderFoot(){const m=user.user_metadata||{};$('foot').innerHTML=`<span><b>${esc(m.name||m.nickname||'')}</b>${L(' 님 · 기록이 계정에 저장돼요','さん · 記録はアカウントに保存されます')}</span><button class="lo" id="lo">${L('로그아웃','ログアウト')}</button>`;
   $('lo').onclick=async()=>{await sb.auth.signOut();location.reload()}}
 async function onUser(){const g=$('gate');
-  if(!user){g.hidden=false;$('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').hidden=false;$('gmsg').textContent='말씀을 한 절씩 읽으며 한자와 단어를 익혀요';return}
-  $('gkk').hidden=true;$('gmsg').textContent='불러오는 중…';
+  if(!user){g.hidden=false;$('gkk').hidden=false;applyLang();return}
+  $('gkk').hidden=true;$('gmsg').textContent=L('불러오는 중…','読み込み中…');
   const ok=await loadAll();
-  if(!ok){$('gmsg').innerHTML='이 앱은 아직 개인 학습용이라 허락된 계정만 열려요.';$('gkk').hidden=false;$('gkk').innerHTML='다른 계정으로 로그인';$('gkk').onclick=async()=>{await sb.auth.signOut();login()};return}
+  if(!ok){$('gmsg').innerHTML=L('이 앱은 아직 개인 학습용이라 허락된 계정만 열려요.','このアプリは現在個人学習用のため、許可されたアカウントのみ利用できます。');$('gkk').hidden=false;$('gkk').dataset.mode='other';$('gkk').innerHTML=L('다른 계정으로 로그인','別のアカウントでログイン');$('gkk').onclick=async()=>{await sb.auth.signOut();login()};return}
   g.hidden=true;renderFoot();updDot();show('read')}
 function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
 $('gkk').onclick=login;
@@ -345,7 +361,8 @@ try{sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefres
   let first=true;sb.auth.onAuthStateChange((ev,ses)=>{const was=user&&user.id;user=ses?ses.user:null;
     if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search))history.replaceState(null,'',location.pathname);
     if(first||(user&&user.id)!==was){first=false;setTimeout(onUser,0)}})}
-catch(e){$('gmsg').textContent='로그인 서버에 연결하지 못했어요. 새로고침해 주세요.'}
+catch(e){$('gmsg').textContent=L('로그인 서버에 연결하지 못했어요. 새로고침해 주세요.','ログインサーバーに接続できません。再読み込みしてください。')}
+$('glang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');applyLang();
 </script>
 </body>
 </html>
