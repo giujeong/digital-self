@@ -5,6 +5,17 @@
       "has": [
         {
           "type": "host",
+          "value": "jpbible.giujeong.me"
+        }
+      ],
+      "destination": "/bible/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "jpkanji.giujeong.me"
         }
       ],
@@ -13,6 +24,26 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "jpbible.giujeong.me"
+        }
+      ],
+      "destination": "/bible/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "jpbible.giujeong.me"
+        }
+      ],
+      "destination": "/bible/:path*"
+    },
     {
       "source": "/",
       "has": [
