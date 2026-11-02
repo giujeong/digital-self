@@ -299,19 +299,56 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
   .ex{grid-template-columns:1fr;gap:2px}
   .q .qk{font-size:80px}
 }
+/* 첫 화면·홈 */
+.gate{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.gate .logo{font-family:var(--f-kanji);font-size:88px;line-height:1;border:1px solid var(--rule);outline:1px solid var(--rule);outline-offset:-6px;background:var(--sheet);width:140px;height:140px;display:flex;align-items:center;justify-content:center}
+.gate .nm{font-family:var(--f-ja);font-size:28px;font-weight:700;letter-spacing:3px;margin-top:20px}
+.gate .sub{color:var(--muted);font-size:14px;margin-top:4px}
+.gate .feat{margin:28px 0 26px;font-size:14px;line-height:1.9}
+.gate .kakao{font-size:16px;padding:14px 0;width:min(300px,100%);justify-content:center;border-radius:10px}
+.gate .guest{margin-top:14px;background:none;border:0;color:var(--muted);text-decoration:underline;font-size:13px;cursor:pointer}
+.gate .fine{position:absolute;bottom:max(16px,env(safe-area-inset-bottom,0px));left:0;right:0;font-size:11px;color:var(--muted)}
+.home{display:flex;flex-direction:column;gap:10px}
+.hm-hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hm-hd .hi{font-size:19px;font-weight:700}.hm-hd .hi small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.hm-av{width:38px;height:38px;border-radius:50%;background:var(--ghost);display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden;flex:none}.hm-av img{width:100%;height:100%;object-fit:cover}
+.hm-card{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:14px}
+.hm-h{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.hm-big{display:flex;align-items:flex-end;gap:8px}.hm-big b{font-size:44px;line-height:1}.hm-big span{color:var(--muted);font-size:14px;padding-bottom:5px}
+.hm-bar{height:10px;background:var(--ghost);border-radius:5px;overflow:hidden;margin-top:10px;display:flex}.hm-bar i{display:block;height:100%}
+.hm-leg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:11px;color:var(--muted)}.hm-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px}
+.hm-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hm-st{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:10px;text-align:center}.hm-st b{display:block;font-size:26px}.hm-st span{font-size:12px;color:var(--muted)}
+.hm-st.hot b{color:var(--hot)}.hm-st.ai b{color:var(--ai)}
+.hm-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hm-btns .btn{padding:12px 0;font-size:14px}.hm-btns .btn.pri{grid-column:1/-1;font-size:16px}
+.hm-jl{display:grid;grid-template-columns:30px 1fr 52px;gap:6px;align-items:center;font-size:12px;margin:5px 0}
+.hm-jl .t{height:8px;background:var(--ghost);border-radius:4px;overflow:hidden}.hm-jl .t i{display:block;height:100%;background:var(--koke)}
+.hm-ls{display:flex;flex-wrap:wrap;gap:6px}
+.hm-ls button{font-family:var(--f-kanji);font-size:20px;width:40px;height:40px;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink);position:relative;padding:0;cursor:pointer;overflow:hidden}
+.hm-ls button i{position:absolute;left:0;bottom:0;height:3px;background:var(--koke)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
+<div class="gate" id="gate" hidden>
+  <div class="logo">部</div><div class="nm">부수 한자</div><div class="sub">부수로 익히는 일본어 한자</div>
+  <div class="feat">부품으로 이해하고 · 간격으로 꺼낸다<br><span id="gcount"></span><br>폰·PC 어디서나 기록이 이어져요</div>
+  <button class="kakao" id="gkk"></button>
+  <button class="guest" id="gguest">로그인 없이 둘러보기 (기록은 이 기기에만)</button>
+  <div class="fine">닉네임·프로필 사진만 받아요 · 이메일은 받지 않아요</div>
+</div>
 <div class="wrap">
   <header>
     <div class="brand"><b>부수 한자</b><span>부품으로 이해하고, 간격으로 꺼낸다</span></div>
     <div class="tabs" role="tablist">
+      <button class="tab" id="tab-home" role="tab" aria-selected="false">홈</button>
       <button class="tab" id="tab-learn" role="tab" aria-selected="true">익히기</button>
       <button class="tab" id="tab-cards" role="tab" aria-selected="false">카드</button>
       <button class="tab" id="tab-review" role="tab" aria-selected="false">복습<span class="badge" id="due-badge" hidden>0</span></button>
       <button class="tab" id="tab-board" role="tab" aria-selected="false">한판</button>
     </div>
   </header>
+
+  <section id="v-home" class="view" hidden><div class="home" id="home"></div></section>
 
   <section id="v-learn" class="view">
     <div class="fab" id="backbar" hidden><button class="btn" id="bbnext" hidden>다음 모름 ▶</button><button class="btn pri" id="bbback">← 한판</button></div>
@@ -424,7 +461,7 @@ const KEY='busu-kanji-v1';
 let S={};
 try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
 let KN={};try{KN=JSON.parse(localStorage.getItem('busu-kanji-know-v1')||'{}')||{}}catch(e){KN={}}
-function setKnow(ch,ok){KN[ch]=ok?'k':'u';try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){};push()}
+function setKnow(ch,ok){KN[ch]=ok?'k':'u';act();try{localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){};push()}
 const unkCount=l=>l.chars.filter(c=>KN[c]==='u').length;
 const learned=ch=>KN[ch]==='k'||(!!S[ch]&&KN[ch]!=='u');
 const learnedCount=l=>l.chars.filter(learned).length;
@@ -432,7 +469,9 @@ function heat(l){const r=learnedCount(l)/l.chars.length;
   const bg=r<.5?`color-mix(in srgb,var(--rad) ${Math.round(r*200)}%,var(--hotd))`:`color-mix(in srgb,var(--okg) ${Math.round((r-.5)*200)}%,var(--rad))`;
   const bd=r>=1?'var(--okgl)':(r<.5?'var(--hotd)':'var(--radl)');
   return `background:${bg};border-color:${bd}${r<.35?';color:#FFF8F0':''}`}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};push()}
+let LOG={};try{LOG=JSON.parse(localStorage.getItem('busu-kanji-log-v1')||'{}')||{}}catch(e){LOG={}}
+function act(){const d=(typeof iso==='function')?iso(new Date()):new Date().toISOString().slice(0,10);LOG[d]=(LOG[d]||0)+1;LOG.at=new Date().toISOString();try{localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}}
+function save(){act();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};push()}
 /* ---------- 계정·동기화 (Supabase + 카카오) ---------- */
 const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
 let sb=null,user=null,pushT=null,syncMsg='';
@@ -442,25 +481,30 @@ function renderAcct(){const a=$('acct');if(!a)return;
   if(!user){a.innerHTML=`<button class="kakao" id="kk">${KK}카카오로 로그인</button><span>로그인하면 폰·PC 어디서나 복습 기록이 이어져요. 지금 이 기기의 기록도 그대로 옮겨져요.</span>`;$('kk').onclick=login;return}
   const m=user.user_metadata||{};const nm=m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자';
   a.innerHTML=`<span><b>${esc(nm)}</b> 님 · 기록이 계정에 저장돼요</span><span class="sync" id="sync">${esc(syncMsg)}</span><button class="lo" id="lo">로그아웃</button>`;
-  $('lo').onclick=async()=>{await sb.auth.signOut();user=null;renderAcct()}}
+  $('lo').onclick=async()=>{await sb.auth.signOut();user=null;try{localStorage.removeItem('busu-guest')}catch(e){};renderAcct();gateCheck('SIGNED_OUT')}}
+let gateReady=false;
+function isGuest(){try{return localStorage.getItem('busu-guest')==='1'}catch(e){return false}}
+function gateCheck(ev){const g=$('gate');if(!g)return;
+  if(user){g.hidden=true;if(ev==='SIGNED_IN'&&!gateReady&&typeof show==='function')show('home');gateReady=true;return}
+  if(ev==='INITIAL_SESSION'||ev==='SIGNED_OUT'){gateReady=true;g.hidden=isGuest()}}
 function setSync(m){syncMsg=m;const s=$('sync');if(s)s.textContent=m}
 function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
 const recT=r=>r?(r.last||r.start||''):'';
 function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
 let pulling=false;
 async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
-  const {data,error}=await sb.from('progress').select('srs,know').eq('user_id',user.id).maybeSingle();
+  const {data,error}=await sb.from('progress').select('srs,know,log').eq('user_id',user.id).maybeSingle();
   pulling=false;if(error){setSync('불러오기 실패');return}
-  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN}}
-  try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN))}catch(e){}
-  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='review'&&!Q)renderReview()}
+  if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
+  try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN));localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}
+  await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='review'&&!Q)renderReview()}
 function push(now){if(!sb||!user)return;clearTimeout(pushT);
-  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,updated_at:new Date().toISOString()});
+  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,updated_at:new Date().toISOString()});
     setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
   if(now)return go();pushT=setTimeout(go,1200)}
 function sbInit(){try{if(!window.supabase)return;
   sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
-  sb.auth.onAuthStateChange((ev,ses)=>{const had=!!user;user=ses?ses.user:null;renderAcct();
+  sb.auth.onAuthStateChange((ev,ses)=>{const had=!!user;user=ses?ses.user:null;renderAcct();gateCheck(ev);
     if(user&&(!had||ev==='SIGNED_IN'))setTimeout(pull,0);
     if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search))history.replaceState(null,'',location.pathname)});
   renderAcct()}catch(e){sb=null}}
@@ -742,8 +786,8 @@ function renderReview(){
   });
 }
 let view='learn';
-function show(v){view=v;['learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
-  if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
+function show(v){view=v;['home','learn','cards','review','board','rad'].forEach(x=>{if(x!=='rad')$('tab-'+x).setAttribute('aria-selected',v===x||(v==='rad'&&x===backTo));$('v-'+x).hidden=v!==x});
+  if(v==='home')renderHome();if(v==='cards')renderCards();if(v==='learn'&&curL){renderLessons();renderChars()}if(v==='review'){if(!Q)renderReview()}if(v==='board')renderBoard();if(v!=='learn'&&v!=='rad')bdFrom=false;$('backbar').hidden=!(v==='learn'&&bdFrom)}
 /* ---------- 한판 ---------- */
 let bdScope='all',bdList=[],bdFrom=false,bdCur=null,bdQ=[],bdI=-1,bdPage=0,bdAnim='';const BD_PG=30;
 function bdChars(){refreshToday();
@@ -836,6 +880,36 @@ $('cm-k').onclick=()=>{cmode='k';flip=false;renderCards()};$('cm-m').onclick=()=
 document.addEventListener('keydown',e=>{if(view!=='cards')return;if(e.key===' '){e.preventDefault();cardFlip()}if(e.key==='ArrowRight')cardMove(1);if(e.key==='ArrowLeft')cardMove(-1)});
 $('tab-cards').onclick=()=>show('cards');
 $('tab-learn').onclick=()=>show('learn');$('tab-review').onclick=()=>show('review');
+/* ---------- 홈 ---------- */
+function streak(){let n=0;const d=new Date();d.setHours(0,0,0,0);if(!LOG[iso(d)])d.setDate(d.getDate()-1);while(LOG[iso(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=Object.keys(D.chars),N=all.length;
+  const learned=all.filter(c=>S[c]),st=[0,0,0,0,0,0];learned.forEach(c=>{st[Math.min(5,S[c].stage||0)]++});
+  const due=dueList().length,unk=all.filter(c=>KN[c]==='u').length,sk=streak();
+  const m=user?(user.user_metadata||{}):{};const nm=user?(m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자'):'';
+  const h=new Date().getHours(),gr=h<5?'늦은 밤이에요':h<11?'좋은 아침이에요':h<17?'좋은 오후예요':h<22?'좋은 저녁이에요':'늦은 밤이에요';
+  const lastCh=_last&&D.chars[_last]?_last:null;let lastAt='';
+  if(LOG.at){const a=new Date(LOG.at);const dd=iso(a)===TODAY?'오늘':iso(a)===addDays(TODAY,-1)?'어제':(a.getMonth()+1)+'/'+a.getDate();lastAt=dd+' '+String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0')}
+  const sub=(lastAt||lastCh)?`마지막 학습: ${[lastAt,lastCh?lastCh+' '+esc(D.chars[lastCh].hun):''].filter(Boolean).join(' · ')}`:'첫 글자부터 시작해 볼까요';
+  const av=user&&(m.avatar_url||m.picture)?`<img src="${esc(m.avatar_url||m.picture)}" alt="">`:esc((nm||'部').slice(0,1));
+  const COL=['#c9a24a','#a8b88a','#7f9a5f','#5f7d45','var(--koke)','var(--ink)'],LAB=['오늘','1일','3일','7일','1달','완료'];
+  const bar=st.map((n,i)=>n?`<i style="width:${n/N*100}%;background:${COL[i]}"></i>`:'').join('');
+  const leg=st.map((n,i)=>`<span><i style="background:${COL[i]}"></i>${LAB[i]} ${n}</span>`).join('');
+  const jl=[5,4,3,2,1].map(n=>{const cs=all.filter(c=>D.chars[c].jlpt===n);if(!cs.length)return'';const k=cs.filter(c=>S[c]).length;return `<div class="hm-jl"><b>N${n}</b><div class="t"><i style="width:${k/cs.length*100}%"></i></div><span>${k}/${cs.length}</span></div>`}).join('');
+  const ls=[...D.lessons].sort((a,b)=>(b.ord[0]-a.ord[0])||(b.ord[1]-a.ord[1])).slice(0,10);
+  el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div class="hm-av">${av}</div></div>
+  <div class="hm-card"><div class="hm-h">익힌 글자</div><div class="hm-big"><b>${learned.length}</b><span>/ ${N}자 · ${Math.round(learned.length/N*100)}%</span></div><div class="hm-bar">${bar}</div><div class="hm-leg">${leg}</div></div>
+  <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
+  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${lastCh?'이어서 익히기 · '+lastCh:'익히기 시작'}</button><button class="btn" id="hmbd">한판</button></div>
+  <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
+  <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>`;
+  $('hmrv').onclick=()=>show(due?'review':'board');
+  $('hmgo').onclick=()=>{show('learn');if(lastCh)goChar(lastCh)};
+  $('hmbd').onclick=()=>show('board');
+  el.querySelectorAll('.hm-ls button').forEach(b=>b.onclick=()=>{const l=D.lessons[+b.dataset.i];curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})})}
+$('tab-home').onclick=()=>show('home');
+$('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').onclick=()=>{if(sb)login()};
+$('gguest').onclick=()=>{try{localStorage.setItem('busu-guest','1')}catch(e){};$('gate').hidden=true;show('home')};
 sbInit();
-renderAll();
+function start(){$('gcount').textContent=Object.keys(D.chars).length+'자 · '+D.lessons.length+'계열 · JLPT 급수 단어';renderAll();show('home')}
+start();
 </script>

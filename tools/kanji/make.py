@@ -7,9 +7,9 @@ s=t
 for a,b in [("const D = __DATA__;","let D=null;"),
  ("let curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0], curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0]","let curL=null, curC=null")]:
     assert a in s,a; s=s.replace(a,b)
-a="\nrenderAll();\n</script>"; assert a in s
+a="\nstart();\n</script>"; assert a in s
 s=s.replace(a,"""
-function boot(d){D=d;curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0];curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0];renderAll()}
+function boot(d){D=d;curL=(_last&&D.chars[_last]&&D.lessons.find(l=>l.chars.includes(_last)))||D.lessons[0];curC=(_last&&curL.chars.includes(_last))?_last:curL.chars[0];start()}
 fetch('kanji-data.json',{cache:'no-cache'}).then(r=>r.json()).then(boot).catch(()=>{document.getElementById('v-learn').innerHTML='<p class="note">글자 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.</p>'});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>""")
