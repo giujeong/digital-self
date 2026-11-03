@@ -14,6 +14,11 @@ for c,v in K.items():
     out[c]={"hun":v["hun"],"on":v["on"],"kun":v["kun"],"parts":v.get("parts",""),"memo":v.get("memo",""),"s":v["s"],"pg":v.get("pg"),"busu":1}
 for c,v in X.items():
     out[c]={"hun":v["hun"],"on":v["on"],"kun":v["kun"],"s":strokes(c)}
+KWP=os.path.join(B,'kanji_words.json')
+if os.path.exists(KWP):
+    KW=json.load(open(KWP,encoding='utf-8'))
+    for c in out:
+        if c in KW: out[c]['kw']=KW[c]
 os.makedirs(OUT,exist_ok=True)
 open(os.path.join(OUT,'bible-kanji.json'),'w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,separators=(',',':')))
 t=open(os.path.join(B,'tpl.html'),encoding='utf-8').read()
