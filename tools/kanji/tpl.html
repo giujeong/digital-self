@@ -957,6 +957,8 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   const m=user?(user.user_metadata||{}):{};const nm=user?(m.name||m.full_name||m.nickname||m.preferred_username||'카카오 사용자'):'';
   const h=new Date().getHours(),gr=h<5?'늦은 밤이에요':h<11?'좋은 아침이에요':h<17?'좋은 오후예요':h<22?'좋은 저녁이에요':'늦은 밤이에요';
   const lastCh=_last&&D.chars[_last]?_last:null;let lastAt='';
+  const ORD=[...D.lessons.filter(l=>l.series),...D.lessons.filter(l=>!l.series)].flatMap(l=>l.chars).filter((c,i,x)=>D.chars[c]&&x.indexOf(c)===i);
+  const fi=lastCh?Math.max(0,ORD.indexOf(lastCh)):0;const nextCh=[...ORD.slice(fi),...ORD.slice(0,fi)].find(c=>!S[c])||null;
   if(LOG.at){const a=new Date(LOG.at);const dd=iso(a)===TODAY?'오늘':iso(a)===addDays(TODAY,-1)?'어제':(a.getMonth()+1)+'/'+a.getDate();lastAt=dd+' '+String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0')}
   const sub=(lastAt||lastCh)?`마지막 학습: ${[lastAt,lastCh?lastCh+' '+esc(D.chars[lastCh].hun):''].filter(Boolean).join(' · ')}`:'첫 글자부터 시작해 볼까요';
   const av=user&&(m.avatar_url||m.picture)?`<img src="${esc(m.avatar_url||m.picture)}" alt="">`:esc((nm||'部').slice(0,1));
@@ -968,12 +970,12 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div style="display:flex;align-items:center"><button class="hm-q" id="hmq" title="사용 안내 다시 보기">?</button><div class="hm-av">${av}</div></div></div>
   <div class="hm-card"><div class="hm-h">익힌 글자</div><div class="hm-big"><b>${learned.length}</b><span>/ ${N}자 · ${Math.round(learned.length/N*100)}%</span></div><div class="hm-bar">${bar}</div><div class="hm-leg">${leg}</div></div>
   <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습${wd?' · 단어 '+wd:''}</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
-  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${lastCh?'이어서 익히기 · '+lastCh:'익히기 시작'}</button><button class="btn" id="hmbd">한판</button></div>
+  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${nextCh&&(lastCh||learned.length)?'이어서 익히기 · '+nextCh:nextCh?'익히기 시작':'모두 익혔어요 — 한판으로'}</button><button class="btn" id="hmbd">한판</button></div>
   <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
   <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>
   <div class="hm-card fb" id="fb"></div>`;renderFB();
   $('hmrv').onclick=()=>{if(due){rvMode='kanji';show('review')}else if(wd){rvMode='words';show('review')}else show('board')};
-  $('hmgo').onclick=()=>{show('learn');if(lastCh)goChar(lastCh)};
+  $('hmgo').onclick=()=>{if(!nextCh){show('board');return}show('learn');goChar(nextCh)};
   $('hmbd').onclick=()=>show('board');
   el.querySelectorAll('.hm-ls button').forEach(b=>b.onclick=()=>{const l=D.lessons[+b.dataset.i];curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})})}
 $('tab-home').onclick=()=>show('home');
