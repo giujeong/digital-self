@@ -143,6 +143,9 @@ button.chip{cursor:pointer;color:var(--ink)}
 .gate h1{margin:10px 0 0;font-size:26px}.gate .sub{color:var(--muted);font-family:var(--f-ja)}
 .kakao{background:#FEE500;color:#191600;border:0;border-radius:12px;padding:14px 22px;font-weight:700;font-size:17px;display:inline-flex;gap:8px;align-items:center;margin-top:14px;min-width:260px;justify-content:center}
 .kakao svg{width:20px;height:20px}
+.line{background:#06C755;color:#fff;border:0;border-radius:12px;padding:14px 22px;font-weight:700;font-size:17px;display:inline-flex;gap:8px;align-items:center;margin-top:14px;min-width:260px;justify-content:center}
+.line svg{width:22px;height:22px}
+.gbtns{display:flex;flex-direction:column;align-items:center}.gbtns.ja .line{order:0}.gbtns.ja .kakao{order:1}
 .foot{font-size:12px;color:var(--muted);margin-top:24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .foot .lo{margin-left:auto;border:1px solid var(--line);background:var(--ghost);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
 </style>
@@ -153,7 +156,7 @@ button.chip{cursor:pointer;color:var(--ink)}
   <h1 id="gtitle">일본어 성경 읽기</h1>
   <div class="sub" id="gsub">日韓対訳で読む聖書</div>
   <div class="note" id="gmsg"></div>
-  <button class="kakao" id="gkk"></button>
+  <div class="gbtns" id="gbtns"><button class="kakao" id="gkk"></button><button class="line" id="gln" hidden></button></div>
   <div class="note" id="gfine" style="margin-top:18px"></div>
   <button class="btn" id="glang" style="margin-top:6px;padding:5px 12px;font-size:13px"></button>
 </div>
@@ -188,8 +191,12 @@ button.chip{cursor:pointer;color:var(--ink)}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
+const LN='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2.5C6.2 2.5 1.5 6.3 1.5 11c0 4.2 3.7 7.7 8.8 8.4.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.6s5.8-3.4 7.9-5.9c1.5-1.6 2.1-3.3 2.1-5.5 0-4.7-4.7-8.5-10.5-8.5zM8.1 13.6H6.1c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v3.6h1.5c.3 0 .5.2.5.5s-.2.5-.5.5zm1.9-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v4.1zm5-.1c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-2.1-2.8v2.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l2.1 2.8V9c0-.3.2-.5.5-.5s.5.2.5.5v4zm3.4-2.6c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v1h1.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5h2c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v1h1.5z"/></svg>';
 const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
-const BOOKS={jhn:{ko:'요한복음서',ja:'ヨハネの福音書',ks:'요한복음서',js:'ヨハネ',yv:'JHN'}};
+const LINE_ON=false; // LINE 로그인: Supabase custom:line 등록 후 true (B1)
+const BOOKS={jhn:{ko:'요한복음서',ja:'ヨハネの福音書',ks:'요한복음서',js:'ヨハネ',yv:'JHN'},'1jn':{ko:'요한1서',ja:'ヨハネの手紙Ⅰ',ks:'요한1서',js:'Ⅰヨハネ',yv:'1JN'}};
+const CHAPS=[['jhn',1],['jhn',2],['1jn',1]]; // 올라간 장 목록 — 새 장 업로드 후 여기 한 줄
+const chapIdx=()=>CHAPS.findIndex(([b,c])=>b===book&&c===ch);
 const bname=b=>LANG==='ja'?b.ja:b.ko;
 const bshort=b=>LANG==='ja'?b.js:b.ks;
 const chs=n=>L(n+'장','第'+n+'章');
@@ -204,8 +211,8 @@ let LANG='ko';try{LANG=localStorage.getItem('jpbible-lang')||((navigator.languag
 const L=(ko,ja)=>LANG==='ja'?ja:ko;
 let sb=null,user=null,KJ={},U=[],WD=[],book='jhn',ch=1,cur=0,furi=true,acol=true,asel=0;
 let P={rd:{},srs:{},words:{},sent:{},log:{}};
-try{const s=JSON.parse(localStorage.getItem('jpbible-pref')||'{}');furi=s.furi!==false;acol=s.acol!==false;cur=s.cur||0}catch(e){}
-const savePref=()=>{try{localStorage.setItem('jpbible-pref',JSON.stringify({furi,cur,acol}))}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem('jpbible-pref')||'{}');furi=s.furi!==false;acol=s.acol!==false;cur=s.cur||0;if(s.book&&CHAPS.some(([b,c])=>b===s.book&&c===s.ch)){book=s.book;ch=s.ch}}catch(e){}
+const savePref=()=>{try{localStorage.setItem('jpbible-pref',JSON.stringify({furi,cur,acol,book,ch}))}catch(e){}};
 
 /* ---------- 토큰 ---------- */
 const tk=t=>typeof t==='string'?{s:t}:{s:t[0],r:t[1]||'',b:t[2]||'',br:t[3]||''};
@@ -230,7 +237,7 @@ function applyLang(){document.documentElement.lang=LANG;IVL_L=LANG==='ja'?IVLJ:I
   $('gtitle').textContent=L('일본어 성경 읽기','日韓対訳で読む聖書');$('gsub').textContent=L('日韓対訳で読む聖書','일본어 성경 읽기');
   if(!user)$('gmsg').textContent=L('말씀을 한 절씩 읽으며 한자와 단어를 익혀요','みことばを一節ずつ読みながら、漢字と韓国語を学びます');
   $('gfine').textContent=L('지금은 개인 학습용이에요 · 허락받은 계정만 열려요','現在は個人学習用です · 許可されたアカウントのみ利用できます');
-  if(!user||$('gkk').dataset.mode!=='other')$('gkk').innerHTML=KK+L('카카오로 시작하기','カカオでログイン');
+  if(!user||$('gkk').dataset.mode!=='other')$('gkk').innerHTML=KK+L('카카오로 시작하기','カカオでログイン');$('gln').innerHTML=LN+L('LINE으로 시작하기','LINEでログイン');$('gbtns').classList.toggle('ja',LANG==='ja');
   $('leg').innerHTML=L('<i></i>부수한자에 있는 한자 <i class="n"></i>새 한자 — 단어를 누르면 한국어 짝이 켜지고, 동사·형용사는 변형 풀이가 나와요','<i></i>部首漢字アプリにある漢字 <i class="n"></i>新しい漢字 — 語をタップで韓国語の対応が光り、動詞・形容詞は活用の解説が出ます')}
 function setLang(l){LANG=l;try{localStorage.setItem('jpbible-lang',l)}catch(e){};applyLang();if(user&&U.length){renderFoot();show(view)}}
 /* ---------- 대응 하이라이트 ---------- */
@@ -366,7 +373,8 @@ function koCloze(key,w,oth){ // 단어가 든 절의 한국어 번역에서, 그
     const ans=ps[0][0];const ds=oth.map(x=>x.ko).filter(x=>x&&x!==ans).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3);if(ds.length<3)continue;
     return{type:'kcloze',key,u,gid:g[0],ans,opts:shuffle([ans,...ds])}}
   return null}
-function start(prac){const s=store();queue=prac?shuffle(Object.keys(s)).slice(0,15):shuffle(dueOf(s));Q=null;done=0;window.__prac=prac;next()}
+const inCh=key=>rm==='w'?WD.some(x=>x.w===key):rm==='s'?U.some(u=>uid(u)===key):true; // 다른 장에서 익힌 단어·문장은 그 장을 열었을 때만
+function start(prac){const s=store();queue=(prac?shuffle(Object.keys(s)).slice(0,15):shuffle(dueOf(s))).filter(inCh);Q=null;done=0;window.__prac=prac;next()}
 function next(){Q=queue.length?makeQ(queue[0]):null;renderRev()}
 function grade(ok){const key=queue.shift();done++;if(!window.__prac){const s=store()[key];
     if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?'9999-12-31':addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;queue.push(key)}act();save();updDot()}
@@ -410,10 +418,11 @@ function renderHome(){refreshToday();const m=user?(user.user_metadata||{}):{};co
   const nxt=U.findIndex(u=>!P.rd[uid(u)]);
   $('home').innerHTML=`<div class="hi">${nm?esc(nm)+L(' 님, ','さん、'):''}${L('오늘도 말씀과 함께','今日もみことばと共に')}<small>${bname(BOOKS[book])} ${chs(ch)} · ${rd}/${U.length} ${L('읽음','読了')}</small></div>
     <div class="st3"><div class="st"><b>${rd}</b><span>${L('읽은 절','読んだ節')}</span></div><div class="st"><b style="color:var(--shu)">${due}</b><span>${L('오늘 복습','今日の復習')}</span></div><div class="st"><b style="color:var(--ai)">${streak()}</b><span>${L('연속일','連続日数')}</span></div></div>
-    <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?L(ch+'장 다 읽었어요 — 처음부터','第'+ch+'章を読み終えました — 最初から'):L('이어서 읽기 · ','続きを読む · ')+vlabel(U[nxt])}</button>${due?'<button class="btn" id="hrv">'+L('복습','復習')+' ('+due+')</button>':''}</div>
+    <div class="ctl"><select id="hch" aria-label="${L('책·장 고르기','書・章を選ぶ')}">${CHAPS.map(([b,c],i)=>`<option value="${i}" ${b===book&&c===ch?'selected':''}>${bname(BOOKS[b])} ${chs(c)}</option>`).join('')}</select></div>
+    <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?L(ch+'장 다 읽었어요 — 처음부터','第'+ch+'章を読み終えました — 最初から'):L('이어서 읽기 · ','続きを読む · ')+vlabel(U[nxt])}</button>${nxt<0&&chapIdx()<CHAPS.length-1?'<button class="btn" id="hnx">'+L('다음 장 →','次の章 →')+'</button>':''}${due?'<button class="btn" id="hrv">'+L('복습','復習')+' ('+due+')</button>':''}</div>
     <details class="card fold" id="hfold"${fopen()?' open':''}><summary><span>${bname(BOOKS[book])} ${chs(ch)}</span><small>${rd}/${U.length}</small></summary><div class="vgrid">${U.map((u,i)=>`<button class="${P.rd[uid(u)]?'r':''} ${i===cur?'cur':''}" data-i="${i}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}</button>`).join('')}</div></details>
     <div class="card"><h3>${L('익힌 것','学んだもの')}</h3><div>${L('한자','漢字')} ${Object.keys(P.srs).length} · ${L('단어','単語')} ${Object.keys(P.words).length} · ${L('문장','文')} ${Object.keys(P.sent).length}</div></div>`;
-  $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
+  $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};$('hch').onchange=e=>goChapter(+e.target.value);if($('hnx'))$('hnx').onclick=()=>goChapter(chapIdx()+1);if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
   $('hfold').ontoggle=e=>{try{localStorage.setItem('jpbible-fold-'+book+ch,e.target.open?'1':'0')}catch(x){}};
   $('home').querySelectorAll('.vgrid button').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;savePref();show('read')})}
 
@@ -428,6 +437,11 @@ function act(){P.log[TODAY]=(P.log[TODAY]||0)+1}
 let pushT=null;
 function save(){try{localStorage.setItem('jpbible-p-'+(user?user.id:'x'),JSON.stringify(P))}catch(e){}
   if(!sb||!user)return;clearTimeout(pushT);pushT=setTimeout(async()=>{await sb.from('bible_progress').upsert({user_id:user.id,...P,updated_at:new Date().toISOString()})},1000)}
+async function goChapter(i){const [b,c]=CHAPS[i]||CHAPS[0];if(b===book&&c===ch)return;book=b;ch=c;cur=0;savePref();
+  const [u,w]=await Promise.all([sb.from('bible_units').select('id,book,ch,v1,v2,ord,jp,toks,ko,al').eq('book',book).eq('ch',ch).order('ord'),
+    sb.from('bible_meta').select('data').eq('id',`${book}.${ch}.words`).maybeSingle()]);
+  if(u.error||!u.data||!u.data.length){alert(L('이 장은 아직 준비 중이에요.','この章はまだ準備中です。'));return}
+  U=u.data;NOTES={};U.forEach(x=>{if(x.al&&x.al.notes)for(const k in x.al.notes)if(!NOTES[k])NOTES[k]=x.al.notes[k]});WD=(w.data&&w.data.data)||[];updDot();show('home')}
 async function loadAll(){
   const [k,u,w,p]=await Promise.all([fetch('bible-kanji.json',{cache:'no-cache'}).then(r=>r.json()),
     sb.from('bible_units').select('id,book,ch,v1,v2,ord,jp,toks,ko,al').eq('book',book).eq('ch',ch).order('ord'),
@@ -440,13 +454,13 @@ async function loadAll(){
 function renderFoot(){const m=user.user_metadata||{};$('foot').innerHTML=`<span><b>${esc(m.name||m.nickname||'')}</b>${L(' 님 · 기록이 계정에 저장돼요','さん · 記録はアカウントに保存されます')}</span><button class="lo" id="lo">${L('로그아웃','ログアウト')}</button>`;
   $('lo').onclick=async()=>{await sb.auth.signOut();location.reload()}}
 async function onUser(){const g=$('gate');
-  if(!user){g.hidden=false;$('gkk').hidden=false;applyLang();return}
-  $('gkk').hidden=true;$('gmsg').textContent=L('불러오는 중…','読み込み中…');
+  if(!user){g.hidden=false;$('gkk').hidden=false;$('gln').hidden=!LINE_ON;applyLang();return}
+  $('gkk').hidden=true;$('gln').hidden=true;$('gmsg').textContent=L('불러오는 중…','読み込み中…');
   const ok=await loadAll();
-  if(!ok){$('gmsg').innerHTML=L('이 앱은 아직 개인 학습용이라 허락된 계정만 열려요.','このアプリは現在個人学習用のため、許可されたアカウントのみ利用できます。');$('gkk').hidden=false;$('gkk').dataset.mode='other';$('gkk').innerHTML=L('다른 계정으로 로그인','別のアカウントでログイン');$('gkk').onclick=async()=>{await sb.auth.signOut();login()};return}
+  if(!ok){$('gmsg').innerHTML=L('이 앱은 아직 개인 학습용이라 허락된 계정만 열려요.','このアプリは現在個人学習用のため、許可されたアカウントのみ利用できます。');$('gkk').hidden=false;$('gkk').dataset.mode='other';$('gkk').innerHTML=L('다른 계정으로 로그인','別のアカウントでログイン');$('gkk').onclick=async()=>{await sb.auth.signOut();$('gkk').dataset.mode='';$('gmsg').textContent='';$('gln').hidden=false;applyLang()};return}
   g.hidden=true;renderFoot();updDot();show('read')}
-function login(){sb.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:location.origin+location.pathname}})}
-$('gkk').onclick=login;
+function login(provider='kakao'){sb.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+location.pathname}})}
+$('gkk').onclick=()=>login('kakao');$('gln').onclick=()=>login('custom:line');
 try{sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
   let first=true;sb.auth.onAuthStateChange((ev,ses)=>{const was=user&&user.id;user=ses?ses.user:null;
     if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search))history.replaceState(null,'',location.pathname);

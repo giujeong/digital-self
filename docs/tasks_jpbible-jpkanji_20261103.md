@@ -10,13 +10,15 @@
 - [x] 배포 확인(11-03 21:5x): 프로덕션 dpl_2xkib…= 768ea54 main, 라이브 /bible/·/kanji/ md5 = 커밋 파일 일치. Vercel이 푸시를 놓친 적 있음 → deployments API로 sha 대조. 놓치면 빈 커밋으로 재배포
 
 ## 1. 지금 상태 (배포됨)
-- jpbible 임시 주소 https://jpkanji.giujeong.me/bible/ (정식 jpbible.giujeong.me 미연결)
+- jpbible 정식 주소 https://jpbible.giujeong.me (11-03 A1·A2 완료, 인증서 *.giujeong.me). 임시 https://jpkanji.giujeong.me/bible/ 도 살아 있음
 - 요한복음 1장 47단위(JCB 묶음 절: 1-2, 6-7, 11-12, 24-25). Supabase 프로젝트 jpkanji (`qfypowruejziftranphu`)
   - `bible_units.ko` 47절 = 신지 초벌 한국어 번역(검토 전)
-  - `bible_units.al` jsonb 47절 = 일·한 대응 하이라이트(색 7종, 동사·형용사 변형 풀이 171개). **k 조각은 ko와 정확 일치가 연결 조건** → ko 고치면 그 절 al 재생성
+  - `bible_units.al` jsonb 47절 = 일·한 대응 하이라이트(색 7종, 동사·형용사 변형 풀이 171개). 11-03 느슨한 짝 17건 정리(B3). **k 조각은 ko와 정확 일치가 연결 조건**(검사 SQL `tools/bible/al/`, 현재 47/47) → ko 고치면 그 절 al 재생성
   - 한자 카드: 발음 칩 音·訓·한(TTS), 한자별 단어+예문 359자 (`tools/bible/kanji_words.json`, 일 1,213 / 한 1,156)
-- jpkanji: 홈 「이어서 익히기」= 안 익힌 다음 글자(현재 又)
-- ⚠ 정렬 작업 파일(/home/claude/bible/al: check.py 검증기, example.json 포맷)은 클라우드 컨테이너에만 있었고 **지금은 없음**. 필요하면 Supabase al 데이터를 내려받아 포맷을 역으로 확인하고 `tools/bible/al/`에 검증기를 다시 두기
+- jpbible 일본어 모드: 단어 복습 = 한국어 문장 빈칸·일→한·한→일 (B5, 배포 ad578a6), SRS는 한국어 모드와 공유
+- 새 장 파이프라인 `tools/bible/pipeline/` (toks·words·upload + README) — 1장 toks 재현 44/47 (27·32·36절은 1장 수작업 편차)
+- jpkanji: 홈 「이어서 익히기」= 안 익힌 다음 글자(현재 又). 10-30 광고 계측 코드는 브랜치 `local/kanji-ads-20261030`에만(main 미반영)
+- 정렬 작업 파일: 클라우드 컨테이너의 check.py·example.json은 사라짐 → 11-03 `tools/bible/al/`에 al 포맷 메모·검사 SQL 2종·`fix_loose_pairs_20261103.sql`로 대체(해결)
 
 ## 2. 과업 (우선순위 순)
 
@@ -36,7 +38,7 @@
 
 ### C. 마무리 체크
 - [ ] 매 화면 판권 문구 + bible.com 링크 유지 확인
-- [ ] `tools/bible/README.md` 「남은 일」 갱신(이 문서와 동기)
+- [x] `tools/bible/README.md` 「남은 일」 갱신(11-03 코워크, 이 문서와 동기)
 - [x] 코워크 복귀용 핸드오프(11-03 밤):
   - 끝난 것: 0번 전부(rebase·빌드·배포 대조), A1 도메인, A2 Redirect URL, A4 A안, B3 느슨한 짝 17건(해제 6·문법 9, 검사 통과), B4 표기 확인, B5 일본어 모드 단어 복습(배포 ad578a6), B6 파이프라인 스크립트 3종+README(1장 toks 재현 44/47), al 검사 SQL 2종, LINE 로그인 조사(볼트)
   - 남은 것: A3 허락 양식(신수), B1 LINE 채널 생성(11-04 신수)→Supabase 등록→버튼, B2 번역 수정 대기, B6 2장 본문 대기

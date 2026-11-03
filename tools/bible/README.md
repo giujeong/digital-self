@@ -16,12 +16,17 @@
 - `extra_kanji.json` — 부수한자에 없는 1장 한자 153자(KANJIDIC 읽기 + 훈음)
 - `hun.json` — 위 153자 훈음 원본 / `wgloss.json` — 단어 뜻 원본
 
-## 남은 일
-1. `tpl.html` 작성 — 로그인(카카오, 부수한자와 같은 Supabase) → 회원 확인 → 읽기(절 카드·후리가나 토글·한자 탭=부수한자 카드·단어 탭=뜻·▶듣기·읽었어요) → 복습(한자/단어/문장) → 매 화면 판권 문구 + bible.com 링크
-2. `vercel.json`에 jpbible.giujeong.me 호스트 규칙(jpkanji와 같은 방식, /bible/)
-3. 신수 작업: Vercel 도메인 추가 + DNS CNAME, Supabase Auth Redirect URLs에 https://jpbible.giujeong.me 추가
-4. 미리보기 → "좋아" → 배포 (본문은 레포·정적 파일에 절대 넣지 않기)
-5. 한국어 번역(ko) 입력, 2장 이후 추가 — 신수가 bible.com에서 장 단위로 붙여 주기(스크래핑 금지)
+## 남은 일 (2026-11-03 밤 기준 — 원본은 `docs/tasks_jpbible-jpkanji_20261103.md`)
+끝남: tpl.html(읽기·복습·일본어 모드) · jpbible.giujeong.me 도메인·Redirect URL · 느슨한 짝 정리(k==ko 47/47) · 일본어 모드 단어 복습 · 새 장 파이프라인 `pipeline/`.
+
+1. **LINE 로그인(B1)** — 신수가 LINE 채널 생성(볼트 `261103 일본어 성경 읽기 jpbible/조사_LINE로그인_Supabase연결_v1_20261103` §1) → Supabase Custom OAuth2 `custom:line` 등록 → `tpl.html` 로그인 버튼(일본어 모드에서 LINE 앞). 결정 대기: 카카오 계정과 identity linking 여부
+2. **한국어 번역 검토(B2)** — 신수가 절 번호+수정문 → `ko` 갱신 → 그 절 `al` 재생성(k 조각은 ko 정확 일치) → `al/` 검사 SQL 통과 → 미리보기. 큰 SQL은 8절씩, md5 대조
+3. **2장 이후(B6)** — 신수가 bible.com에서 장 단위 붙여넣기(스크래핑 금지) → `pipeline/` toks → words → ko 초벌 → al → upload. 1장 toks 재현 44/47(27·32·36절 수작업 편차)
+4. 허락 요청(A3) — 아래 「허락」
+5. 마무리 체크 — 매 화면 판권 문구 + bible.com 링크 유지
+6. 결정 대기(신수) — 한자 광고 계측 코드(`local/kanji-ads-20261030`)를 tpl.html로 이식할지(광고 실험 11-06 예정)
+
+규칙: `public/bible/index.html`은 생성 파일 — `tpl.html` 고치고 `make.py`(먼저 `tools/kanji/data.py`). 미리보기 → "좋아" → 커밋·푸시. `git commit -a` 금지. 본문(jp·toks·ko·al)은 레포에 절대 넣지 않기.
 
 ## 허락
 Biblica Permission Request Form 3단계 작성 중(11/3), いのちのことば社 문의 양식 작성(사람 확인 후 送信 필요). 승인 전까지 개인용.
