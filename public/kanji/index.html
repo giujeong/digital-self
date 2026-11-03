@@ -858,16 +858,16 @@ function renderReview(){
   if(Q.type==='char')q=`<div class="ql">이 뜻의 글자는?</div><div class="qt">${esc(c.hun)}</div>`;
   if(Q.type==='reading')q=`<div class="ql">표시한 글자를 어떻게 읽을까요?</div><div class="qs">${esc(Q.ex.jp).split(Q.ch).join('<mark>'+Q.ch+'</mark>')}</div><div class="ql">${esc(Q.ex.ko)}</div>`;
   const cls=Q.type==='char'?'k':(Q.type==='reading'?'ja':'');
-  rv.innerHTML=head+`<div class="q">${q}</div><div class="opts">${Q.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(Q.type==='reading'?rdTxt(o):o)}</button>`).join('')}</div><div class="fb" id="fb"></div>`;
+  rv.innerHTML=head+`<div class="q">${q}</div><div class="opts">${Q.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(Q.type==='reading'?rdTxt(o):o)}</button>`).join('')}</div><div class="fb" id="rvfb"></div>`;
   rv.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     if(rv.dataset.lock==='1')return;rv.dataset.lock='1';
     const ok=Q.opts[+b.dataset.i]===Q.ans;
     rv.querySelectorAll('.opt').forEach(x=>{if(Q.opts[+x.dataset.i]===Q.ans)x.classList.add('ok')});
     if(!ok)b.classList.add('no');
-    $('fb').className='fb '+(ok?'ok':'no');
-    $('fb').innerHTML=(ok?'맞았어요':'틀렸어요 — 처음 간격부터 다시')+`<div class="note" style="font-weight:400;margin-top:4px">${Q.ch} ${esc(c.hun)} · ${esc(c.parts)} · ${esc(c.memo)}</div><div class="ctl" style="justify-content:center"><button class="btn pri" id="nx">다음</button></div>`;
-    $('nx').onclick=()=>{rv.dataset.lock='0';grade(ok);next()};
-    $('nx').focus();
+    $('rvfb').className='fb '+(ok?'ok':'no');
+    $('rvfb').innerHTML=(ok?'맞았어요':'틀렸어요 — 처음 간격부터 다시')+`<div class="note" style="font-weight:400;margin-top:4px">${Q.ch} ${esc(c.hun)} · ${esc(c.parts)} · ${esc(c.memo)}</div><div class="ctl" style="justify-content:center"><button class="btn pri" id="rvnx">다음</button></div>`;
+    $('rvnx').onclick=()=>{rv.dataset.lock='0';grade(ok);next()};
+    $('rvnx').focus();
   });
 }
 let view='learn';
