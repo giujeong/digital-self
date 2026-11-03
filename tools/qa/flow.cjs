@@ -1,5 +1,7 @@
 // 흐름 점검 — 화면에서 실제로 눌러 보고 다음으로 넘어가는지 확인 (playwright 필요).
-//   node tools/qa/flow.js            (레포 루트에서, public/ 빌드 후)
+//   node tools/qa/flow.cjs           (레포 루트에서, public/ 빌드 후)
+//   .cjs 인 이유: package.json 이 "type":"module" 이라 .js 는 require 를 못 쓴다
+//   맥: playwright 를 레포 밖에 두고 NODE_PATH 로 — tools/qa/README.md
 // 실패하면 exit 1. 새 화면·흐름을 만들면 여기 한 묶음씩 추가.
 const {chromium}=require('playwright');
 const http=require('http'),fs=require('fs'),path=require('path');
@@ -12,7 +14,8 @@ const fails=[];const ok=(name,cond,info)=>{console.log((cond?'✓ ':'✗ ')+name
 const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='then'?(res)=>res({data:null,error:null}):mk(),apply:()=>mk()});window.supabase={createClient:()=>mk()}})()`;
 (async()=>{
   await new Promise(r=>srv.listen(0,r));const base='http://localhost:'+srv.address().port;
-  const b=await chromium.launch();
+  // 브라우저 묶음(npx playwright install)이 없으면 맥에 깔린 크롬으로
+  const b=await chromium.launch().catch(()=>chromium.launch({channel:'chrome'}));
   const page=async()=>{const p=await b.newPage({viewport:{width:390,height:844}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
     await p.route('**/*',r=>{const u=r.request().url();if(u.includes('supabase')&&u.endsWith('.js'))return r.fulfill({contentType:'text/javascript',body:SB_STUB});return u.startsWith(base)?r.fallback():r.abort()});return [p,errs]};
   // ── 부수 한자: 복습 — 답 고르기 → 피드백이 복습 칸에 보임 → 다음 → 새 문제

@@ -53,7 +53,7 @@
 
 ## 6. 이 레포(digital-self) 규칙
 - `public/*/index.html`은 **생성 파일** — `tools/*/tpl.html` 고치고 `make.py`. 한자는 `tools/kanji/data.py` 먼저. 빌드는 `tools/qa/lint.py`(id 중복·script 문법)를 자동 실행하고 실패하면 멈춘다.
-- 커밋 전 `node tools/qa/flow.js`(흐름 점검). 새 화면·흐름을 만들면 여기 한 묶음 추가 → `tools/qa/README.md`.
+- 커밋 전 `NODE_PATH=~/.cache/digital-self-qa/node_modules node tools/qa/flow.cjs`(흐름 점검). 새 화면·흐름을 만들면 여기 한 묶음 추가 → `tools/qa/README.md`.
 - **성경 본문(jp·toks·ko·al)은 레포에 절대 넣지 않기** — Supabase(회원 전용)에만.
 - 흐름: 미리보기(스크린샷) → 신수 "좋아" → 커밋 → 푸시. **`git commit -a` 금지**(미승인 변경이 섞인 사고 1건) — 파일명을 지정해 커밋. 커밋 메시지는 한국어로 무엇이 바뀌었는지, 끝에 Co-Authored-By.
 - 한자 앱 루프(한자공부 루프 v3.1): 책 사진 → 볼트 게시글 노트 → `content/works/kanji-<slug>.md`(제목에 쪽수 없음, source에 쪽·번호) + `data.py`(ANT/ANTH·KUNKO·PGX·기본자) → 빌드 → 미리보기 → "좋아" → 커밋.

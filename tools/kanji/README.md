@@ -19,4 +19,4 @@ sw.js 의 CACHE 이름을 버전마다 올리면 폰 캐시가 새로 받음.
 - vocab.json — N5~N1 단어 [급수, 표제어, 읽기, 영어 뜻]. 출처: jamsinclair/open-anki-jlpt-decks
 - jlpt_ko.json — 표제어 → 한국어 뜻 (신지 번역). 뜻이 있는 단어만 앱에 실림. `data.py` 실행 시 미번역 수를 출력
 
-점검: `make.py`가 `tools/qa/lint.py`(id 중복·문법)를 자동 실행 — 실패하면 빌드 멈춤. 커밋 전 `node tools/qa/flow.js`(복습 흐름). → `tools/qa/README.md`
+점검: `make.py`가 `tools/qa/lint.py`(id 중복·문법)를 자동 실행 — 실패하면 빌드 멈춤. 커밋 전 `node tools/qa/flow.cjs`(복습 흐름). → `tools/qa/README.md`
