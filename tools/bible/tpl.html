@@ -133,7 +133,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <section class="view" id="v-home" hidden><div id="home"></div></section>
 
   <section class="view" id="v-read">
-    <div class="rhd"><b id="rtitle"></b><button class="btn" id="lang" style="padding:6px 10px" aria-label="언어 / 言語"></button><select id="vsel" aria-label="절 고르기"></select></div>
+    <div class="rhd"><b id="rtitle"></b><button class="btn" id="lang" style="padding:4px 10px;font-size:22px;line-height:1" aria-label="언어 / 言語"></button><select id="vsel" aria-label="절 고르기"></select></div>
     <div class="prog"><i id="rprog"></i></div>
     <div class="vcard" id="vcard"></div>
     <div class="leg" id="leg"></div>
@@ -155,8 +155,9 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
 const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
-const BOOKS={jhn:{ko:'요한복음',ja:'ヨハネの福音書',yv:'JHN'}};
+const BOOKS={jhn:{ko:'요한복음',ja:'ヨハネの福音書',ks:'요',js:'ヨハネ',yv:'JHN'}};
 const bname=b=>LANG==='ja'?b.ja:b.ko;
+const bshort=b=>LANG==='ja'?b.js:b.ks;
 const chs=n=>L(n+'장','第'+n+'章');
 const IVL=[0,1,3,7,30];const IVLK=['오늘','1일','3일','7일','1달'],IVLJ=['今日','1日','3日','7日','1か月'];let IVL_L=IVLK;
 const CJK=/[㐀-鿿々]/;
@@ -191,7 +192,7 @@ const wordsOf=u=>[...new Set(u.toks.map(tk).filter(t=>t.b).map(t=>t.b))].filter(
 function applyLang(){document.documentElement.lang=LANG;IVL_L=LANG==='ja'?IVLJ:IVLK;
   $('t-home').textContent=L('홈','ホーム');$('t-read').textContent=L('읽기','読む');$('t-rev-l').textContent=L('복습','復習');
   $('rm-k').textContent=L('한자','漢字');$('rm-w').textContent=L('단어','単語');$('rm-s').textContent=L('문장','文');
-  $('lang').textContent=L('日本語','한국어');$('glang').textContent=L('日本語で表示','한국어로 보기');
+  $('lang').textContent=L('🇯🇵','🇰🇷');$('lang').title=L('日本語で表示','한국어로 보기');$('glang').textContent=L('日本語で表示','한국어로 보기');
   $('gtitle').textContent=L('일본어 성경 읽기','日韓対訳で読む聖書');$('gsub').textContent=L('日韓対訳で読む聖書','일본어 성경 읽기');
   if(!user)$('gmsg').textContent=L('말씀을 한 절씩 읽으며 한자와 단어를 익혀요','みことばを一節ずつ読みながら、漢字と韓国語を学びます');
   $('gfine').textContent=L('지금은 개인 학습용이에요 · 허락받은 계정만 열려요','現在は個人学習用です · 許可されたアカウントのみ利用できます');
@@ -200,7 +201,7 @@ function applyLang(){document.documentElement.lang=LANG;IVL_L=LANG==='ja'?IVLJ:I
 function setLang(l){LANG=l;try{localStorage.setItem('jpbible-lang',l)}catch(e){};applyLang();if(user&&U.length){renderFoot();show(view)}}
 /* ---------- 읽기 ---------- */
 function renderRead(){if(!U.length)return;const u=U[cur],b=BOOKS[book];
-  $('rtitle').textContent=`${bname(b)} ${chs(ch)}`;$('lang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');
+  $('rtitle').textContent=`${bshort(b)} ${chs(ch)}`;$('lang').onclick=()=>setLang(LANG==='ja'?'ko':'ja');
   $('vsel').innerHTML=U.map((x,i)=>`<option value="${i}" ${i===cur?'selected':''}>${vlabel(x)}${P.rd[uid(x)]?' ✓':''}</option>`).join('');
   $('rprog').style.width=(U.filter(x=>P.rd[uid(x)]).length/U.length*100)+'%';
   const rd=P.rd[uid(u)];
