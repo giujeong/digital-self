@@ -24,13 +24,13 @@
 - [x] A1 (완료 11-03 22:1x — 신수가 `vercel domains add` 실행, DNS는 Vercel 네임서버라 CNAME 불필요. 확인: / → 307 → /bible/ 200, 인증서 *.giujeong.me) Vercel 도메인: `vercel domains add jpbible.giujeong.me` (프로젝트 digital-self, `.vercel/` 링크 있음) → 안내되는 CNAME 값 확인. DNS는 giujeong.me 등록처에서 `jpbible CNAME cname.vercel-dns.com` — 등록처 CLI/API 없으면 브라우저로 직접 등록 (신수 로그인)
 - [ ] A2 Supabase Redirect URL: 프로젝트 `qfypowruejziftranphu` Auth 설정에 `https://jpbible.giujeong.me/**` 추가 — Management API(`PATCH /v1/projects/{ref}/config/auth`, `uri_allow_list`) 또는 대시보드. 기존 jpkanji URL 유지(덮어쓰기 금지)
 - [ ] A3 허락 요청: Biblica Permission Request Form 3단계 — 브라우저로 이어서 작성, 제출 직전 화면 보여주고 신수 "좋아" 후 제출. いのちのことば社 문의 양식은 CAPTCHA·送信만 신수
-- [ ] A4 묶음 절(1-2, 6-7, 11-12, 24-25) — A안(원문 묶음 유지) 추천. 신수가 달리 말하지 않으면 A안으로 진행하고 B4에서 표시만 통일
+- [x] A4 (A안으로 진행, 11-03 — 신수 이견 없음) 묶음 절(1-2, 6-7, 11-12, 24-25) — A안(원문 묶음 유지) 추천. 신수가 달리 말하지 않으면 A안으로 진행하고 B4에서 표시만 통일
 
 ### B. 클로드 코드 작업
 - [ ] B1 **LINE 로그인** — LINE Developers 채널 생성(브라우저, 로그인은 신수) → Channel ID/Secret 받기 → Supabase 커스텀 OIDC 등록 → tpl.html 로그인 화면에 LINE 버튼(카카오 옆). 일본어 UI 모드에서는 LINE을 앞에
 - [ ] B2 **한국어 번역 검토 루프** — 신수가 절 번호+수정문을 주면: `ko` 갱신 → 해당 절 `al` 재생성(k 조각 재연결) → 해시 대조 → 미리보기. 절 단위 SQL 스크립트로(큰 SQL은 8절씩 쪼개기, md5 대조)
-- [ ] B3 **느슨한 짝 정리** — 46절 など↔이, 44절 や↔쉼표 등 조사·기호가 억지로 묶인 짝 → 짝 해제 또는 '문법' 색으로 분류. 먼저 47절 전체를 훑어 느슨한 짝 목록을 뽑아 신수에게 보고 후 수정
-- [ ] B4 묶음 절 표시 — A안 기준으로 「1-2절」 표시 통일 확인(코드 변경 없을 가능성 큼)
+- [ ] B3 (11-03 목록 보고: 해제 6·문법 재분류 9·유지 52 — 신수 판정 대기. 검사 SQL `tools/bible/al/loose_pairs.sql`) **느슨한 짝 정리** — 46절 など↔이, 44절 や↔쉼표 등 조사·기호가 억지로 묶인 짝 → 짝 해제 또는 '문법' 색으로 분류. 먼저 47절 전체를 훑어 느슨한 짝 목록을 뽑아 신수에게 보고 후 수정
+- [x] B4 (확인 11-03: vlabel `1:1-2`, 절 격자 `1-2`, bible.com 링크 `1.1-2` 모두 묶음 표기 통일, 코드 변경 없음) 묶음 절 표시 — A안 기준으로 「1-2절」 표시 통일 확인(코드 변경 없을 가능성 큼)
 - [ ] B5 **일본어 모드 단어 복습** — 지금은 한국어판과 같은 방식. 일본어 모드에서는 "한국어 뜻 고르기" 중심으로(일본인 학습자 관점). 복습 데이터는 `bible_progress.words` 재사용, 모드별 SRS 분리 여부는 신수 확인
 - [ ] B6 **2장 파이프라인** — 신수가 bible.com에서 장 단위 붙여넣기(스크래핑 금지) → toks(형태소·후리가나) → words(bible_meta `jhn.N.words`) → ko 초벌 → al 생성 → 8절 단위 업로드 + md5 대조. 1장에서 손으로 한 단계를 `tools/bible/pipeline/` 스크립트로 고정해 2장부터는 한 명령으로
 
