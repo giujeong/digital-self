@@ -26,7 +26,7 @@
 5. 마무리 체크 — 매 화면 판권 문구 + bible.com 링크 유지
 6. 결정 대기(신수) — 한자 광고 계측 코드(`local/kanji-ads-20261030`)를 tpl.html로 이식할지(광고 실험 11-06 예정)
 
-규칙: `public/bible/index.html`은 생성 파일 — `tpl.html` 고치고 `make.py`(먼저 `tools/kanji/data.py`). 미리보기 → "좋아" → 커밋·푸시. `git commit -a` 금지. 본문(jp·toks·ko·al)은 레포에 절대 넣지 않기.
+규칙: `public/bible/index.html`은 생성 파일 — `tpl.html` 고치고 `make.py`(먼저 `tools/kanji/data.py`). 미리보기 → "좋아" → 커밋·푸시. `git commit -a` 금지. 본문(jp·toks·ko·al)은 레포에 절대 넣지 않기. 빌드할 때 `tools/qa/lint.py`가 자동 점검(id 중복·문법), 커밋 전 `node tools/qa/flow.js`(흐름).
 
 ## 허락
 Biblica Permission Request Form 3단계 작성 중(11/3), いのちのことば社 문의 양식 작성(사람 확인 후 送信 필요). 승인 전까지 개인용.

@@ -9,6 +9,7 @@ spec=importlib.util.spec_from_file_location('kd',os.path.join(REPO,'tools','kanj
 # strokes()만 쓰기 위해 data.py를 실행하지 않고 함수만 가져온다
 src=open(os.path.join(REPO,'tools','kanji','data.py'),encoding='utf-8').read().split('def ex(')[0]
 ns={'__file__':os.path.join(REPO,'tools','kanji','data.py')};exec(src,ns);strokes=ns['strokes']
+import sys as _s;_s.path.insert(0,os.path.join(REPO,'tools','qa'));from lint import lint;lint(os.path.join(B,'tpl.html'),'bible')
 out={}
 for c,v in K.items():
     out[c]={"hun":v["hun"],"on":v["on"],"kun":v["kun"],"parts":v.get("parts",""),"memo":v.get("memo",""),"s":v["s"],"pg":v.get("pg"),"busu":1}

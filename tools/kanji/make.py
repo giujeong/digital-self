@@ -1,6 +1,7 @@
 import os
 B=os.path.dirname(os.path.abspath(__file__));REPO=os.path.dirname(os.path.dirname(B));OUT=os.path.join(REPO,'public','kanji');import shutil
 t=open(B+'/tpl.html',encoding='utf-8').read()
+import sys as _s;_s.path.insert(0,os.path.join(REPO,'tools','qa'));from lint import lint;lint(os.path.join(B,'tpl.html'),'kanji')
 d=open(B+'/data.json',encoding='utf-8').read().strip()
 os.makedirs(B+'/preview',exist_ok=True);open(B+'/preview/부수한자_preview.html','w',encoding='utf-8').write(t.replace('__DATA__',d))
 s=t
