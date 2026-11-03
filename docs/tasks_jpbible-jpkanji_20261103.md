@@ -22,7 +22,7 @@
 
 ### A. 환경·외부 (클로드 코드가 직접 — 로그인·CAPTCHA·최종 제출만 신수)
 - [x] A1 (완료 11-03 22:1x — 신수가 `vercel domains add` 실행, DNS는 Vercel 네임서버라 CNAME 불필요. 확인: / → 307 → /bible/ 200, 인증서 *.giujeong.me) Vercel 도메인: `vercel domains add jpbible.giujeong.me` (프로젝트 digital-self, `.vercel/` 링크 있음) → 안내되는 CNAME 값 확인. DNS는 giujeong.me 등록처에서 `jpbible CNAME cname.vercel-dns.com` — 등록처 CLI/API 없으면 브라우저로 직접 등록 (신수 로그인)
-- [ ] A2 Supabase Redirect URL: 프로젝트 `qfypowruejziftranphu` Auth 설정에 `https://jpbible.giujeong.me/**` 추가 — Management API(`PATCH /v1/projects/{ref}/config/auth`, `uri_allow_list`) 또는 대시보드. 기존 jpkanji URL 유지(덮어쓰기 금지)
+- [x] A2 (완료 11-03 22:5x — 신수가 대시보드에서 `https://jpbible.giujeong.me/**` 추가, jpkanji 줄 유지) Supabase Redirect URL: 프로젝트 `qfypowruejziftranphu` Auth 설정에 `https://jpbible.giujeong.me/**` 추가 — Management API(`PATCH /v1/projects/{ref}/config/auth`, `uri_allow_list`) 또는 대시보드. 기존 jpkanji URL 유지(덮어쓰기 금지)
 - [ ] A3 허락 요청: Biblica Permission Request Form 3단계 — 브라우저로 이어서 작성, 제출 직전 화면 보여주고 신수 "좋아" 후 제출. いのちのことば社 문의 양식은 CAPTCHA·送信만 신수
 - [x] A4 (A안으로 진행, 11-03 — 신수 이견 없음) 묶음 절(1-2, 6-7, 11-12, 24-25) — A안(원문 묶음 유지) 추천. 신수가 달리 말하지 않으면 A안으로 진행하고 B4에서 표시만 통일
 
