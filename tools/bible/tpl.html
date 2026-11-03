@@ -80,6 +80,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 팝업 */
 .pop{position:fixed;inset:0;z-index:50;background:rgba(30,25,20,.45);display:flex;align-items:flex-end;justify-content:center}
 .pop[hidden]{display:none}
+.chb{display:flex;justify-content:space-between;align-items:center;text-align:left;flex:1}
+.bk{position:fixed;inset:0;z-index:55;background:var(--paper);display:flex;flex-direction:column;max-width:560px;margin:0 auto}.bk[hidden]{display:none}
+.bkh{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ink);color:var(--paper);font-weight:700;font-size:17px}
+.bkh button{background:none;border:0;color:inherit;font-size:24px;line-height:1;padding:2px 6px}
+.bkc{flex:1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);min-height:0}
+.bkc>div{overflow:auto;border-right:1px solid var(--line)}.bkc>div:last-child{border-right:0}
+.bkg{background:var(--ghost);color:var(--muted);font-size:12px;padding:6px 10px}
+.bkb,.bkn{display:block;width:100%;background:var(--sheet);border:0;border-bottom:1px solid var(--line);padding:13px 10px;color:var(--ink);font-size:15px}
+.bkb{text-align:left;font-weight:700}.bkb .ab{color:var(--shu);display:inline-block;min-width:2.2em}
+.bkb small{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-left:33px;font-family:var(--f-ja)}
+.bkn{text-align:center}.bkb.on,.bkn.on{background:var(--line)}
+.bkn.p{box-shadow:inset 5px 0 0 var(--koke)}.bkn.r{background:var(--koke);color:#fff}.bkn.r.on{box-shadow:inset 0 0 0 3px var(--ink)}
+.bkn.cur{box-shadow:inset 0 0 0 2px var(--ink)}
+.bkf{display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);background:var(--sheet)}.bkf span{flex:1;font-weight:700}
 .pcard{background:var(--sheet);width:100%;max-width:560px;max-height:82vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px 22px;box-shadow:0 -8px 30px rgba(0,0,0,.25)}
 .pk{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px}
 .rail{display:flex;flex-direction:column;gap:5px}.rail svg{width:44px;height:44px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
@@ -184,6 +198,7 @@ button.chip{cursor:pointer;color:var(--ink)}
 
   <div class="foot" id="foot"></div>
 </div>
+<div class="bk" id="bk" hidden role="dialog"><div class="bkh"><span id="bkt"></span><button id="bkx" aria-label="닫기">×</button></div><div class="bkc"><div id="bkl"></div><div id="bkm"></div><div id="bkr"></div></div><div class="bkf"><span id="bks"></span><button class="btn pri" id="bkgo"></button></div></div>
 <div class="pop" id="pop" hidden><div class="pcard" id="pcard"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -194,7 +209,8 @@ const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_y
 const LN='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2.5C6.2 2.5 1.5 6.3 1.5 11c0 4.2 3.7 7.7 8.8 8.4.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.6s5.8-3.4 7.9-5.9c1.5-1.6 2.1-3.3 2.1-5.5 0-4.7-4.7-8.5-10.5-8.5zM8.1 13.6H6.1c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v3.6h1.5c.3 0 .5.2.5.5s-.2.5-.5.5zm1.9-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.3.2-.5.5-.5s.5.2.5.5v4.1zm5-.1c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-2.1-2.8v2.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l2.1 2.8V9c0-.3.2-.5.5-.5s.5.2.5.5v4zm3.4-2.6c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v1h1.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2c-.3 0-.5-.2-.5-.5V9c0-.3.2-.5.5-.5h2c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v1h1.5z"/></svg>';
 const KK='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>';
 const LINE_ON=false; // LINE 로그인: Supabase custom:line 등록 후 true (B1)
-const BOOKS={jhn:{ko:'요한복음서',ja:'ヨハネの福音書',ks:'요한복음서',js:'ヨハネ',yv:'JHN'},'1jn':{ko:'요한1서',ja:'ヨハネの手紙Ⅰ',ks:'요한1서',js:'Ⅰヨハネ',yv:'1JN'}};
+const BOOKS={jhn:{ko:'요한복음서',ja:'ヨハネの福音書',ks:'요한복음서',js:'ヨハネ',yv:'JHN',cat:'gos',ab:'요',jab:'ヨハ'},'1jn':{ko:'요한1서',ja:'ヨハネの手紙Ⅰ',ks:'요한1서',js:'Ⅰヨハネ',yv:'1JN',cat:'gen',ab:'요일',jab:'Ⅰヨ'}};
+const CATS=[['gos','복음서','福音書'],['his','역사서','歴史書'],['pau','바울서신','パウロ書簡'],['gen','공동서신','公同書簡'],['pro','예언서','預言書']]; // 책 고르기 묶음 — BOOKS.cat
 const CHAPS=[['jhn',1],['jhn',2],['1jn',1]]; // 올라간 장 목록 — 새 장 업로드 후 여기 한 줄
 const chapIdx=()=>CHAPS.findIndex(([b,c])=>b===book&&c===ch);
 const bname=b=>LANG==='ja'?b.ja:b.ko;
@@ -211,6 +227,7 @@ let LANG='ko';try{LANG=localStorage.getItem('jpbible-lang')||((navigator.languag
 const L=(ko,ja)=>LANG==='ja'?ja:ko;
 let sb=null,user=null,KJ={},U=[],WD=[],book='jhn',ch=1,cur=0,furi=true,acol=true,asel=0;
 let P={rd:{},srs:{},words:{},sent:{},log:{}};
+let IDX=null,bkB=null,bkC=null; // 책·장 고르기 시트
 try{const s=JSON.parse(localStorage.getItem('jpbible-pref')||'{}');furi=s.furi!==false;acol=s.acol!==false;cur=s.cur||0;if(s.book&&CHAPS.some(([b,c])=>b===s.book&&c===s.ch)){book=s.book;ch=s.ch}}catch(e){}
 const savePref=()=>{try{localStorage.setItem('jpbible-pref',JSON.stringify({furi,cur,acol,book,ch}))}catch(e){}};
 
@@ -418,11 +435,11 @@ function renderHome(){refreshToday();const m=user?(user.user_metadata||{}):{};co
   const nxt=U.findIndex(u=>!P.rd[uid(u)]);
   $('home').innerHTML=`<div class="hi">${nm?esc(nm)+L(' 님, ','さん、'):''}${L('오늘도 말씀과 함께','今日もみことばと共に')}<small>${bname(BOOKS[book])} ${chs(ch)} · ${rd}/${U.length} ${L('읽음','読了')}</small></div>
     <div class="st3"><div class="st"><b>${rd}</b><span>${L('읽은 절','読んだ節')}</span></div><div class="st"><b style="color:var(--shu)">${due}</b><span>${L('오늘 복습','今日の復習')}</span></div><div class="st"><b style="color:var(--ai)">${streak()}</b><span>${L('연속일','連続日数')}</span></div></div>
-    <div class="ctl"><select id="hch" aria-label="${L('책·장 고르기','書・章を選ぶ')}">${CHAPS.map(([b,c],i)=>`<option value="${i}" ${b===book&&c===ch?'selected':''}>${bname(BOOKS[b])} ${chs(c)}</option>`).join('')}</select></div>
+    <div class="ctl"><button class="btn chb" id="hch" aria-label="${L('책·장 고르기','書・章を選ぶ')}"><span>${bname(BOOKS[book])} ${chs(ch)}</span><span>▾</span></button></div>
     <div class="ctl"><button class="btn pri" id="hgo">${nxt<0?L(ch+'장 다 읽었어요 — 처음부터','第'+ch+'章を読み終えました — 最初から'):L('이어서 읽기 · ','続きを読む · ')+vlabel(U[nxt])}</button>${nxt<0&&chapIdx()<CHAPS.length-1?'<button class="btn" id="hnx">'+L('다음 장 →','次の章 →')+'</button>':''}${due?'<button class="btn" id="hrv">'+L('복습','復習')+' ('+due+')</button>':''}</div>
     <details class="card fold" id="hfold"${fopen()?' open':''}><summary><span>${bname(BOOKS[book])} ${chs(ch)}</span><small>${rd}/${U.length}</small></summary><div class="vgrid">${U.map((u,i)=>`<button class="${P.rd[uid(u)]?'r':''} ${i===cur?'cur':''}" data-i="${i}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}</button>`).join('')}</div></details>
     <div class="card"><h3>${L('익힌 것','学んだもの')}</h3><div>${L('한자','漢字')} ${Object.keys(P.srs).length} · ${L('단어','単語')} ${Object.keys(P.words).length} · ${L('문장','文')} ${Object.keys(P.sent).length}</div></div>`;
-  $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};$('hch').onchange=e=>goChapter(+e.target.value);if($('hnx'))$('hnx').onclick=()=>goChapter(chapIdx()+1);if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
+  $('hgo').onclick=()=>{cur=nxt<0?0:nxt;savePref();show('read')};$('hch').onclick=openBk;if($('hnx'))$('hnx').onclick=()=>goChapter(chapIdx()+1);if($('hrv'))$('hrv').onclick=()=>{rm=dueOf(P.srs).length?'k':dueOf(P.words).length?'w':'s';['k','w','s'].forEach(x=>$('rm-'+x).setAttribute('aria-pressed',x===rm));show('rev')};
   $('hfold').ontoggle=e=>{try{localStorage.setItem('jpbible-fold-'+book+ch,e.target.open?'1':'0')}catch(x){}};
   $('home').querySelectorAll('.vgrid button').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;savePref();show('read')})}
 
@@ -437,6 +454,22 @@ function act(){P.log[TODAY]=(P.log[TODAY]||0)+1}
 let pushT=null;
 function save(){try{localStorage.setItem('jpbible-p-'+(user?user.id:'x'),JSON.stringify(P))}catch(e){}
   if(!sb||!user)return;clearTimeout(pushT);pushT=setTimeout(async()=>{await sb.from('bible_progress').upsert({user_id:user.id,...P,updated_at:new Date().toISOString()})},1000)}
+const units=(b,c)=>(IDX||[]).filter(x=>x.book===b&&x.ch===c).sort((x,y)=>x.ord-y.ord);
+async function openBk(){bkB=book;bkC=ch;$('bk').hidden=false;$('bkx').onclick=()=>{$('bk').hidden=true};renderBk();
+  if(!IDX){const r=await sb.from('bible_units').select('id,book,ch,v1,v2,ord');IDX=r.data||[];renderBk()}}
+function renderBk(){const bks=[...new Set(CHAPS.map(x=>x[0]))];
+  if(!CHAPS.some(([b,c])=>b===bkB&&c===bkC))bkC=(CHAPS.find(x=>x[0]===bkB)||CHAPS[0])[1];
+  $('bkt').textContent=L('책·장 고르기','書・章を選ぶ');
+  $('bkl').innerHTML=CATS.map(([k,ko,ja])=>{const bs=bks.filter(b=>BOOKS[b].cat===k);return bs.length?`<div class="bkg">${L(ko,ja)}</div>`+bs.map(b=>`<button class="bkb ${b===bkB?'on':''}" data-b="${b}"><span class="ab">${LANG==='ja'?BOOKS[b].jab:BOOKS[b].ab}</span>${bname(BOOKS[b])}<small>${LANG==='ja'?BOOKS[b].ko:BOOKS[b].ja}</small></button>`).join(''):''}).join('');
+  $('bkm').innerHTML=CHAPS.filter(x=>x[0]===bkB).map(([b,c])=>{const us=units(b,c),n=us.filter(u=>P.rd[uid(u)]).length;return `<button class="bkn ${us.length&&n===us.length?'r':n?'p':''} ${c===bkC?'on':''}" data-c="${c}">${chs(c)}</button>`}).join('');
+  const here=bkB===book&&bkC===ch;
+  $('bkr').innerHTML=units(bkB,bkC).map((u,j)=>`<button class="bkn ${P.rd[uid(u)]?'r':''} ${here&&j===cur?'cur':''}" data-j="${j}">${u.v1}${u.v2!==u.v1?'-'+u.v2:''}${L('절','節')}</button>`).join('')||(IDX?'':`<div class="bkg">…</div>`);
+  $('bks').textContent=bname(BOOKS[bkB])+' '+chs(bkC);$('bkgo').textContent=here?L('닫기','閉じる'):L('이 장 열기','この章を開く');
+  $('bkl').querySelectorAll('[data-b]').forEach(e=>e.onclick=()=>{bkB=e.dataset.b;bkC=-1;renderBk()});
+  $('bkm').querySelectorAll('[data-c]').forEach(e=>e.onclick=()=>{bkC=+e.dataset.c;renderBk()});
+  $('bkr').querySelectorAll('[data-j]').forEach(e=>e.onclick=()=>pickV(+e.dataset.j));
+  $('bkgo').onclick=async()=>{$('bk').hidden=true;if(!here)await goChapter(CHAPS.findIndex(([b,c])=>b===bkB&&c===bkC))}}
+async function pickV(j){const b=bkB,c=bkC;$('bk').hidden=true;if(!(b===book&&c===ch))await goChapter(CHAPS.findIndex(x=>x[0]===b&&x[1]===c));if(b!==book||c!==ch)return;cur=j;savePref();show('read')}
 async function goChapter(i){const [b,c]=CHAPS[i]||CHAPS[0];if(b===book&&c===ch)return;book=b;ch=c;cur=0;savePref();
   const [u,w]=await Promise.all([sb.from('bible_units').select('id,book,ch,v1,v2,ord,jp,toks,ko,al').eq('book',book).eq('ch',ch).order('ord'),
     sb.from('bible_meta').select('data').eq('id',`${book}.${ch}.words`).maybeSingle()]);
