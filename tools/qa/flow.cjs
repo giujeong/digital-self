@@ -26,6 +26,22 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
       if(nx)nx.click();return{vis,hasNext:!!nx,after:rv.querySelectorAll('.opt').length,lock:rv.dataset.lock}});
     ok('한자 복습: 답 고른 뒤 피드백이 보임',r.vis,JSON.stringify(r));ok('한자 복습: 다음 → 새 문제',r.hasNext&&r.after>0&&r.lock==='0');
     ok('한자: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
+  // ── 부수 한자: 복습 평가 — 답이 유형별로 기록 → 약점·강점 판정 → 제안 버튼이 그 유형만 냄
+  {const [p,errs]=await page();await p.goto(base+'/kanji/');await p.waitForFunction(()=>typeof D!=='undefined'&&D);
+    const r=await p.evaluate(()=>{ST={h:{},d:{},ses:[]};
+      ST.h.reading=Array(12).fill(0).map((_,i)=>i%3?0:1);ST.h.meaning=Array(12).fill(1);ST.h.char=Array(12).fill(1).map((x,i)=>i%5?1:0);
+      const lv={reading:stLevel('reading'),meaning:stLevel('meaning'),paper:stLevel('paper')};
+      const c={};for(let i=0;i<400;i++){const k=stPick(['meaning','reading','char','reading']);c[k]=(c[k]||0)+1}
+      show('home');const btn=document.querySelector('#home [data-focus="reading"]');const hasCard=!!document.querySelector('#home .ev');
+      if(btn)btn.click();const types=new Set();queue.forEach(ch=>types.add(makeQ(ch,1).type));const q=Q&&Q.type;const n0=(ST.h.reading||[]).length;
+      document.querySelector('#rv .opt').click();document.getElementById('rvnx').click();
+      return{lv,c,hasCard,btn:!!btn,q,types:[...types],rec:(ST.h.reading||[]).length-n0,hard:stHard('meaning')}});
+    ok('복습 평가: 약점·강점·보류 판정',r.lv.reading==='weak'&&r.lv.meaning==='strong'&&r.lv.paper==='wait',JSON.stringify(r.lv));
+    ok('복습 평가: 약한 유형이 더 자주 나옴',r.c.reading/400>0.6,JSON.stringify(r.c));
+    ok('복습 평가: 대시보드 카드·제안 버튼',r.hasCard&&r.btn);
+    ok('복습 평가: 집중 연습은 그 유형만, 답이 기록됨',r.q==='reading'&&r.types.join()==='reading'&&r.rec===1,JSON.stringify({q:r.q,types:r.types,rec:r.rec}));
+    ok('복습 평가: 강점 유형은 강화',r.hard===true);
+    ok('복습 평가: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
   // ── jpbible: 책·장·절 고르기 — 열림 → 책 바꾸면 장·절이 그 책으로
   {const [p,errs]=await page();await p.goto(base+'/bible/');await p.waitForTimeout(600);
     const r=await p.evaluate(()=>{IDX=[];CHAPS.forEach(([b,c])=>{for(let v=1;v<=3;v++)IDX.push({id:b+'.'+c+'.'+v,book:b,ch:c,v1:v,v2:v,ord:v})});

@@ -327,6 +327,16 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .hm-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hm-btns .btn{padding:12px 0;font-size:14px}.hm-btns .btn.pri{grid-column:1/-1;font-size:16px}
 .hm-jl{display:grid;grid-template-columns:30px 1fr 52px;gap:6px;align-items:center;font-size:12px;margin:5px 0}
 .hm-jl .t{height:8px;background:var(--ghost);border-radius:4px;overflow:hidden}.hm-jl .t i{display:block;height:100%;background:var(--koke)}
+.ev-g{font-size:12px;color:var(--muted);margin:8px 0 2px}
+.ev-r{display:grid;grid-template-columns:86px 1fr 40px;gap:4px 8px;align-items:center;font-size:14px;margin:6px 0}
+.ev-r .t{height:10px;background:var(--ghost);border-radius:5px;overflow:hidden}.ev-r .t i{display:block;height:100%;background:var(--koke)}
+.ev-r.lv-weak .t i{background:var(--hot)}.ev-r.lv-strong .t i{background:var(--ai)}.ev-r b{text-align:right;font-size:14px}
+.ev-r small{grid-column:2/4;font-size:12px;color:var(--muted);margin-top:-3px}.ev-r small:empty{display:none}
+.ev-r em{font-style:normal;margin-left:4px;padding:1px 7px;border-radius:9px;font-size:11.5px}
+.ev-r em.x{background:var(--rad);color:var(--hot)}.ev-r em.s{background:color-mix(in srgb,var(--ai) 15%,transparent);color:var(--ai)}.ev-r em.w{background:var(--ghost)}
+.ev-tip{margin:0;padding-left:18px;font-size:14px;line-height:1.55}.ev-tip li{margin:6px 0}.ev-tip .btn{margin-left:4px;padding:6px 12px;min-height:36px;font-size:13px}
+.ev-ses td,.ev-ses th{font-size:12.5px;white-space:nowrap}
+.ev-hard{display:inline-block;font-size:12px;color:var(--ai);border:1px solid var(--ai);border-radius:10px;padding:1px 9px;margin-bottom:6px}
 .hm-ls{display:flex;flex-wrap:wrap;gap:6px}
 .hm-ls button{font-family:var(--f-kanji);font-size:20px;width:40px;height:40px;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink);position:relative;padding:0;cursor:pointer;overflow:hidden}
 .hm-ls button i{position:absolute;left:0;bottom:0;height:3px;background:var(--koke)}
@@ -540,6 +550,31 @@ let KSR={};try{KSR=JSON.parse(localStorage.getItem('busu-kana-v1')||'{}')||{}}ca
 let LOG={};try{LOG=JSON.parse(localStorage.getItem('busu-kanji-log-v1')||'{}')||{}}catch(e){LOG={}}
 function act(){const d=(typeof iso==='function')?iso(new Date()):new Date().toISOString().slice(0,10);LOG[d]=(LOG[d]||0)+1;LOG.at=new Date().toISOString();try{localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}}
 function save(){act();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};push()}
+/* ---------- 복습 평가 (유형별 약점·강점) ----------
+   기록: 유형별 최근 40개 정오 · 날짜별 합계 · 세션 요약(최근 60).
+   추정: 최근 20개를 최근일수록 무겁게(0.9^k) + Beta(1,1) → 정답 확률. 8개 미만은 '판단 보류'
+   선택: 기본 비율 × (0.35 + 2×(1−추정)) — 약한 유형을 더 자주. 추정 ≥ .85 이면 '강화'(어려운 형태)
+   근거: 가상 학습자 400명 30일 비교(11-04) — 최약 유형 .716→.755, 강한 유형 .924→.946 */
+const RT={meaning:'뜻 고르기',char:'글자 고르기',reading:'예문 읽기',paper:'안 보고 쓰기',w_mean:'단어 뜻',w_read:'단어 읽기',w_cloze:'문장 빈칸'};
+const RT_K=['meaning','char','reading','paper'],RT_W=['w_mean','w_read','w_cloze'],RT_MIN=8,RT_STRONG=.85;
+let ST={h:{},d:{},ses:[]};try{ST=Object.assign({h:{},d:{},ses:[]},JSON.parse(localStorage.getItem('busu-kanji-stats-v1')||'{}')||{})}catch(e){}
+let SES=null;
+function stEst(k){const h=ST.h[k]||[];let a=1,b=1,w=1;for(let i=h.length-1,j=0;i>=0&&j<20;i--,j++){a+=w*h[i];b+=w*(1-h[i]);w*=.9}return{p:a/(a+b),n:h.length}}
+function stTrend(k){const h=ST.h[k]||[];if(h.length<16)return 0;const a=h.slice(-8),b=h.slice(-16,-8);const s=x=>x.reduce((u,v)=>u+v,0)/x.length;return s(a)-s(b)}
+function stRec(k,ok){const h=ST.h[k]||(ST.h[k]=[]);h.push(ok?1:0);if(h.length>40)h.shift();
+  const d=iso(new Date());const dd=ST.d[d]||(ST.d[d]={});const x=dd[k]||(dd[k]=[0,0]);x[0]++;if(ok)x[1]++;
+  if(SES){SES.n++;if(ok)SES.ok++;const y=SES.by[k]||(SES.by[k]=[0,0]);y[0]++;if(ok)y[1]++}
+  stSave()}
+function stSave(){try{localStorage.setItem('busu-kanji-stats-v1',JSON.stringify(ST))}catch(e){}}
+function sesStart(m,prac,focus){SES={at:new Date().toISOString(),m,prac:!!prac,focus:focus||null,n:0,ok:0,by:{}}}
+function sesEnd(){if(SES&&SES.n){ST.ses.push(SES);if(ST.ses.length>60)ST.ses.shift();stSave();push()}SES=null}
+function stHard(k){const e=stEst(k);return e.n>=RT_MIN&&e.p>=RT_STRONG&&k!=='paper'}
+function stPick(kinds){const c={};kinds.forEach(k=>c[k]=(c[k]||0)+1);const ks=Object.keys(c);
+  const ws=ks.map(k=>{const e=stEst(k);return c[k]*(e.n<RT_MIN?1:(.35+2*(1-e.p)))});let r=Math.random()*ws.reduce((a,b)=>a+b,0);
+  for(let i=0;i<ks.length;i++){r-=ws[i];if(r<=0)return ks[i]}return ks[ks.length-1]}
+function stLevel(k){const e=stEst(k);if(e.n<RT_MIN)return'wait';const all=[...RT_K,...RT_W].map(stEst).filter(x=>x.n>=RT_MIN);
+  const m=all.reduce((a,x)=>a+x.p,0)/all.length;if(e.p>=RT_STRONG)return'strong';if(e.p<m-.08||e.p<.65)return'weak';return'ok'}
+let FOCUS=null;
 /* ---------- 계정·동기화 (Supabase + 카카오) ---------- */
 const SB_URL='https://qfypowruejziftranphu.supabase.co',SB_KEY='sb_publishable_ydyXHH4TPkBbMaWhgrZqKg_ZEboa29J';
 let sb=null,user=null,pushT=null,syncMsg='';
@@ -561,13 +596,13 @@ const recT=r=>r?(r.last||r.start||''):'';
 function mergeS(a,b){const o={...a};for(const k in b){const x=o[k],y=b[k];if(!x||recT(y)>recT(x)||(recT(y)===recT(x)&&(y.stage||0)>=(x.stage||0)))o[k]=y}return o}
 let pulling=false,pulledOnce=false;
 async function pull(){if(pulling)return;pulling=true;setSync('불러오는 중…');
-  const {data,error}=await sb.from('progress').select('srs,know,log,kana,words').eq('user_id',user.id).maybeSingle();
+  const {data,error}=await sb.from('progress').select('srs,know,log,kana,words,stats').eq('user_id',user.id).maybeSingle();
   pulling=false;pulledOnce=true;if(error){setSync('불러오기 실패');return}
   if(data){S=mergeS(data.srs||{},S);KN={...(data.know||{}),...KN};KSR=mergeS(data.kana||{},KSR);WS=mergeS(data.words||{},WS);try{localStorage.setItem('busu-kanji-words-v1',JSON.stringify(WS))}catch(e){};try{localStorage.setItem('busu-kana-v1',JSON.stringify(KSR))}catch(e){};const g=data.log||{};for(const k in g){if(k==='at'){if(!LOG.at||g.at>LOG.at)LOG.at=g.at}else if(k==='tour'){LOG.tour=[...new Set(((LOG.tour||'')+','+(g.tour||'')).split(',').filter(Boolean))].join(',')}else LOG[k]=Math.max(LOG[k]||0,g[k]||0)}}
   try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('busu-kanji-know-v1',JSON.stringify(KN));localStorage.setItem('busu-kanji-log-v1',JSON.stringify(LOG))}catch(e){}
   await push(true);if(typeof renderAll==='function'&&curL)renderAll();if(view==='home')renderHome();if(view==='kana')renderKana();if(view==='review'&&!Q)renderReview();if(typeof tourMaybe==='function')tourMaybe(view)}
 function push(now){if(!sb||!user)return;clearTimeout(pushT);
-  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,kana:KSR,words:WS,updated_at:new Date().toISOString()});
+  const go=async()=>{setSync('저장 중…');const {error}=await sb.from('progress').upsert({user_id:user.id,srs:S,know:KN,log:LOG,kana:KSR,words:WS,stats:ST,updated_at:new Date().toISOString()});
     setSync(error?'저장 실패 — 다음 기록 때 다시 시도':'저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}))};
   if(now)return go();pushT=setTimeout(go,1200)}
 function sbInit(){try{if(!window.supabase)return;
@@ -786,23 +821,25 @@ function pool(ch){const h=D.chars[ch].hun,seenH=new Set([h]);const l=lessonOf(ch
   return shuffle(same).concat(shuffle(other)).filter(x=>{const hx=D.chars[x].hun;if(seenH.has(hx))return false;seenH.add(hx);return true})}
 function makeQ(ch,stage){
   const c=D.chars[ch];
-  if(stage>=4)return{type:'paper',ch};
+  if(stage>=4||FOCUS==='paper')return{type:'paper',ch};
   const kinds=stage<=1?['meaning','reading','char','reading']:['reading','reading','char','reading'];
-  const k=kinds[Math.floor(Math.random()*kinds.length)];
-  if(k==='meaning'){const ds=pool(ch).slice(0,3).map(x=>D.chars[x].hun);return{type:k,ch,ans:c.hun,opts:shuffle([c.hun,...ds])}}
-  if(k==='char'){const ds=pool(ch).slice(0,3);return{type:k,ch,ans:ch,opts:shuffle([ch,...ds])}}
+  const k=FOCUS&&RT_K.includes(FOCUS)&&FOCUS!=='paper'?FOCUS:stPick(kinds);
+  const hard=stHard(k),near=()=>{const l=lessonOf(ch);const same=l.chars.filter(x=>x!==ch&&D.chars[x].hun!==c.hun);return same.length>=3?shuffle(same).slice(0,3):pool(ch).slice(0,3)};
+  if(k==='meaning'){const ds=(hard?near():pool(ch).slice(0,3)).map(x=>D.chars[x].hun);return{type:k,ch,hard,ans:c.hun,opts:shuffle([c.hun,...ds])}}
+  if(k==='char'){const ds=hard?near():pool(ch).slice(0,3);return{type:k,ch,hard,ans:ch,opts:shuffle([ch,...ds])}}
   if(!c.ex.length){const ds=pool(ch).slice(0,3);return{type:'char',ch,ans:ch,opts:shuffle([ch,...ds])}}
   const e=c.ex[Math.floor(Math.random()*c.ex.length)];
   const mine=[...c.on,...c.kun].filter(r=>r!==e.r);
   const l=lessonOf(ch);let sib=[];l.chars.filter(x=>x!==ch).forEach(x=>sib.push(...D.chars[x].on,...D.chars[x].kun));
   const ds=[...new Set(shuffle(mine).concat(shuffle(sib)))].filter(r=>r!==e.r).slice(0,3);
-  return{type:'reading',ch,ex:e,ans:e.r,opts:shuffle([e.r,...ds])};
+  return{type:'reading',ch,ex:e,hard:stHard('reading'),ans:e.r,opts:shuffle([e.r,...ds])};
 }
 let queue=[],Q=null,practice=false,done=0;
-function startReview(prac){practice=prac;queue=prac?shuffle(curL.chars):shuffle(dueList());done=0;next()}
-function next(){Q=queue.length?makeQ(queue[0],practice?Math.floor(Math.random()*4):S[queue[0]].stage):null;renderReview()}
+function focusPool(k){let c=Object.keys(S).length>=4?Object.keys(S):curL.chars;if(k==='reading'){const e=c.filter(x=>D.chars[x].ex.length);c=e.length>=4?e:Object.keys(D.chars).filter(x=>D.chars[x].ex.length&&(S[x]||curL.chars.includes(x)))}return shuffle(c).slice(0,10)}
+function startReview(prac,focus){practice=prac;FOCUS=focus||null;queue=focus?focusPool(focus):prac?shuffle(curL.chars):shuffle(dueList());done=0;sesStart('k',prac,focus);next()}
+function next(){Q=queue.length?makeQ(queue[0],practice?Math.floor(Math.random()*4):S[queue[0]].stage):null;if(!Q){sesEnd();FOCUS=null}renderReview()}
 function grade(ok){
-  const ch=queue.shift();done++;setKnow(ch,ok);
+  const ch=queue.shift();done++;if(Q)stRec(Q.type,ok);setKnow(ch,ok);
   if(!practice){const s=S[ch];
     if(ok){s.stage++;s.last=TODAY;if(s.stage>=5){s.due=null}else{s.due=addDays(TODAY,IVL[s.stage])}}
     else{s.stage=0;s.start=TODAY;s.last=TODAY;s.due=TODAY;queue.push(ch)}
@@ -828,7 +865,7 @@ function renderReview(){
   }
   const c=D.chars[Q.ch];
   const st=practice?null:S[Q.ch].stage;
-  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${practice?'연습':'남은 '+queue.length}</span></div>`;
+  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${practice?(FOCUS?RT[FOCUS]+' 집중 · '+queue.length:'연습'):'남은 '+queue.length}</span></div>`;
   if(Q.type==='paper'){
     rv.innerHTML=head+`<div class="q"><div class="ql">종이에 안 보고 써 보세요</div><div class="qt">${esc(c.hun)}</div><div class="qs">${[...c.on.map(rdTxt),...c.kun].join(' · ')}</div></div>
       <div class="paper" id="pp"><button class="btn pri" id="reveal">정답 보기</button></div>`;
@@ -840,7 +877,8 @@ function renderReview(){
   let q='';
   if(Q.type==='meaning')q=`<div class="ql">이 글자의 뜻은?</div><div class="qk">${Q.ch}</div>`;
   if(Q.type==='char')q=`<div class="ql">이 뜻의 글자는?</div><div class="qt">${esc(c.hun)}</div>`;
-  if(Q.type==='reading')q=`<div class="ql">표시한 글자를 어떻게 읽을까요?</div><div class="qs">${esc(Q.ex.jp).split(Q.ch).join('<mark>'+Q.ch+'</mark>')}</div><div class="ql">${esc(Q.ex.ko)}</div>`;
+  if(Q.type==='reading')q=`<div class="ql">표시한 글자를 어떻게 읽을까요?</div><div class="qs">${esc(Q.ex.jp).split(Q.ch).join('<mark>'+Q.ch+'</mark>')}</div>${Q.hard?'':`<div class="ql">${esc(Q.ex.ko)}</div>`}`;
+  if(Q.hard)q=`<div class="ev-hard">강화 · ${RT[Q.type]}${Q.type==='reading'?' — 뜻 힌트 없이':' — 같은 계열 글자 사이에서'}</div>`+q;
   const cls=Q.type==='char'?'k':(Q.type==='reading'?'ja':'');
   rv.innerHTML=head+`<div class="q">${q}</div><div class="opts">${Q.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(Q.type==='reading'?rdTxt(o):o)}</button>`).join('')}</div><div class="fb" id="rvfb"></div>`;
   rv.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
@@ -973,11 +1011,31 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${nextCh&&(lastCh||learned.length)?'이어서 익히기 · '+nextCh:nextCh?'익히기 시작':'모두 익혔어요 — 한판으로'}</button><button class="btn" id="hmbd">한판</button></div>
   <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
   <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>
-  <div class="hm-card fb" id="fb"></div>`;renderFB();
+  ${rtCard()}
+  <div class="hm-card fb" id="fb"></div>`;renderFB();rtBind(el);
   $('hmrv').onclick=()=>{if(due){rvMode='kanji';show('review')}else if(wd){rvMode='words';show('review')}else show('board')};
   $('hmgo').onclick=()=>{if(!nextCh){show('board');return}show('learn');goChar(nextCh)};
   $('hmbd').onclick=()=>show('board');
   el.querySelectorAll('.hm-ls button').forEach(b=>b.onclick=()=>{const l=D.lessons[+b.dataset.i];curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})})}
+function rtCard(){const rows=t=>t.map(k=>{const e=stEst(k),lv=stLevel(k),tr=stTrend(k);const pct=Math.round(e.p*100);
+    const tag={wait:`<em class="w">판단 보류 ${e.n}/${RT_MIN}</em>`,weak:'<em class="x">약점</em>',strong:'<em class="s">강점 · 강화 중</em>',ok:''}[lv];
+    return `<div class="ev-r lv-${lv}"><span>${RT[k]}</span><div class="t"><i style="width:${lv==='wait'?0:pct}%"></i></div><b>${lv==='wait'?'—':pct+'%'}</b><small>${tr>.12?'▲':tr<-.12?'▼':''}${tag}</small></div>`}).join('');
+  const any=[...RT_K,...RT_W].some(k=>(ST.h[k]||[]).length);
+  const weak=[...RT_K,...RT_W].filter(k=>stLevel(k)==='weak').sort((a,b)=>stEst(a).p-stEst(b).p);
+  const strong=[...RT_K,...RT_W].filter(k=>stLevel(k)==='strong');
+  const wait=[...RT_K,...RT_W].filter(k=>stLevel(k)==='wait'&&(ST.h[k]||[]).length);
+  const tips=[];
+  weak.slice(0,2).forEach(k=>tips.push({t:`<b>${RT[k]}</b>가 약해요 (최근 ${Math.round(stEst(k).p*100)}%). 복습에서 더 자주 나오게 했어요 — 10문제만 따로 해 볼까요?`,k}));
+  if(strong.length)tips.push({t:`<b>${strong.map(k=>RT[k]).join(' · ')}</b>는 강해요. 이제 비슷한 글자 사이에서 고르고 뜻 힌트를 빼서 더 단단하게 만들어요.`});
+  if(wait.length&&tips.length<3)tips.push({t:`${wait.map(k=>RT[k]).join(' · ')}는 아직 답이 적어 판단을 미뤘어요 (유형마다 ${RT_MIN}개부터).`});
+  if(!any)tips.push({t:'복습을 하면 유형마다 정답률이 쌓여 약한 곳과 강한 곳을 알려 드려요.'});
+  const ses=ST.ses.slice(-6).reverse().map(s=>{const a=new Date(s.at);const wk=Object.keys(s.by).filter(k=>s.by[k][0]>=2).sort((x,y)=>s.by[x][1]/s.by[x][0]-s.by[y][1]/s.by[y][0])[0];
+    return `<tr><td>${a.getMonth()+1}/${a.getDate()}</td><td>${s.focus?RT[s.focus]+' 집중':(s.m==='w'?'단어':'한자')+(s.prac?' 연습':'')}</td><td title="${s.ok}/${s.n}">${Math.round(s.ok/s.n*100)}%</td><td>${wk?RT[wk]:'—'}</td></tr>`}).join('');
+  return `<div class="hm-card ev"><div class="hm-h">복습 평가 · 유형별 최근 20문제</div>
+    <div class="ev-g">한자</div>${rows(RT_K)}<div class="ev-g">단어</div>${rows(RT_W)}
+    <div class="hm-h" style="margin-top:12px">학습 제안</div><ul class="ev-tip">${tips.map(x=>`<li>${x.t}${x.k?` <button class="btn" data-focus="${x.k}">${RT[x.k]} 10문제</button>`:''}</li>`).join('')}</ul>
+    ${ses?`<div class="hm-h" style="margin-top:12px">평가 기록 (최근)</div><div style="overflow-x:auto"><table class="sched ev-ses"><thead><tr><th>언제</th><th>무엇</th><th>정답</th><th>약했던 유형</th></tr></thead><tbody>${ses}</tbody></table></div>`:''}</div>`}
+function rtBind(el){el.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{const k=b.dataset.focus;if(RT_W.includes(k)){rvMode='words';show('review');wStart(true,k)}else{rvMode='kanji';show('review');startReview(true,k)}})}
 $('tab-home').onclick=()=>show('home');
 $('gkk').innerHTML=KK+'카카오로 시작하기';$('gkk').onclick=()=>{if(sb)login()};
 $('gguest').onclick=()=>{try{localStorage.setItem('busu-guest','1')}catch(e){};$('gate').hidden=true;show('home')};
@@ -992,16 +1050,17 @@ function wNew(){return wActive().filter(w=>!WS[wKey(w)]).slice(0,W_NEW)}
 function wSave(){try{localStorage.setItem('busu-kanji-words-v1',JSON.stringify(WS))}catch(e){};act();push();updBadge()}
 function wSent(w){const [ch,ei]=w.in[0];const e=D.chars[ch].ex[ei];return e}
 function wMake(w){const st=WS[wKey(w)]?WS[wKey(w)].stage:0;const all=D.words.filter(x=>x!==w);
-  const kinds=st<=1?['mean','read']:['cloze','read','mean'];let k=kinds[Math.floor(Math.random()*kinds.length)];
+  const kinds=st<=1?['mean','read']:['cloze','read','mean'];let k=FOCUS&&RT_W.includes(FOCUS)?FOCUS.slice(2):stPick(kinds.map(x=>'w_'+x)).slice(2);
   const e=wSent(w);if(k==='cloze'&&!e.jp.includes(w.w))k='mean';
   const near=all.filter(x=>[...w.w].some(c=>/[㐀-鿿]/.test(c)&&x.w.includes(c)));
   const pick=(f)=>{const seen=new Set([f(w)]);const o=[];for(const x of shuffle(near).concat(shuffle(all))){const v=f(x);if(!seen.has(v)){seen.add(v);o.push(v)}if(o.length===3)break}return o};
-  if(k==='mean')return{type:'mean',w,e,ans:w.ko,opts:shuffle([w.ko,...pick(x=>x.ko)])};
-  if(k==='read')return{type:'read',w,e,ans:w.r,opts:shuffle([w.r,...pick(x=>x.r)])};
-  return{type:'cloze',w,e,ans:w.w,opts:shuffle([w.w,...pick(x=>x.w)])}}
-function wStart(prac){wPrac=prac;const d=wDue(),n=wNew();wQueue=prac?shuffle(wActive()).slice(0,20):shuffle(d.concat(n));wDone=0;wNext()}
-function wNext(){wQ=wQueue.length?wMake(wQueue[0]):null;renderWords()}
-function wGrade(ok){const w=wQueue.shift();wDone++;
+  const hard=stHard('w_'+k);const pk=hard&&near.length>=3?(f=>{const seen=new Set([f(w)]);const o=[];for(const x of shuffle(near)){const v=f(x);if(!seen.has(v)){seen.add(v);o.push(v)}if(o.length===3)break}return o.length===3?o:pick(f)}):pick;
+  if(k==='mean')return{type:'mean',w,e,hard,ans:w.ko,opts:shuffle([w.ko,...pk(x=>x.ko)])};
+  if(k==='read')return{type:'read',w,e,hard,ans:w.r,opts:shuffle([w.r,...pk(x=>x.r)])};
+  return{type:'cloze',w,e,hard,ans:w.w,opts:shuffle([w.w,...pk(x=>x.w)])}}
+function wStart(prac,focus){wPrac=prac;FOCUS=focus||null;const d=wDue(),n=wNew();wQueue=focus?shuffle(wActive()).slice(0,10):prac?shuffle(wActive()).slice(0,20):shuffle(d.concat(n));wDone=0;sesStart('w',prac,focus);wNext()}
+function wNext(){wQ=wQueue.length?wMake(wQueue[0]):null;if(!wQ){sesEnd();FOCUS=null}renderWords()}
+function wGrade(ok){const w=wQueue.shift();wDone++;if(wQ)stRec('w_'+wQ.type,ok);
   if(!wPrac){const k=wKey(w);const s=WS[k]||(WS[k]={stage:0,start:TODAY,last:TODAY,due:TODAY});
     if(ok){s.stage++;s.last=TODAY;s.due=s.stage>=5?null:addDays(TODAY,IVL[s.stage])}else{s.stage=0;s.last=TODAY;s.due=TODAY;wQueue.push(w)}wSave()}
   else if(!ok)wQueue.push(w);wNext()}
@@ -1018,11 +1077,12 @@ function renderWords(){const el=$('wv');refreshToday();
       ${rows?`<div class="sec-h" style="margin-top:14px">단어장 · ${act.length}개 (익힌 한자 기준)</div><div style="overflow-x:auto"><table class="sched wt"><thead><tr><th>단어</th><th>뜻</th><th>단계</th><th>다음</th></tr></thead><tbody>${rows}</tbody></table></div>`:''}`;
     if($('wgo'))$('wgo').onclick=()=>wStart(false);if($('wprac'))$('wprac').onclick=()=>wStart(true);return}
   const st=wPrac?null:(WS[wKey(wQ.w)]?WS[wKey(wQ.w)].stage:0);
-  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${wPrac?'연습':'남은 '+wQueue.length}</span></div>`;
+  const head=`<div class="ivl">${IVL_L.map((x,i)=>`<span class="${st===i?'cur':''}">${x}</span>`).join('')}<span style="margin-left:auto;border:0">${wPrac?(FOCUS?RT[FOCUS]+' 집중 · '+wQueue.length:'연습'):'남은 '+wQueue.length}</span></div>`;
   let q='';const e=wQ.e;
   if(wQ.type==='mean')q=`<div class="ql">이 단어의 뜻은?</div><div class="qw">${esc(wQ.w.w)}<small>${esc(wQ.w.r)}</small></div>`;
-  if(wQ.type==='read')q=`<div class="ql">이 단어를 어떻게 읽을까요?</div><div class="qw">${esc(wQ.w.w)}</div><div class="ql">${esc(wQ.w.ko)}</div>`;
-  if(wQ.type==='cloze')q=`<div class="ql">빈칸에 들어갈 단어는?</div><div class="qs">${esc(e.jp).split(wQ.w.w).join('<mark>＿＿</mark>')}</div><div class="ql">${esc(e.ko)}</div>`;
+  if(wQ.type==='read')q=`<div class="ql">이 단어를 어떻게 읽을까요?</div><div class="qw">${esc(wQ.w.w)}</div>${wQ.hard?'':`<div class="ql">${esc(wQ.w.ko)}</div>`}`;
+  if(wQ.type==='cloze')q=`<div class="ql">빈칸에 들어갈 단어는?</div><div class="qs">${esc(e.jp).split(wQ.w.w).join('<mark>＿＿</mark>')}</div>${wQ.hard?'':`<div class="ql">${esc(e.ko)}</div>`}`;
+  if(wQ.hard)q=`<div class="ev-hard">강화 · ${RT['w_'+wQ.type]} — 같은 한자 단어 사이에서${wQ.type==='mean'?'':', 뜻 힌트 없이'}</div>`+q;
   const cls=wQ.type==='cloze'?'ja':(wQ.type==='read'?'ja':'');
   el.innerHTML=head+`<div class="q">${q}</div><div class="opts">${wQ.opts.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="wfb"></div>`;
   el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(el.dataset.lock==='1')return;el.dataset.lock='1';const ok=wQ.opts[+b.dataset.i]===wQ.ans;
