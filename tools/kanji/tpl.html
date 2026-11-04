@@ -636,6 +636,8 @@ const lessonOf=ch=>D.lessons.find(l=>l.chars.includes(ch));
 function svgOf(strokes,upto,opt={}){
   const s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 109 109');
   const sw=opt.sw||4;
+  if(opt.grid!==false){const G=[];[28.25,80.75].forEach(v=>{G.push([v,2,v,107,.35],[2,v,107,v,.35])});G.push([54.5,2,54.5,107,.6],[2,54.5,107,54.5,.6],[2,2,107,107,.4],[107,2,2,107,.4]);
+    G.forEach(([a,b,c,d,w])=>{const l=document.createElementNS(NS,'line');l.setAttribute('x1',a);l.setAttribute('y1',b);l.setAttribute('x2',c);l.setAttribute('y2',d);l.setAttribute('stroke','var(--line)');l.setAttribute('stroke-width',w);l.setAttribute('class','grid');s.appendChild(l)})}
   if(opt.ghost!==false){strokes.forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','var(--ghost)');p.setAttribute('stroke-width',sw);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');s.appendChild(p)})}
   strokes.forEach((d,i)=>{if(i>upto)return;const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',i===upto&&opt.mark!==false?'var(--shu)':'var(--ink)');p.setAttribute('stroke-width',sw);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');s.appendChild(p)});
   return s;
@@ -786,6 +788,7 @@ function renderRP(){
 }
 function setHdr(){const h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hdr',h.offsetHeight+'px')}
 window.addEventListener('resize',setHdr);window.addEventListener('load',setHdr);setTimeout(setHdr,50);
+function toReads(){const el=$('reads');if(!el)return;const tf=[...document.querySelectorAll('.topfix')].find(x=>x.offsetParent);const h=document.querySelector('header');const off=tf?tf.getBoundingClientRect().bottom:(h?h.offsetHeight:0);const y=el.getBoundingClientRect().top+window.scrollY-off-10;window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
 function renderInfo(){setHdr();
   const c=D.chars[curC];try{localStorage.setItem('busu-kanji-last',curC)}catch(e){}
   const an=c.ant?(D.chars[c.ant]?`<button class="ant" data-go="${c.ant}" title="반의어 ${c.ant} 익히기">↔ <span class="k">${c.ant}</span>${esc(D.chars[c.ant].hun)}</button>`:`<span class="ant off" title="반의어 — 아직 덱에 없어요">↔ <span class="k">${c.ant}</span>${esc(c.anth||'')}</span>`):'';
@@ -793,7 +796,7 @@ function renderInfo(){setHdr();
   $('hun').innerHTML=`${esc(c.hun)}<small>${c.s.length?c.s.length+'획':''}${isHead(curC)?' · 부수':''}</small>${lv}${an}`;$('hun2').innerHTML=$('hun').innerHTML;
   ['hun','hun2'].forEach(id=>$(id).querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goChar(b.dataset.go)));
   $('reads').innerHTML=readsHTML(c,true)||'<span class="radnote">부수·기본자 — 단독으로 읽는 상용 읽기는 없어요</span>';
-  $('reads').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=b.dataset.r;say(isKata(r)?hira(r):r.replace(/[()]/g,''));selR=selR===r?null:r;renderInfo()});
+  $('reads').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=b.dataset.r;say(isKata(r)?hira(r):r.replace(/[()]/g,''));selR=selR===r?null:r;renderInfo();if(selR)toReads()});
   void c.on.map(r=>`<span class="rd on"><em>音</em>${r}</span>`).join('')+c.kun.map(r=>`<span class="rd kun"><em>訓</em>${r}</span>`).join('');
   $('mnimg').innerHTML='';$('mnimg').appendChild(partsSVG(c));
   $('parts').innerHTML=c.pg.map((g,i)=>`<span style="color:${GC[i%3]}">${g[0]}</span>`).join(' + ');$('memo').innerHTML=esc(c.memo)+(c.draft?' <em class="draft">신지 초안</em>':'');$('ill').innerHTML=illSVG(curC);
