@@ -64,8 +64,8 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
     ok('익혔어요 퀴즈: 다 맞히면 복습은 바로 예문부터',r5.rd===1&&r5.ts.every(x=>x==='reading'),JSON.stringify(r5));
     const r6=await p.evaluate(()=>{show('home');renderHome();const b=$('hmwr');b.click();const open=!$('wrov').hidden&&!!$('wrcard').offsetParent,n=WR&&WR.cs.length;const cv=$('wrpad').querySelector('canvas');
       const R=cv.getBoundingClientRect();const ev=(t,x,y)=>cv.dispatchEvent(new PointerEvent(t,{clientX:R.left+x,clientY:R.top+y,pointerId:1,bubbles:true}));ev('pointerdown',20,20);ev('pointermove',120,120);ev('pointerup',120,120);
-      const drawn=WR.strokes.length;$('wrdone').click();const ref=!!$('wrpad').querySelector('svg.ref');const h0=(ST.h.paper||[]).length;$('wry').click();const rec=(ST.h.paper||[]).length===h0+1;wrClose();show('learn');renderAll();return{open,n,drawn,ref,rec,closed:$('wrov').hidden}});
-    ok('써 보기: 홈 버튼 → 손가락으로 쓰기 → 정답 겹쳐 보기 → 기록',r6.open&&r6.n>0&&r6.drawn===1&&r6.ref&&r6.rec&&r6.closed,JSON.stringify(r6));
+      const drawn=WR.strokes.length;const h0=(ST.h.paper||[]).length;$('wrdone').click();const ref=!!$('wrpad').querySelector('svg.ref');const adv=$('wrtools').querySelectorAll('.wr-adv li').length;const rec=(ST.h.paper||[]).length===h0+1;$('wrnx').click();wrClose();show('learn');renderAll();return{open,n,drawn,ref,rec,adv,closed:$('wrov').hidden}});
+    ok('써 보기: 홈 버튼 → 손가락으로 쓰기 → 자동 판정·조언 → 기록',r6.open&&r6.n>0&&r6.drawn===1&&r6.ref&&r6.rec&&r6.adv>0&&r6.closed,JSON.stringify(r6));
     const r3=await p.evaluate(()=>{const ch=curC;delete S[ch];renderAll();const b=$('learnmute');const vis=!!b.offsetParent;b.click();const m=LQ&&LQ.mute;const head=$('lqcard').textContent.includes('🔇');lqClose();return{vis,m,head}});
     ok('익혔어요 퀴즈: 🔇 소리 없이 버튼 → 무음 퀴즈',r3.vis&&r3.m&&r3.head,JSON.stringify(r3));
     ok('익혔어요 퀴즈: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}

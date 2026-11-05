@@ -272,6 +272,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .lrow{display:inline-flex;gap:6px;align-items:stretch}.btn.mute{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px}
 .wr-pad{position:relative;width:min(280px,78vw);aspect-ratio:1;margin:10px auto;border:1px solid var(--rule);background:var(--paper);border-radius:2px;touch-action:none}
 .wr-pad>svg,.wr-pad>canvas{position:absolute;inset:0;width:100%;height:100%}.wr-pad .ref{opacity:.55;pointer-events:none}
+.wr-tools .acts{flex-basis:100%;margin-top:8px}.wr-adv{flex-basis:100%;margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.5;text-align:left}.wr-adv li{margin:3px 0}
 .wr-tools{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.wr-cnt{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
 .lq-msg{margin-top:12px;font-weight:700;text-align:center}.lq-note{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
@@ -877,6 +878,42 @@ let WR=null;
 function wrPick(n){const hasS=x=>D.chars[x]&&D.chars[x].s&&D.chars[x].s.length&&!D.chars[x].rad;
   let pool=Object.keys(S).filter(hasS);if(pool.length<n)pool=pool.concat(curL.chars.filter(x=>hasS(x)&&!pool.includes(x)));
   const miss=pool.filter(x=>S[x]&&S[x].miss),rest=shuffle(pool.filter(x=>!miss.includes(x)));return shuffle(miss).concat(rest).slice(0,n)}
+/* 쓴 획 판정 — KanjiVG 정답 획과 비교: 획 수 → 순서 → 방향 → 위치(시작·끝·중심) → 전체 균형. 단위는 109칸 격자, 4×4 한 칸 ≈ 26 */
+function wrSample(pts,n){if(pts.length<2)return pts.length?Array(n).fill(pts[0]):[];const d=[0];for(let i=1;i<pts.length;i++)d.push(d[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));const L=d[d.length-1]||1,o=[];let k=0;
+  for(let s=0;s<n;s++){const t=L*s/(n-1);while(k<d.length-2&&d[k+1]<t)k++;const u=(t-d[k])/((d[k+1]-d[k])||1);o.push([pts[k][0]+(pts[k+1][0]-pts[k][0])*u,pts[k][1]+(pts[k+1][1]-pts[k][1])*u])}return o}
+function wrRefPts(d){const p=document.createElementNS(NS,'path');p.setAttribute('d',d);const s=document.createElementNS(NS,'svg');s.style.cssText='position:absolute;width:0;height:0';s.appendChild(p);document.body.appendChild(s);const L=p.getTotalLength(),o=[];for(let i=0;i<24;i++){const q=p.getPointAtLength(L*i/23);o.push([q.x,q.y])}s.remove();return o}
+function wrJudge(ref,drawn){const R=ref.map(wrRefPts),Dw=drawn.filter(s=>s.length>1).map(s=>wrSample(s,24));const tips=[],marks=[];
+  const cen=a=>[a.reduce((s,p)=>s+p[0],0)/a.length,a.reduce((s,p)=>s+p[1],0)/a.length],dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  const kind=a=>{const dx=a[a.length-1][0]-a[0][0],dy=a[a.length-1][1]-a[0][1];if(Math.abs(dx)>2*Math.abs(dy))return'가로';if(Math.abs(dy)>3*Math.abs(dx))return'세로';return dx<0?'삐침':'점·파임'};
+  const amt=v=>v<16?'조금':v<26?'반 칸쯤':'한 칸 넘게';const ro=w=>w+(/쪽$/.test(w)?'으로':'로');
+  const dir=(dx,dy)=>{const h=Math.abs(dx)>=5?(dx>0?'오른쪽':'왼쪽'):'',v=Math.abs(dy)>=5?(dy>0?'아래':'위'):'';return[v,h].filter(Boolean).join(' ')};
+  const sd=(a,b)=>a.reduce((s,p,i)=>s+dist(p,b[i]),0)/a.length; /* 같은 방향 모양 거리 */
+  let good=0,n=Math.min(R.length,Dw.length);
+  if(Dw.length!==R.length)tips.push(Dw.length<R.length?`획이 ${R.length-Dw.length}개 모자라요 — 정답은 ${R.length}획이에요.`:`획이 ${Dw.length-R.length}개 많아요 — 이어 써야 할 획을 끊었는지 봐 주세요 (정답 ${R.length}획).`);
+  /* 순서: 각 쓴 획에 가장 가까운 정답 획 */
+  const best=Dw.map(d=>{let bi=0,bv=1e9;R.forEach((r,i)=>{const v=Math.min(sd(d,r),sd(d.slice().reverse(),r));if(v<bv){bv=v;bi=i}});return bi});
+  const swapped=[];for(let i=0;i<n-1;i++)if(best[i]===i+1&&best[i+1]===i)swapped.push(i);
+  swapped.slice(0,1).forEach(i=>{tips.push(`획 순서 — ${i+1}획과 ${i+2}획이 바뀐 것 같아요. 정답은 ${kind(R[i])}(${i+1}) → ${kind(R[i+1])}(${i+2}).`);marks.push([R[i][0][0]-6,R[i][0][1]-2,i+1],[R[i+1][0][0]-6,R[i+1][0][1]-2,i+2])});
+  const per=[];
+  for(let i=0;i<n;i++){const r=R[i],d=Dw[i];const fw=sd(d,r),bw=sd(d.slice().reverse(),r);
+    if(swapped.includes(i)||swapped.includes(i-1)){continue}
+    if(bw+6<fw&&bw<22){per.push([i,30,`${i+1}획(${kind(r)}) 방향이 반대예요 — ${ro(dir(r[r.length-1][0]-r[0][0],r[r.length-1][1]-r[0][1]))} 그어요.`]);continue}
+    const cs=cen(d),cr=cen(r),dc=dist(cs,cr),ds=dist(d[0],r[0]);
+    if(fw<8){good++;continue}
+    if(ds>=9&&ds>=dc)per.push([i,ds,`${i+1}획(${kind(r)}) 시작점이 ${amt(ds)} ${ro(dir(d[0][0]-r[0][0],d[0][1]-r[0][1]))} 치우쳤어요.`]);
+    else if(dc>=9)per.push([i,dc,`${i+1}획(${kind(r)})이 ${amt(dc)} ${ro(dir(cs[0]-cr[0],cs[1]-cr[1]))} 가 있어요.`]);
+    else{const lr=Math.hypot(r[23][0]-r[0][0],r[23][1]-r[0][1]),ld=Math.hypot(d[23][0]-d[0][0],d[23][1]-d[0][1]);per.push([i,fw,ld<lr*.75?`${i+1}획(${kind(r)})이 짧아요 — 끝까지 그어 주세요.`:ld>lr*1.3?`${i+1}획(${kind(r)})이 길어요.`:`${i+1}획(${kind(r)}) 모양이 조금 달라요.`])}}
+  per.sort((a,b)=>b[1]-a[1]).forEach(x=>{if(tips.length<3)tips.push(x[2]);marks.push([R[x[0]][0][0]-6,R[x[0]][0][1]-2,x[0]+1])});
+  /* 전체 균형 */
+  if(Dw.length){const all=Dw.flat(),ra=R.flat();const bb=a=>[Math.min(...a.map(p=>p[0])),Math.min(...a.map(p=>p[1])),Math.max(...a.map(p=>p[0])),Math.max(...a.map(p=>p[1]))];const A=bb(all),B=bb(ra);
+    const sc=((A[2]-A[0])+(A[3]-A[1]))/(((B[2]-B[0])+(B[3]-B[1]))||1);const cx=(A[0]+A[2]-B[0]-B[2])/2,cy=(A[1]+A[3]-B[1]-B[3])/2;
+    if(tips.length<3&&Math.hypot(cx,cy)>=8)tips.push(`글자 전체가 ${ro(dir(cx,cy))} 치우쳤어요 — 격자 가운데 십자를 기준으로 맞춰 보세요.`);
+    if(tips.length<3&&(sc<.78||sc>1.25))tips.push(sc<.78?'글자가 작아요 — 격자를 더 넓게 써 보세요.':'글자가 커요 — 격자 안쪽에 맞춰 보세요.')}
+  const rate=R.length?good/R.length:0,cnt=Dw.length===R.length;
+  const v=cnt&&!swapped.length&&rate>=.85?'◎':cnt&&rate>=.5?'○':'△';
+  if(!tips.length)tips.push('획 수·순서·위치 모두 좋아요.');
+  const head=v==='◎'?'잘 썼어요':v==='○'?'거의 맞았어요':'다시 한 번 써 봐요';
+  return{v,head,tips:tips.slice(0,3),marks,rate}}
 function wrStart(){const cs=wrPick(5);if(!cs.length)return;WR={cs,i:0,ok:0};$('wrov').hidden=false;wrDraw()}
 function wrClose(){$('wrov').hidden=true;WR=null}
 function wrDraw(){const box=$('wrcard');const ch=WR.cs[WR.i];
@@ -897,10 +934,15 @@ function wrDraw(){const box=$('wrcard');const ch=WR.cs[WR.i];
   cv.onpointermove=e=>{if(!cur)return;cur.push(pt(e));redraw()};
   cv.onpointerup=cv.onpointercancel=()=>{cur=null};
   $('wrundo').onclick=()=>{strokes.pop();redraw()};$('wrclr').onclick=()=>{strokes.length=0;redraw()};
-  $('wrdone').onclick=()=>{cv.dataset.lock='1';const ref=svgOf(c.s,c.s.length-1,{sw:4,mark:false,ghost:false,grid:false});ref.classList.add('ref');ref.querySelectorAll('path').forEach(p=>p.setAttribute('stroke','var(--shu)'));pad.appendChild(ref);
-    $('wrcnt').textContent=`쓴 획 ${strokes.length} · 정답 ${c.s.length}획`;
-    $('wrtools').innerHTML=`<button class="btn ok" id="wry">맞게 썼어요</button><button class="btn shu" id="wrn">다시 볼게요</button>`;
-    const fin=ok=>{stRec('paper',ok);if(ok)WR.ok++;WR.i++;wrDraw()};$('wry').onclick=()=>fin(true);$('wrn').onclick=()=>fin(false)};
+  const judge=()=>{cv.dataset.lock='1';const ref=svgOf(c.s,c.s.length-1,{sw:4,mark:false,ghost:false,grid:false});ref.classList.add('ref');ref.querySelectorAll('path').forEach(p=>p.setAttribute('stroke','var(--shu)'));pad.appendChild(ref);
+    const J=wrJudge(c.s,strokes.map(s=>s.map(p=>[p[0]*109/r.width,p[1]*109/r.height])));
+    /* 문제 획 번호 표시 */
+    J.marks.forEach(m=>{const tx=document.createElementNS(NS,'text');tx.setAttribute('x',m[0]);tx.setAttribute('y',m[1]);tx.setAttribute('font-size','8');tx.setAttribute('fill','var(--shu)');tx.setAttribute('font-weight','700');tx.textContent=m[2];ref.appendChild(tx)});
+    $('wrcnt').innerHTML=`<b style="font-size:16px;color:var(${J.v==='◎'?'--koke':J.v==='○'?'--ai':'--shu'})">${J.v} ${J.head}</b><br>쓴 획 ${strokes.length} · 정답 ${c.s.length}획`;
+    const ok=J.v!=='△';if(!WR.rec){WR.rec=1;stRec('paper',ok);if(ok)WR.ok++}
+    $('wrtools').innerHTML=`<ul class="wr-adv">${J.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="acts"><button class="btn" id="wrre">다시 써 보기</button><button class="btn pri" id="wrnx">다음 →</button></div>`;
+    $('wrre').onclick=()=>{wrDraw()};$('wrnx').onclick=()=>{WR.rec=0;WR.i++;wrDraw()}};
+  $('wrdone').onclick=judge;
   WR.strokes=strokes}
 document.body.appendChild($('wrov')); /* 홈에서도 열리게 — 익히기 칸 밖(body)으로 */
 $('wrov').onclick=e=>{if(e.target===$('wrov'))wrClose()};
