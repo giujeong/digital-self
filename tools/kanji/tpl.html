@@ -268,6 +268,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .lq-s{font-family:var(--f-ja);font-size:20px;line-height:1.6;color:var(--ink)}.lq-s mark{background:var(--hl);color:inherit}
 .lq-ko{color:var(--muted);font-size:14px;margin:4px 0 12px;text-align:center}
 .lq-w{display:flex;justify-content:center;margin:12px 0}.lq-svg{width:160px;height:160px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
+.opt.blink{animation:lqblink .45s ease-in-out 4}@keyframes lqblink{50%{background:var(--okg);box-shadow:0 0 0 4px var(--koke)}}@media (prefers-reduced-motion: reduce){.opt.blink{animation:none}}
 .lq-msg{margin-top:12px;font-weight:700;text-align:center}.lq-note{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
 .bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
@@ -840,11 +841,11 @@ function lqDraw(){const c=D.chars[LQ.ch],q=LQ.qs[LQ.i],box=$('lqcard'),n=LQ.qs.l
   box.innerHTML=h+`<div id="lqfb"></div>`;
   $('lqskip').onclick=()=>{lqCommit();lqClose()};
   box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(box.dataset.lock==='1')return;box.dataset.lock='1';const o=q.opts[+b.dataset.i],good=o===q.ans;if(good)LQ.ok++;
-    b.classList.add(good?'ok':'no');if(!good)box.querySelectorAll('.opt').forEach(x=>{if(q.opts[+x.dataset.i]===q.ans)x.classList.add('ok')});
+    b.classList.add(good?'ok':'no');if(!good)box.querySelectorAll('.opt').forEach(x=>{if(q.opts[+x.dataset.i]===q.ans)x.classList.add('ok','blink')});
     lqMsg(good?'맞아요 ◎':'정답 — '+(q.t==='reading'?rdTxt(q.ans):q.ans));
-    /* 넘김 간격: 맞음 0.9초(확인만) · 틀림 = 정답을 보고 듣는 시간 — 읽기는 소리가 끝난 뒤 +1초(소리 없으면 3.5초 뒤 +1초), 뜻은 2.5초 (11/5 신수 "추천으로") */
+    /* 넘김 간격: 맞음 0.3초(확인만, 11/5 "더 빨리") · 틀림 = 정답을 보고 듣는 시간 — 읽기는 소리가 끝난 뒤 +1초(소리 없으면 3.5초 뒤 +1초), 뜻은 2.5초 (11/5 신수 "추천으로") */
     const at=LQ.i,adv=()=>{if(LQ&&LQ.i===at)lqAdv()},sp=isKata(q.ans)?hira(q.ans):q.ans.replace(/[()]/g,'');
-    if(good){if(q.t==='reading')say(sp);setTimeout(adv,900)}
+    if(good){if(q.t==='reading')say(sp);setTimeout(adv,300)}
     else if(q.t==='reading'){let f=false;const go=()=>{if(f)return;f=true;setTimeout(adv,1000)};say(sp,go);setTimeout(go,3500)}
     else setTimeout(adv,2500)});
   if(q.t==='write')$('lqrev').onclick=()=>{const w=$('lqw');w.innerHTML='';const s=svgOf(c.s,c.s.length-1,{sw:4,mark:false});s.classList.add('lq-svg');w.appendChild(s);
@@ -854,6 +855,7 @@ function lqAdv(){LQ.i++;if(LQ.i>=LQ.qs.length)lqCommit();lqDraw()}
 function lqCommit(){if(LQ&&!S[LQ.ch]){S[LQ.ch]={stage:0,start:TODAY,due:TODAY};save()}}
 function lqClose(){$('lqov').hidden=true;LQ=null;renderAll()}
 $('learnbtn').onclick=lqStart;
+$('lqov').onclick=e=>{if(e.target===$('lqov'))lqClose()}; /* 팝업 바깥을 누르면 원래 화면으로 — 끝내기 전이면 복습에 넣지 않음 (11/5) */
 
 /* ---------- 복습 ---------- */
 function dueList(){refreshToday();return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}

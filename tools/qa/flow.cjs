@@ -49,6 +49,8 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
       while(LQ&&LQ.i<LQ.qs.length&&steps++<10){const i0=LQ.i;const o=$('lqcard').querySelector('.opt');if(!o)break;o.click();await new Promise(r=>setTimeout(r,5000));if(LQ.i===i0)auto=false}
       const endShown=!!$('lqend');const inS=!!S[ch];$('lqend')&&$('lqend').click();return{open,n,auto,endShown,inS,closed:$('lqov').hidden}});
     ok('익혔어요 퀴즈: 팝업 열림·문제 2개(뜻·읽기)',r.open&&r.n===2,JSON.stringify(r));ok('익혔어요 퀴즈: 답 고르면 저절로 다음',r.auto);ok('익혔어요 퀴즈: 끝 → 오늘 복습에 들어감 → 닫힘',r.endShown&&r.inS&&r.closed);
+    const r2=await p.evaluate(()=>{const ch=curC;delete S[ch];renderAll();$('learnbtn').click();const ov=$('lqov');ov.dispatchEvent(new MouseEvent('click',{bubbles:true}));return{closed:ov.hidden,notAdded:!S[ch],lq:LQ===null}});
+    ok('익혔어요 퀴즈: 바깥 누르면 닫힘(복습에 안 넣음)',r2.closed&&r2.notAdded&&r2.lq,JSON.stringify(r2));
     ok('익혔어요 퀴즈: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
   // ── jpbible: 책·장·절 고르기 — 열림 → 책 바꾸면 장·절이 그 책으로
   {const [p,errs]=await page();await p.goto(base+'/bible/');await p.waitForTimeout(600);
