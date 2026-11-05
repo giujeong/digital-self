@@ -286,6 +286,9 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .lq-w{display:flex;justify-content:center;margin:12px 0}.lq-svg{width:160px;height:160px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
 .opt.blink{animation:lqblink .45s ease-in-out 4}@keyframes lqblink{50%{background:var(--okg);box-shadow:0 0 0 4px var(--koke)}}@media (prefers-reduced-motion: reduce){.opt.blink{animation:none}}
 .lrow{display:inline-flex;gap:6px;align-items:stretch}.btn.mute{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px}
+.wr-pad{position:relative;width:min(280px,78vw);aspect-ratio:1;margin:10px auto;border:1px solid var(--rule);background:var(--paper);border-radius:2px;touch-action:none}
+.wr-pad>svg,.wr-pad>canvas{position:absolute;inset:0;width:100%;height:100%}.wr-pad .ref{opacity:.55;pointer-events:none}
+.wr-tools{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.wr-cnt{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
 .lq-msg{margin-top:12px;font-weight:700;text-align:center}.lq-note{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
 .bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
@@ -484,6 +487,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
         <div class="jw" id="jw" hidden></div>
         <div class="learned">
           <span class="lrow"><button class="btn ok" id="learnbtn">익혔어요 → 오늘 복습에 넣기</button><button class="btn ok mute" id="learnmute" title="소리 없이 복습하기" aria-label="소리 없이 복습하기"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg></button></span>
+          <div class="bdov" id="wrov" hidden><div class="bdcard lqcard" id="wrcard" role="dialog" aria-modal="true"></div></div>
           <div class="bdov" id="lqov" hidden><div class="bdcard lqcard" id="lqcard" role="dialog" aria-modal="true"></div></div>
           <span class="note" id="learnnote"></span>
         </div>
@@ -708,7 +712,7 @@ function renderRail(){
     f.onclick=()=>{stop();curStep=i;drawBig();markRail()};r.appendChild(f)});
 }
 function markRail(){[...$('rail').querySelectorAll('.frame')].forEach((f,i)=>f.setAttribute('aria-pressed',i===curStep));
-  const a=$('rail').querySelectorAll('.frame')[curStep];if(a)a.scrollIntoView({block:'nearest'})}
+  const a=$('rail').querySelectorAll('.frame')[curStep];if(a&&!playing)a.scrollIntoView({block:'nearest'})} /* 필순 재생 중에는 화면 위치 고정 (11/5 신수) */
 function drawBig(){
   const st=D.chars[curC].s;const b=$('big');b.innerHTML='';
   if(!st.length){b.innerHTML=`<div class="glyph">${curC}</div>`;$('cnt').textContent='필순 자료 없음';$('play').hidden=true;return}
@@ -883,6 +887,39 @@ function lqMsg(m){$('lqfb').innerHTML=`<div class="lq-msg">${esc(m)}</div>`}
 function lqAdv(){LQ.i++;if(LQ.i>=LQ.qs.length)lqCommit();lqDraw()}
 function lqCommit(){if(LQ&&!S[LQ.ch]){S[LQ.ch]={stage:0,start:TODAY,due:TODAY};if(LQ.miss.length){S[LQ.ch].miss=[...new Set(LQ.miss)];if(LQ.missEx!=null&&LQ.missEx>=0)S[LQ.ch].missEx=LQ.missEx}else if(LQ.i>=LQ.qs.length&&LQ.ok===LQ.base&&LQ.qs.some(x=>x.t==='reading'))S[LQ.ch].rd=1;save()}}
 function lqClose(){$('lqov').hidden=true;LQ=null;renderAll()}
+/* ---------- 손으로 써 보기 (하루 한 번 따로 — 11/5 신수 "핸드폰에서 직접 쓰면 좋긴한데 이건 개발은 해두자")
+   뜻·읽기를 보고 손가락으로 격자 위에 쓴다 → 정답 획을 겹쳐 보고 → 스스로 ○/× (안 보고 쓰기 'paper' 기록) */
+let WR=null;
+function wrPick(n){const hasS=x=>D.chars[x]&&D.chars[x].s&&D.chars[x].s.length&&!D.chars[x].rad;
+  let pool=Object.keys(S).filter(hasS);if(pool.length<n)pool=pool.concat(curL.chars.filter(x=>hasS(x)&&!pool.includes(x)));
+  const miss=pool.filter(x=>S[x]&&S[x].miss),rest=shuffle(pool.filter(x=>!miss.includes(x)));return shuffle(miss).concat(rest).slice(0,n)}
+function wrStart(){const cs=wrPick(5);if(!cs.length)return;WR={cs,i:0,ok:0};$('wrov').hidden=false;wrDraw()}
+function wrClose(){$('wrov').hidden=true;WR=null}
+function wrDraw(){const box=$('wrcard');const ch=WR.cs[WR.i];
+  if(!ch){box.innerHTML=`<div class="lq-top"><span>써 보기 끝</span></div><div class="h">${WR.ok} / ${WR.cs.length} 맞게 썼어요</div><div class="lq-note">손으로 쓴 기억은 눈으로 본 것보다 오래 가요. 내일 또 한 번.</div><div class="acts"><button class="btn ok" id="wrend">닫기</button></div>`;$('wrend').onclick=wrClose;return}
+  const c=D.chars[ch];
+  box.innerHTML=`<div class="lq-top"><span>손으로 써 보기 ${WR.i+1} / ${WR.cs.length}</span><button class="lq-x" id="wrx">닫기</button></div>
+    <div class="lq-q">뜻과 읽기를 보고 써 보세요</div><div class="h">${esc(c.hun)}</div><div class="lq-ko">${[...c.on,...c.kun].map(esc).join(' · ')||'&nbsp;'}</div>
+    <div class="wr-pad" id="wrpad"></div><div class="wr-cnt" id="wrcnt">0획</div>
+    <div class="wr-tools" id="wrtools"><button class="btn" id="wrundo">한 획 취소</button><button class="btn" id="wrclr">지우기</button><button class="btn pri" id="wrdone">다 썼어요 → 정답 겹쳐 보기</button></div>`;
+  $('wrx').onclick=wrClose;
+  const pad=$('wrpad');const g=svgOf([],-1,{});pad.appendChild(g); /* 격자만 */
+  const cv=document.createElement('canvas');pad.appendChild(cv);const r=pad.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;
+  const x=cv.getContext('2d');x.scale(dpr,dpr);x.lineCap='round';x.lineJoin='round';x.lineWidth=Math.max(6,r.width/26);x.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink')||'#2B2620';
+  const strokes=[];let cur=null;
+  const pt=e=>{const b=cv.getBoundingClientRect();return[e.clientX-b.left,e.clientY-b.top]};
+  const redraw=()=>{x.clearRect(0,0,r.width,r.height);strokes.forEach(s=>{x.beginPath();s.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke()});$('wrcnt').textContent=strokes.length+'획'};
+  cv.onpointerdown=e=>{if(cv.dataset.lock==='1')return;cv.setPointerCapture(e.pointerId);cur=[pt(e)];strokes.push(cur);redraw()};
+  cv.onpointermove=e=>{if(!cur)return;cur.push(pt(e));redraw()};
+  cv.onpointerup=cv.onpointercancel=()=>{cur=null};
+  $('wrundo').onclick=()=>{strokes.pop();redraw()};$('wrclr').onclick=()=>{strokes.length=0;redraw()};
+  $('wrdone').onclick=()=>{cv.dataset.lock='1';const ref=svgOf(c.s,c.s.length-1,{sw:4,mark:false,ghost:false,grid:false});ref.classList.add('ref');ref.querySelectorAll('path').forEach(p=>p.setAttribute('stroke','var(--shu)'));pad.appendChild(ref);
+    $('wrcnt').textContent=`쓴 획 ${strokes.length} · 정답 ${c.s.length}획`;
+    $('wrtools').innerHTML=`<button class="btn ok" id="wry">맞게 썼어요</button><button class="btn shu" id="wrn">다시 볼게요</button>`;
+    const fin=ok=>{stRec('paper',ok);if(ok)WR.ok++;WR.i++;wrDraw()};$('wry').onclick=()=>fin(true);$('wrn').onclick=()=>fin(false)};
+  WR.strokes=strokes}
+document.body.appendChild($('wrov')); /* 홈에서도 열리게 — 익히기 칸 밖(body)으로 */
+$('wrov').onclick=e=>{if(e.target===$('wrov'))wrClose()};
 $('learnbtn').onclick=()=>lqStart(false);$('learnmute').onclick=()=>lqStart(true); /* 🔇 소리 없이 복습하기 (11/5) */
 $('lqov').onclick=e=>{if(e.target===$('lqov'))lqClose()}; /* 팝업 바깥을 누르면 원래 화면으로 — 끝내기 전이면 복습에 넣지 않음 (11/5) */
 
@@ -1087,13 +1124,14 @@ function renderHome(){if(!D)return;refreshToday();const el=$('home');const all=O
   el.innerHTML=`<div class="hm-hd"><div class="hi">${nm?esc(nm)+' 님, ':''}${gr}<small>${sub}</small></div><div style="display:flex;align-items:center"><button class="hm-q" id="hmq" title="사용 안내 다시 보기">?</button><div class="hm-av">${av}</div></div></div>
   <div class="hm-card"><div class="hm-h">익힌 글자</div><div class="hm-big"><b>${learned.length}</b><span>/ ${N}자 · ${Math.round(learned.length/N*100)}%</span></div><div class="hm-bar">${bar}</div><div class="hm-leg">${leg}</div></div>
   <div class="hm-3"><div class="hm-st hot"><b>${due}</b><span>오늘 복습${wd?' · 단어 '+wd:''}</span></div><div class="hm-st"><b>${unk}</b><span>모름 표시</span></div><div class="hm-st ai"><b>${sk}</b><span>연속 학습일</span></div></div>
-  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${nextCh&&(lastCh||learned.length)?'이어서 익히기 · '+nextCh:nextCh?'익히기 시작':'모두 익혔어요 — 한판으로'}</button><button class="btn" id="hmbd">한판</button></div>
+  <div class="hm-btns"><button class="btn pri" id="hmrv">${due?`복습 시작 (${due}) →`:wd?`단어 복습 (${wd}) →`:'오늘 복습 끝 — 한판으로 →'}</button><button class="btn" id="hmgo">${nextCh&&(lastCh||learned.length)?'이어서 익히기 · '+nextCh:nextCh?'익히기 시작':'모두 익혔어요 — 한판으로'}</button><button class="btn" id="hmbd">한판</button><button class="btn" id="hmwr">✍ 써 보기</button></div>
   <div class="hm-card"><div class="hm-h">JLPT 급수별</div>${jl}</div>
   <div class="hm-card"><div class="hm-h">계열 진행 (최근)</div><div class="hm-ls">${ls.map((l,i)=>{const k=l.chars.filter(c=>S[c]).length;return `<button data-i="${D.lessons.indexOf(l)}" title="${esc(l.name)} ${k}/${l.chars.length}">${l.head}<i style="width:${k/l.chars.length*100}%"></i></button>`}).join('')}</div></div>
   ${rtCard()}
   <div class="hm-card fb" id="fb"></div>`;renderFB();rtBind(el);
   $('hmrv').onclick=()=>{if(due){rvMode='kanji';show('review')}else if(wd){rvMode='words';show('review')}else show('board')};
   $('hmgo').onclick=()=>{if(!nextCh){show('board');return}show('learn');goChar(nextCh)};
+  $('hmwr').onclick=()=>wrStart();
   $('hmbd').onclick=()=>show('board');
   el.querySelectorAll('.hm-ls button').forEach(b=>b.onclick=()=>{const l=D.lessons[+b.dataset.i];curL=l;curC=l.chars[0];show('learn');renderAll();window.scrollTo({top:0})})}
 function rtCard(){const rows=t=>t.map(k=>{const e=stEst(k),lv=stLevel(k),tr=stTrend(k);const pct=Math.round(e.p*100);
