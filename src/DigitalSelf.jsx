@@ -625,6 +625,8 @@ export default function DigitalSelf() {
 
           {currentWork.format === 'note' ? (
             <div className="mt-12 whitespace-pre-wrap text-sm text-stone-700 leading-relaxed break-keep">{currentWork.body}</div>
+          ) : currentWork.format === 'rich' ? (
+            <div className="mt-14"><GuideBody body={currentWork.body} /></div>
           ) : (
           <div className="mt-14 space-y-6 text-base text-stone-700 leading-loose break-keep">
             {currentWork.body.split(/\n\s*\n/).map((para, i) => (
