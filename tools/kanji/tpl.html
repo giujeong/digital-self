@@ -272,7 +272,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .lrow{display:inline-flex;gap:6px;align-items:stretch}.btn.mute{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px}
 .wr-pad{position:relative;width:min(280px,78vw);aspect-ratio:1;margin:10px auto;border:1px solid var(--rule);background:var(--paper);border-radius:2px;touch-action:none}
 .wr-pad>svg,.wr-pad>canvas{position:absolute;inset:0;width:100%;height:100%}.wr-pad .ref{opacity:.55;pointer-events:none}
-.wr-tools .acts{flex-basis:100%;margin-top:8px}.wr-adv{flex-basis:100%;margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.5;text-align:left}.wr-adv li{margin:3px 0}
+.wr-tools .acts{flex-basis:100%;margin-top:8px}.wr-adv{flex-basis:100%;margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.5;text-align:left}.wr-adv li{margin:3px 0}.wr-adv li.pr{color:var(--koke);font-weight:600;list-style:none;margin-left:-18px}
 .wr-tools{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.wr-cnt{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
 .lq-msg{margin-top:12px;font-weight:700;text-align:center}.lq-note{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
@@ -840,19 +840,18 @@ function lqStart(mute){const ch=curC,c=D.chars[ch],qs=[];
     const d2=[...new Set(shuffle(mine).concat(shuffle(sib)))].filter(r=>r!==e.r).slice(0,3);if(d2.length)qs.push({t:'reading',ex:e,ans:e.r,opts:shuffle([e.r,...d2])})}
   LQ={ch,qs,i:0,ok:0,base:qs.length,miss:[],missEx:null,mute:!!mute};$('lqov').hidden=false;lqDraw()}
 function lqDraw(){const c=D.chars[LQ.ch],q=LQ.qs[LQ.i],box=$('lqcard'),n=LQ.qs.length;box.dataset.lock='0';
-  if(!q){box.innerHTML=`<div class="lq-top"><span>꺼내 보기 끝</span></div><div class="k">${LQ.ch}</div><div class="h">${LQ.ok} / ${LQ.base} 맞았어요</div><div class="lq-note">오늘 복습에 넣었어요. 간격(오늘·1일·3일·7일·1달)대로 다시 나와요.${LQ.miss.length?'<br>틀린 문제('+LQ.miss.map(x=>RT[x]).join('·')+')는 복습 때 먼저 다시 나와요.':(LQ.ok===LQ.base&&LQ.qs.some(x=>x.t==='reading')?'<br>다 맞혔어요 — 복습은 바로 예문부터 해요.':'')}</div><div class="acts"><button class="btn ok" id="lqend">닫기</button></div>`;$('lqend').onclick=lqClose;return}
-  let h=`<div class="lq-top"><span>익힌 것 꺼내 보기 ${LQ.i+1} / ${n}${LQ.mute?' · 🔇':''}</span><button class="lq-x" id="lqskip">건너뛰고 넣기</button></div>`;
-  if(q.t==='meaning')h+=`<div class="lq-q">이 글자의 뜻은?</div><div class="k">${LQ.ch}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>`;
+  if(!q){box.innerHTML=`<div class="lq-top"><span>한번 꺼내 봤어요</span></div><div class="k">${LQ.ch}</div><div class="h">${LQ.ok===LQ.base?'정말 익혔네요 👍':LQ.ok?'거의 다 왔어요':'아직 낯설죠, 괜찮아요'}</div><div class="lq-note">${LQ.miss.length?'헷갈린 '+LQ.miss.map(x=>RT[x]).join('·')+'은 복습 때 먼저 한 번 더 만나요.':'복습은 바로 예문부터 해요.'}<br>오늘 복습에 넣었어요.</div><div class="acts"><button class="btn ok" id="lqend">좋아요</button></div>`;$('lqend').onclick=lqClose;return}
+  let h=`<div class="lq-top"><span>익혔다고요? 한번 꺼내 볼까요 ${LQ.i+1}/${n}${LQ.mute?' · 🔇':''}</span><button class="lq-x" id="lqskip">그냥 넣기</button></div>`;
+  if(q.t==='meaning')h+=`<div class="lq-q">뜻이 떠오르나요?</div><div class="k">${LQ.ch}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>`;
   if(q.t==='word')h+=`<div class="lq-q">먼저 단어로 — 이 단어를 어떻게 읽을까요?</div><div class="lq-s" style="text-align:center;font-size:30px">${esc(q.w).split(LQ.ch).join('<mark>'+LQ.ch+'</mark>')}</div><div class="lq-ko">${esc(q.ko||'')}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt ja" data-i="${i}">${esc(o)}</button>`).join('')}</div>`;
-  if(q.t==='reading')h+=`<div class="lq-q">${q.retry?'다시 예문으로 — ':''}표시한 글자를 어떻게 읽을까요?</div><div class="lq-s">${esc(q.ex.jp).split(LQ.ch).join('<mark>'+LQ.ch+'</mark>')}</div><div class="lq-ko">${esc(q.ex.ko)}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt ja" data-i="${i}">${esc(rdTxt(o))}</button>`).join('')}</div>`;
+  if(q.t==='reading')h+=`<div class="lq-q">예문에서는 어떻게 읽을까요?</div><div class="lq-s">${esc(q.ex.jp).split(LQ.ch).join('<mark>'+LQ.ch+'</mark>')}</div><div class="lq-ko">${esc(q.ex.ko)}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt ja" data-i="${i}">${esc(rdTxt(o))}</button>`).join('')}</div>`;
   if(q.t==='write')h+=`<div class="lq-q">뜻과 읽기를 보고 종이에 써 보세요</div><div class="h">${esc(c.hun)}</div><div class="lq-ko">${[...c.on,...c.kun].map(esc).join(' · ')}</div><div class="lq-w" id="lqw"><button class="btn pri" id="lqrev">다 썼어요 → 정답 보기</button></div>`;
   box.innerHTML=h+`<div id="lqfb"></div>`;
   if(q.t==='reading'&&!LQ.mute)say(q.ex.kana||q.ex.jp); /* 예문은 뜨자마자 귀로 먼저 (11/5 신수) */
   $('lqskip').onclick=()=>{lqCommit();lqClose()};
   box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(box.dataset.lock==='1')return;box.dataset.lock='1';const o=q.opts[+b.dataset.i],good=o===q.ans;const first=q.t!=='word'&&!q.retry;if(first){if(good)LQ.ok++;else{LQ.miss.push(q.t);if(q.t==='reading')LQ.missEx=c.ex.indexOf(q.ex)}stRec(q.t,good)}
-    if(!good&&q.t==='reading'&&!q.retry)lqHelp(q);
     b.classList.add(good?'ok':'no');if(!good)box.querySelectorAll('.opt').forEach(x=>{if(q.opts[+x.dataset.i]===q.ans)x.classList.add('ok','blink')});
-    lqMsg(good?'맞아요 ◎':'정답 — '+(q.t==='reading'?rdTxt(q.ans):q.ans));
+    lqMsg(good?'맞아요 ◎':'이거였어요 — '+(q.t==='reading'?rdTxt(q.ans):q.ans));
     /* 넘김 간격: 맞음 0.3초(확인만, 11/5 "더 빨리") · 틀림 = 정답을 보고 듣는 시간 — 읽기는 소리가 끝난 뒤 +1초(소리 없으면 3.5초 뒤 +1초), 뜻은 2.5초 (11/5 신수 "추천으로") */
     const at=LQ.i,adv=()=>{if(LQ&&LQ.i===at)lqAdv()},sp=q.t==='word'?q.ans:isKata(q.ans)?hira(q.ans):q.ans.replace(/[()]/g,'');
     if(good){if(q.t!=='meaning'&&!LQ.mute)say(sp);setTimeout(adv,300)}
@@ -860,14 +859,6 @@ function lqDraw(){const c=D.chars[LQ.ch],q=LQ.qs[LQ.i],box=$('lqcard'),n=LQ.qs.l
     else setTimeout(adv,2500)});
   if(q.t==='write')$('lqrev').onclick=()=>{const w=$('lqw');w.innerHTML='';const s=svgOf(c.s,c.s.length-1,{sw:4,mark:false});s.classList.add('lq-svg');w.appendChild(s);
     $('lqfb').innerHTML=`<div class="acts"><button class="btn ok" id="lqy">맞게 썼어요</button><button class="btn shu" id="lqn">다시 볼게요</button></div>`;$('lqy').onclick=()=>{LQ.ok++;lqAdv()};$('lqn').onclick=lqAdv}}
-/* 예문 읽기를 틀리면: 그 예문의 단어로 읽기 먼저 → 같은 예문 다시 (11/5 신수 "예문에서 틀리면 먼저 단어에서 읽기방법을 풀게하고 예문으로") */
-function lqHelp(q){const ch=LQ.ch,c=D.chars[ch],xi=c.ex.indexOf(q.ex);
-  let w=(D.words||[]).find(x=>x.w.includes(ch)&&x.in.some(y=>y[0]===ch&&y[1]===xi))||(D.words||[]).find(x=>x.w.includes(ch)&&x.w!==ch);
-  if(!w&&c.jw&&c.jw.length){const j=c.jw.find(x=>x.w!==ch)||c.jw[0];w={w:j.w,r:j.kana,ko:j.ko}}
-  const add=[];
-  if(w){const L=w.r.length;const ds=shuffle((D.words||[]).filter(x=>x.r!==w.r&&Math.abs(x.r.length-L)<=1).map(x=>x.r)).filter((v,i,a)=>a.indexOf(v)===i).slice(0,3);if(ds.length)add.push({t:'word',w:w.w,ko:w.ko,ans:w.r,opts:shuffle([w.r,...ds])})}
-  add.push({t:'reading',ex:q.ex,ans:q.ans,opts:shuffle(q.opts),retry:true});
-  LQ.qs.splice(LQ.i+1,0,...add)}
 function lqMsg(m){$('lqfb').innerHTML=`<div class="lq-msg">${esc(m)}</div>`}
 function lqAdv(){LQ.i++;if(LQ.i>=LQ.qs.length)lqCommit();lqDraw()}
 function lqCommit(){if(LQ&&!S[LQ.ch]){S[LQ.ch]={stage:0,start:TODAY,due:TODAY};if(LQ.miss.length){S[LQ.ch].miss=[...new Set(LQ.miss)];if(LQ.missEx!=null&&LQ.missEx>=0)S[LQ.ch].missEx=LQ.missEx}else if(LQ.i>=LQ.qs.length&&LQ.ok===LQ.base&&LQ.qs.some(x=>x.t==='reading'))S[LQ.ch].rd=1;save()}}
@@ -888,7 +879,7 @@ function wrJudge(ref,drawn){const R=ref.map(wrRefPts),Dw=drawn.filter(s=>s.lengt
   const amt=v=>v<16?'조금':v<26?'반 칸쯤':'한 칸 넘게';const ro=w=>w+(/쪽$/.test(w)?'으로':'로');
   const dir=(dx,dy)=>{const h=Math.abs(dx)>=5?(dx>0?'오른쪽':'왼쪽'):'',v=Math.abs(dy)>=5?(dy>0?'아래':'위'):'';return[v,h].filter(Boolean).join(' ')};
   const sd=(a,b)=>a.reduce((s,p,i)=>s+dist(p,b[i]),0)/a.length; /* 같은 방향 모양 거리 */
-  let good=0,n=Math.min(R.length,Dw.length);
+  let good=0,n=Math.min(R.length,Dw.length);const goodI=[];
   if(Dw.length!==R.length)tips.push(Dw.length<R.length?`획이 ${R.length-Dw.length}개 모자라요 — 정답은 ${R.length}획이에요.`:`획이 ${Dw.length-R.length}개 많아요 — 이어 써야 할 획을 끊었는지 봐 주세요 (정답 ${R.length}획).`);
   /* 순서: 각 쓴 획에 가장 가까운 정답 획 */
   const best=Dw.map(d=>{let bi=0,bv=1e9;R.forEach((r,i)=>{const v=Math.min(sd(d,r),sd(d.slice().reverse(),r));if(v<bv){bv=v;bi=i}});return bi});
@@ -899,7 +890,7 @@ function wrJudge(ref,drawn){const R=ref.map(wrRefPts),Dw=drawn.filter(s=>s.lengt
     if(swapped.includes(i)||swapped.includes(i-1)){continue}
     if(bw+6<fw&&bw<22){per.push([i,30,`${i+1}획(${kind(r)}) 방향이 반대예요 — ${ro(dir(r[r.length-1][0]-r[0][0],r[r.length-1][1]-r[0][1]))} 그어요.`]);continue}
     const cs=cen(d),cr=cen(r),dc=dist(cs,cr),ds=dist(d[0],r[0]);
-    if(fw<8){good++;continue}
+    if(fw<8){good++;goodI.push(i+1);continue}
     if(ds>=9&&ds>=dc)per.push([i,ds,`${i+1}획(${kind(r)}) 시작점이 ${amt(ds)} ${ro(dir(d[0][0]-r[0][0],d[0][1]-r[0][1]))} 치우쳤어요.`]);
     else if(dc>=9)per.push([i,dc,`${i+1}획(${kind(r)})이 ${amt(dc)} ${ro(dir(cs[0]-cr[0],cs[1]-cr[1]))} 가 있어요.`]);
     else{const lr=Math.hypot(r[23][0]-r[0][0],r[23][1]-r[0][1]),ld=Math.hypot(d[23][0]-d[0][0],d[23][1]-d[0][1]);per.push([i,fw,ld<lr*.75?`${i+1}획(${kind(r)})이 짧아요 — 끝까지 그어 주세요.`:ld>lr*1.3?`${i+1}획(${kind(r)})이 길어요.`:`${i+1}획(${kind(r)}) 모양이 조금 달라요.`])}}
@@ -911,9 +902,12 @@ function wrJudge(ref,drawn){const R=ref.map(wrRefPts),Dw=drawn.filter(s=>s.lengt
     if(tips.length<3&&(sc<.78||sc>1.25))tips.push(sc<.78?'글자가 작아요 — 격자를 더 넓게 써 보세요.':'글자가 커요 — 격자 안쪽에 맞춰 보세요.')}
   const rate=R.length?good/R.length:0,cnt=Dw.length===R.length;
   const v=cnt&&!swapped.length&&rate>=.85?'◎':cnt&&rate>=.5?'○':'△';
-  if(!tips.length)tips.push('획 수·순서·위치 모두 좋아요.');
+  /* 칭찬을 먼저 (11/5 신수 "칭찬을 시작으로") — 맞은 것부터 짚고 고칠 것으로 */
+  const pr=[];if(cnt)pr.push(`획 수 ${R.length}획 정확해요`);if(cnt&&!swapped.length)pr.push('획 순서도 맞아요');
+  if(goodI.length&&goodI.length<R.length)pr.push(`${goodI.join('·')}획은 자리가 정확해요`);
+  const praise=goodI.length===R.length&&cnt&&!swapped.length?'획 수·순서·위치 모두 좋아요. 그대로 손에 익히면 돼요.':pr.length?pr.join(', ')+'.':Dw.length?'끝까지 써 본 것만으로 좋은 출력이에요.':'';
   const head=v==='◎'?'잘 썼어요':v==='○'?'거의 맞았어요':'다시 한 번 써 봐요';
-  return{v,head,tips:tips.slice(0,3),marks,rate}}
+  return{v,head,praise,tips:tips.slice(0,3),marks,rate}}
 function wrStart(){const cs=wrPick(5);if(!cs.length)return;WR={cs,i:0,ok:0};$('wrov').hidden=false;wrDraw()}
 function wrClose(){$('wrov').hidden=true;WR=null}
 function wrDraw(){const box=$('wrcard');const ch=WR.cs[WR.i];
@@ -940,7 +934,7 @@ function wrDraw(){const box=$('wrcard');const ch=WR.cs[WR.i];
     J.marks.forEach(m=>{const tx=document.createElementNS(NS,'text');tx.setAttribute('x',m[0]);tx.setAttribute('y',m[1]);tx.setAttribute('font-size','8');tx.setAttribute('fill','var(--shu)');tx.setAttribute('font-weight','700');tx.textContent=m[2];ref.appendChild(tx)});
     $('wrcnt').innerHTML=`<b style="font-size:16px;color:var(${J.v==='◎'?'--koke':J.v==='○'?'--ai':'--shu'})">${J.v} ${J.head}</b><br>쓴 획 ${strokes.length} · 정답 ${c.s.length}획`;
     const ok=J.v!=='△';if(!WR.rec){WR.rec=1;stRec('paper',ok);if(ok)WR.ok++}
-    $('wrtools').innerHTML=`<ul class="wr-adv">${J.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="acts"><button class="btn" id="wrre">다시 써 보기</button><button class="btn pri" id="wrnx">다음 →</button></div>`;
+    $('wrtools').innerHTML=`<ul class="wr-adv">${J.praise?`<li class="pr">👍 ${esc(J.praise)}</li>`:''}${J.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="acts"><button class="btn" id="wrre">다시 써 보기</button><button class="btn pri" id="wrnx">다음 →</button></div>`;
     $('wrre').onclick=()=>{wrDraw()};$('wrnx').onclick=()=>{WR.rec=0;WR.i++;wrDraw()}};
   $('wrdone').onclick=judge;
   WR.strokes=strokes}

@@ -51,12 +51,11 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
     ok('익혔어요 퀴즈: 팝업 열림·문제 2개(뜻·읽기)',r.open&&r.n===2,JSON.stringify(r));ok('익혔어요 퀴즈: 답 고르면 저절로 다음',r.auto);ok('익혔어요 퀴즈: 끝 → 오늘 복습에 들어감 → 닫힘',r.endShown&&r.inS&&r.closed);
     const r2=await p.evaluate(()=>{const ch=curC;delete S[ch];renderAll();$('learnbtn').click();const ov=$('lqov');ov.dispatchEvent(new MouseEvent('click',{bubbles:true}));return{closed:ov.hidden,notAdded:!S[ch],lq:LQ===null}});
     ok('익혔어요 퀴즈: 바깥 누르면 닫힘(복습에 안 넣음)',r2.closed&&r2.notAdded&&r2.lq,JSON.stringify(r2));
-    const r4=await p.evaluate(async()=>{const ch=Object.keys(D.chars).find(x=>!D.chars[x].rad&&D.chars[x].ex.length>=1&&D.words.some(w=>w.w.includes(x)&&w.w!==x));delete S[ch];curL=D.lessons.find(l=>l.chars.includes(ch));curC=ch;show('learn');renderAll();lqStart(true);
-      LQ.qs.sort((a,b)=>(a.t==='meaning'?0:1)-(b.t==='meaning'?0:1));lqDraw();const wrong=()=>{const q=LQ.qs[LQ.i];const i=q.opts.findIndex(o=>o!==q.ans);$('lqcard').querySelectorAll('.opt')[i].click()};
-      const right=()=>{const q=LQ.qs[LQ.i];const i=q.opts.indexOf(q.ans);$('lqcard').querySelectorAll('.opt')[i].click()};const w=ms=>new Promise(r=>setTimeout(r,ms));
-      right();await w(500);wrong();await w(2800);const t1=LQ.qs[LQ.i]&&LQ.qs[LQ.i].t;right();await w(500);const t2=LQ.qs[LQ.i]&&LQ.qs[LQ.i].t,rt=LQ.qs[LQ.i]&&LQ.qs[LQ.i].retry;right();await w(500);
-      const miss=S[ch]&&S[ch].miss;$('lqend')&&$('lqend').click();S[ch].due=TODAY;queue=[ch];practice=false;FOCUS=null;next();const rem=Q&&Q.remind&&Q.type==='reading';return{ch,t1,t2,rt,miss,rem}});
-    ok('익혔어요 퀴즈: 예문 틀리면 → 단어 읽기 → 같은 예문 다시',r4.t1==='word'&&r4.t2==='reading'&&r4.rt,JSON.stringify(r4));
+    const r4=await p.evaluate(async()=>{const ch=Object.keys(D.chars).find(x=>!D.chars[x].rad&&D.chars[x].ex.length>=1);delete S[ch];curL=D.lessons.find(l=>l.chars.includes(ch));curC=ch;show('learn');renderAll();lqStart(true);
+      LQ.qs.sort((a,b)=>(a.t==='meaning'?0:1)-(b.t==='meaning'?0:1));lqDraw();const w=ms=>new Promise(r=>setTimeout(r,ms));
+      const right=()=>{const q=LQ.qs[LQ.i];$('lqcard').querySelectorAll('.opt')[q.opts.indexOf(q.ans)].click()},wrong=()=>{const q=LQ.qs[LQ.i];$('lqcard').querySelectorAll('.opt')[q.opts.findIndex(o=>o!==q.ans)].click()};
+      right();await w(500);wrong();await w(2800);const n=LQ.qs.length,end=!!$('lqend');const miss=S[ch]&&S[ch].miss;$('lqend')&&$('lqend').click();S[ch].due=TODAY;queue=[ch];practice=false;FOCUS=null;next();const rem=Q&&Q.remind&&Q.type==='reading';return{ch,n,end,miss,rem}});
+    ok('익혔어요 퀴즈: 예문 틀려도 단계 안 늘림(2문제로 끝)',r4.n===2&&r4.end,JSON.stringify(r4));
     ok('익혔어요 퀴즈: 틀린 유형 기록 → 복습에서 먼저·표시',JSON.stringify(r4.miss)==='["reading"]'&&r4.rem);
     const r5=await p.evaluate(async()=>{const ch=Object.keys(D.chars).find(x=>!D.chars[x].rad&&D.chars[x].ex.length);delete S[ch];curL=D.lessons.find(l=>l.chars.includes(ch));curC=ch;show('learn');renderAll();lqStart(true);
       const w=ms=>new Promise(r=>setTimeout(r,ms));while(LQ&&LQ.i<LQ.qs.length){const q=LQ.qs[LQ.i];$('lqcard').querySelectorAll('.opt')[q.opts.indexOf(q.ans)].click();await w(500)}
