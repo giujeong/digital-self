@@ -276,6 +276,15 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
 .bdcard .reads{justify-content:center;margin-top:8px;gap:5px}.bdcard .rd{font-size:14px;padding:2px 9px}
 .bdcard .acts{display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .bdcard .acts .btn{padding:8px 12px}
+.lqcard{width:min(360px,100%);text-align:left;padding:18px 16px 14px;max-height:92vh;overflow:auto}
+.lq-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px;gap:8px}
+.lq-x{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:13px;padding:4px;cursor:pointer}
+.lq-q{font-weight:700;margin:4px 0 10px;color:var(--ink)}
+.lqcard .k{text-align:center;margin:4px 0 14px}.lqcard .h{text-align:center}
+.lq-s{font-family:var(--f-ja);font-size:20px;line-height:1.6;color:var(--ink)}.lq-s mark{background:var(--hl);color:inherit}
+.lq-ko{color:var(--muted);font-size:14px;margin:4px 0 12px;text-align:center}
+.lq-w{display:flex;justify-content:center;margin:12px 0}.lq-svg{width:160px;height:160px;border:1px solid var(--line);background:var(--paper);border-radius:2px}
+.lq-msg{margin-top:12px;font-weight:700;text-align:center}.lq-note{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
 .bdcard .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
 .bdcard .nav button{border:0;background:none;color:var(--muted);font:inherit;padding:4px 2px;cursor:pointer}
@@ -472,6 +481,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.6}
         <div class="jw" id="jw" hidden></div>
         <div class="learned">
           <button class="btn ok" id="learnbtn">익혔어요 → 오늘 복습에 넣기</button>
+          <div class="bdov" id="lqov" hidden><div class="bdcard lqcard" id="lqcard" role="dialog" aria-modal="true"></div></div>
           <span class="note" id="learnnote"></span>
         </div>
       </div>
@@ -641,10 +651,10 @@ const rdTxt=r=>isKata(r)?`${r} (${hira(r)})`:r;
 let jaVoice=null;const synth=window.speechSynthesis;
 function pickVoice(){try{const v=synth.getVoices();jaVoice=v.find(x=>/^ja/i.test(x.lang)&&/google|kyoko|o-ren|haruka|nanami/i.test(x.name))||v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
 if(synth){pickVoice();try{synth.addEventListener('voiceschanged',pickVoice)}catch(e){synth.onvoiceschanged=pickVoice}}
-function say(t){if(!synth){ttsWarn();return}
+function say(t,done){if(!synth){ttsWarn();done&&done();return}
   try{if(synth.speaking||synth.pending)synth.cancel()}catch(e){}
-  setTimeout(()=>{try{pickVoice();const one=/^[\u3041-\u30ff]$/.test(t);const u=new SpeechSynthesisUtterance(one?t+'。':t);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=one?1.05:.85;u.onerror=ev=>{if(ev.error!=='interrupted'&&ev.error!=='canceled')ttsWarn()};synth.speak(u);try{synth.resume()}catch(e){}
-    setTimeout(()=>{if(!jaVoice&&!synth.speaking)ttsWarn()},900)}catch(e){ttsWarn()}},80)}
+  setTimeout(()=>{try{pickVoice();const one=/^[\u3041-\u30ff]$/.test(t);const u=new SpeechSynthesisUtterance(one?t+'。':t);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=one?1.05:.85;u.onend=()=>{done&&done()};u.onerror=ev=>{if(ev.error!=='interrupted'&&ev.error!=='canceled')ttsWarn();done&&done()};synth.speak(u);try{synth.resume()}catch(e){}
+    setTimeout(()=>{if(!jaVoice&&!synth.speaking)ttsWarn()},900)}catch(e){ttsWarn();done&&done()}},80)}
 function ttsWarn(){const n=$('ttsn');if(n)n.hidden=false}
 function bindSay(root){root.querySelectorAll('[data-say]').forEach(b=>b.onclick=e=>{e.stopPropagation();say(b.dataset.say)})}
 const lessonOf=ch=>D.lessons.find(l=>l.chars.includes(ch));
@@ -830,7 +840,36 @@ function renderInfo(){setHdr();
 }
 function renderAll(){stop();curStep=-1;selR=null;renderLessons();renderChars();renderRail();drawBig();renderInfo();updBadge()}
 $('play').onclick=play;
-$('learnbtn').onclick=()=>{S[curC]={stage:0,start:TODAY,due:TODAY};save();renderAll()};
+/* 익혔어요 → 꺼내 보기 퀴즈 (뜻 · 예문 읽기) — 끝나면 오늘 복습에 넣음 (쓰기는 11/5 신수 "써보기는 빼고") */
+let LQ=null;
+function lqStart(){const ch=curC,c=D.chars[ch],qs=[];
+  const ds=pool(ch).slice(0,3).map(x=>D.chars[x].hun);qs.push({t:'meaning',ans:c.hun,opts:shuffle([c.hun,...ds])});
+  if(c.ex.length){const e=c.ex[Math.floor(Math.random()*c.ex.length)];const mine=[...c.on,...c.kun].filter(r=>r!==e.r);let sib=[];lessonOf(ch).chars.filter(x=>x!==ch).forEach(x=>sib.push(...D.chars[x].on,...D.chars[x].kun));
+    const d2=[...new Set(shuffle(mine).concat(shuffle(sib)))].filter(r=>r!==e.r).slice(0,3);if(d2.length)qs.push({t:'reading',ex:e,ans:e.r,opts:shuffle([e.r,...d2])})}
+  LQ={ch,qs,i:0,ok:0};$('lqov').hidden=false;lqDraw()}
+function lqDraw(){const c=D.chars[LQ.ch],q=LQ.qs[LQ.i],box=$('lqcard'),n=LQ.qs.length;box.dataset.lock='0';
+  if(!q){box.innerHTML=`<div class="lq-top"><span>꺼내 보기 끝</span></div><div class="k">${LQ.ch}</div><div class="h">${LQ.ok} / ${n} 맞았어요</div><div class="lq-note">오늘 복습에 넣었어요. 간격(오늘·1일·3일·7일·1달)대로 다시 나와요.</div><div class="acts"><button class="btn ok" id="lqend">닫기</button></div>`;$('lqend').onclick=lqClose;return}
+  let h=`<div class="lq-top"><span>익힌 것 꺼내 보기 ${LQ.i+1} / ${n}</span><button class="lq-x" id="lqskip">건너뛰고 넣기</button></div>`;
+  if(q.t==='meaning')h+=`<div class="lq-q">이 글자의 뜻은?</div><div class="k">${LQ.ch}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>`;
+  if(q.t==='reading')h+=`<div class="lq-q">표시한 글자를 어떻게 읽을까요?</div><div class="lq-s">${esc(q.ex.jp).split(LQ.ch).join('<mark>'+LQ.ch+'</mark>')}</div><div class="lq-ko">${esc(q.ex.ko)}</div><div class="opts">${q.opts.map((o,i)=>`<button class="opt ja" data-i="${i}">${esc(rdTxt(o))}</button>`).join('')}</div>`;
+  if(q.t==='write')h+=`<div class="lq-q">뜻과 읽기를 보고 종이에 써 보세요</div><div class="h">${esc(c.hun)}</div><div class="lq-ko">${[...c.on,...c.kun].map(esc).join(' · ')}</div><div class="lq-w" id="lqw"><button class="btn pri" id="lqrev">다 썼어요 → 정답 보기</button></div>`;
+  box.innerHTML=h+`<div id="lqfb"></div>`;
+  $('lqskip').onclick=()=>{lqCommit();lqClose()};
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(box.dataset.lock==='1')return;box.dataset.lock='1';const o=q.opts[+b.dataset.i],good=o===q.ans;if(good)LQ.ok++;
+    b.classList.add(good?'ok':'no');if(!good)box.querySelectorAll('.opt').forEach(x=>{if(q.opts[+x.dataset.i]===q.ans)x.classList.add('ok')});
+    lqMsg(good?'맞아요 ◎':'정답 — '+(q.t==='reading'?rdTxt(q.ans):q.ans));
+    /* 넘김 간격: 맞음 0.9초(확인만) · 틀림 = 정답을 보고 듣는 시간 — 읽기는 소리가 끝난 뒤 +1초(소리 없으면 3.5초 뒤 +1초), 뜻은 2.5초 (11/5 신수 "추천으로") */
+    const at=LQ.i,adv=()=>{if(LQ&&LQ.i===at)lqAdv()},sp=isKata(q.ans)?hira(q.ans):q.ans.replace(/[()]/g,'');
+    if(good){if(q.t==='reading')say(sp);setTimeout(adv,900)}
+    else if(q.t==='reading'){let f=false;const go=()=>{if(f)return;f=true;setTimeout(adv,1000)};say(sp,go);setTimeout(go,3500)}
+    else setTimeout(adv,2500)});
+  if(q.t==='write')$('lqrev').onclick=()=>{const w=$('lqw');w.innerHTML='';const s=svgOf(c.s,c.s.length-1,{sw:4,mark:false});s.classList.add('lq-svg');w.appendChild(s);
+    $('lqfb').innerHTML=`<div class="acts"><button class="btn ok" id="lqy">맞게 썼어요</button><button class="btn shu" id="lqn">다시 볼게요</button></div>`;$('lqy').onclick=()=>{LQ.ok++;lqAdv()};$('lqn').onclick=lqAdv}}
+function lqMsg(m){$('lqfb').innerHTML=`<div class="lq-msg">${esc(m)}</div>`}
+function lqAdv(){LQ.i++;if(LQ.i>=LQ.qs.length)lqCommit();lqDraw()}
+function lqCommit(){if(LQ&&!S[LQ.ch]){S[LQ.ch]={stage:0,start:TODAY,due:TODAY};save()}}
+function lqClose(){$('lqov').hidden=true;LQ=null;renderAll()}
+$('learnbtn').onclick=lqStart;
 
 /* ---------- 복습 ---------- */
 function dueList(){refreshToday();return Object.keys(S).filter(ch=>S[ch].stage<5&&S[ch].due<=TODAY)}

@@ -42,6 +42,14 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
     ok('복습 평가: 집중 연습은 그 유형만, 답이 기록됨',r.q==='reading'&&r.types.join()==='reading'&&r.rec===1,JSON.stringify({q:r.q,types:r.types,rec:r.rec}));
     ok('복습 평가: 강점 유형은 강화',r.hard===true);
     ok('복습 평가: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
+  // ── 부수 한자: 익혔어요 → 꺼내 보기 퀴즈 팝업 — 문제마다 다음으로 넘어감 → 끝나면 오늘 복습에 들어감
+  {const [p,errs]=await page();await p.goto(base+'/kanji/');await p.waitForFunction(()=>typeof D!=='undefined'&&D);
+    const r=await p.evaluate(async()=>{const ch=Object.keys(D.chars).find(x=>!D.chars[x].rad&&D.chars[x].ex.length&&D.chars[x].s.length);delete S[ch];curL=D.lessons.find(l=>l.chars.includes(ch));curC=ch;show('learn');renderAll();
+      $('learnbtn').click();const open=!$('lqov').hidden;const n=LQ.qs.length;let steps=0,auto=true;
+      while(LQ&&LQ.i<LQ.qs.length&&steps++<10){const i0=LQ.i;const o=$('lqcard').querySelector('.opt');if(!o)break;o.click();await new Promise(r=>setTimeout(r,5000));if(LQ.i===i0)auto=false}
+      const endShown=!!$('lqend');const inS=!!S[ch];$('lqend')&&$('lqend').click();return{open,n,auto,endShown,inS,closed:$('lqov').hidden}});
+    ok('익혔어요 퀴즈: 팝업 열림·문제 2개(뜻·읽기)',r.open&&r.n===2,JSON.stringify(r));ok('익혔어요 퀴즈: 답 고르면 저절로 다음',r.auto);ok('익혔어요 퀴즈: 끝 → 오늘 복습에 들어감 → 닫힘',r.endShown&&r.inS&&r.closed);
+    ok('익혔어요 퀴즈: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
   // ── jpbible: 책·장·절 고르기 — 열림 → 책 바꾸면 장·절이 그 책으로
   {const [p,errs]=await page();await p.goto(base+'/bible/');await p.waitForTimeout(600);
     const r=await p.evaluate(()=>{IDX=[];CHAPS.forEach(([b,c])=>{for(let v=1;v<=3;v++)IDX.push({id:b+'.'+c+'.'+v,book:b,ch:c,v1:v,v2:v,ord:v})});
