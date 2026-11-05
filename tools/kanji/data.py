@@ -114,17 +114,21 @@ for ch,m in KUNKO.items():
 JL=json.load(open(os.path.join(HERE,'jlpt','levels.json'),encoding='utf-8'))
 JV=json.load(open(os.path.join(HERE,'jlpt','vocab.json'),encoding='utf-8'))
 JK=json.load(open(os.path.join(HERE,'jlpt_ko.json'),encoding='utf-8'))
+try: FQ=json.load(open(os.path.join(HERE,'freq.json'),encoding='utf-8'))
+except FileNotFoundError: FQ={}
 untr=set()
 for ch,v in C.items():
     v["jlpt"]=JL.get(ch)
-    ws=[]
-    for n,e,rd,en in JV:
-        if ch in e and n>=4:
-            if e in JK: ws.append({"n":n,"w":e,"kana":rd,"ko":JK[e]})
-            else: untr.add((n,e,rd,en))
-    ws.sort(key=lambda x:(-x["n"],len(x["w"])))
+    ws=[];seen=set()
+    # 급수 무관 · 자주 쓰는 순(freq.json) · 한자당 10개 상한 (11/5 신수)
+    for n,e,rd,en in sorted([x for x in JV if ch in x[1]],key=lambda x:(-FQ.get(x[1],0),-x[0])):
+        if e in seen: continue  # 같은 표기는 한 번 (人気 にんき/ひとけ)
+        seen.add(e)
+        if e in JK: ws.append({"n":n,"w":e,"kana":rd,"ko":JK[e]})
+        else: untr.add((n,e,rd,en))
+        if len(seen)>=10: break
     v["jw"]=ws
-if untr: print("JLPT 미번역",len(untr),sorted(untr)[:10])
+if untr: print("JLPT 미번역",len(untr),sorted(untr))
 PGX={"器":[["口 口",1,6],["大",7,9],["口 口",10,15]],"爽":[["大",1,1],["㸚",2,9],["大",10,11]],"右":[["ナ",1,2],["口",3,5]],"左":[["ナ",1,2],["工",3,5]],"存":[["ナ 丨",1,3],["子",4,6]],"在":[["ナ 丨",1,3],["土",4,6]],"友":[["ナ",1,2],["又",3,4]],"共":[["廾",1,4],["八",5,6]],"爪":[["爪",1,4]],"尋":[["彐",1,3],["工",4,6],["口",7,9],["寸",10,12]],"止":[["止",1,4]],"渋":[["氵",1,3],["止",4,7],["⺍",8,11]],"走":[["土",1,3],["疋",4,7]],"傑":[["亻",1,2],["舛",3,9],["木",10,13]],"克":[["十",1,2],["兄",3,7]],"品":[["口",1,3],["口 口",4,9]],"固":[["囗",1,2],["古",3,7],["囗",8,8]],"図":[["囗",1,2],["丶 丶",3,4],["乂",5,6],["囗",7,7]],"脳":[["月",1,4],["⺍",5,7],["凶",8,11]],"悩":[["忄",1,3],["⺍",4,6],["凶",7,10]],"胸":[["月",1,4],["勹",5,6],["凶",7,10]],"言":[["丶 三",1,4],["口",5,7]],"診":[["言",1,7],["人",8,9],["彡",10,12]],"巨":[["巨",1,5]],"臨":[["臣",1,7],["𠂉",8,9],["品",10,18]],"具":[["目",1,5],["廾",6,8]],"眉":[["尸",1,4],["目",5,9]],"自":[["自",1,6]],"鼻":[["自",1,6],["田",7,11],["廾",12,14]],"嗅":[["口",1,3],["自",4,9],["犬",10,13]],"首":[["丷",1,2],["一",3,3],["自",4,9]],"夏":[["百",1,7],["夊",8,10]],"憂":[["百",1,7],["冖",8,9],["心",10,13],["夊",14,15]],"寡":[["宀",1,3],["百",4,10],["分",11,14]],"聴":[["耳",1,6],["十",7,8],["罒",9,13],["心",14,17]],"修":[["亻",1,2],["丨",3,3],["攵",4,7],["彡",8,10]],"悠":[["亻",1,2],["丨",3,3],["攵",4,7],["心",8,11]],"有":[["ナ",1,2],["月",3,6]]}
 for ch,pg in PGX.items():
     if ch in C: C[ch]["pg"]=pg
@@ -222,6 +226,7 @@ try:
         if w["w"] not in EXK or not EXK[w["w"]]: continue
         w2={"w":w["w"],"r":w["r"],"ko":EXK[w["w"]],"pos":w["pos"][:1],"in":[x for x in w["in"] if x[0] in C and x[1]<len(C[x[0]]["ex"])]}
         if w["w"] in JLV: w2["n"]=JLV[w["w"]]
+        if w.get("parts"): w2["parts"]=[{"w":q["w"],"r":q["r"],"ko":EXK.get(q["w"],"")} for q in w["parts"] if re.search(r'[㐀-鿿]',q["w"])]
         if w2["in"]: words.append(w2)
     d=json.load(open(os.path.join(HERE,"data.json"),encoding="utf-8"));d["words"]=words
     open(os.path.join(HERE,"data.json"),"w",encoding="utf-8").write(json.dumps(d,ensure_ascii=False))

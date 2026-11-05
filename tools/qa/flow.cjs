@@ -67,6 +67,9 @@ const SB_STUB=`(function(){const mk=()=>new Proxy(function(){},{get:(t,k)=>k==='
     ok('써 보기: 홈 버튼 → 손가락으로 쓰기 → 자동 판정·조언 → 기록',r6.open&&r6.n>0&&r6.drawn===1&&r6.ref&&r6.rec&&r6.adv>0&&r6.closed,JSON.stringify(r6));
     const r3=await p.evaluate(()=>{const ch=curC;delete S[ch];renderAll();const b=$('learnmute');const vis=!!b.offsetParent;b.click();const m=LQ&&LQ.mute;const head=$('lqcard').textContent.includes('🔇');lqClose();return{vis,m,head}});
     ok('익혔어요 퀴즈: 🔇 소리 없이 버튼 → 무음 퀴즈',r3.vis&&r3.m&&r3.head,JSON.stringify(r3));
+    const r7=await p.evaluate(async()=>{show('learn');renderAll();window.scrollTo(0,0);const n=D.chars[curC].s.length;$('play').click();await new Promise(r=>setTimeout(r,n*700+1600));
+      const tf=[...document.querySelectorAll('.topfix')].find(x=>x.offsetParent);const top=$('hun2').getBoundingClientRect().top,lim=tf?tf.getBoundingClientRect().bottom:0;return{y:scrollY,top:Math.round(top),lim:Math.round(lim),done:!playing}});
+    ok('필순 재생: 끝나면 뜻·연상으로 내려감',r7.done&&r7.y>0&&r7.top>=r7.lim-2&&r7.top<r7.lim+60,JSON.stringify(r7));
     ok('익혔어요 퀴즈: 화면 오류 없음',!errs.length,errs.join(' | '));await p.close()}
   // ── jpbible: 책·장·절 고르기 — 열림 → 책 바꾸면 장·절이 그 책으로
   {const [p,errs]=await page();await p.goto(base+'/bible/');await p.waitForTimeout(600);

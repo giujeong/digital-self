@@ -109,6 +109,12 @@ button:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
 .ex .jp mark{background:var(--hl);color:inherit;padding:0 1px;border-radius:2px}
 .ex .kana{font-family:var(--f-ja);font-size:13px;color:var(--muted)}
 .ex .ko{font-size:14px}
+.exw{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.exw .wc{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--line);background:transparent;border-radius:6px;padding:4px 8px;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.exw .wc b{font-family:var(--f-ja);font-weight:500;font-size:15px}.exw .wc b mark{background:var(--hl);color:inherit;padding:0 1px;border-radius:2px}
+.exw .wc span{font-family:var(--f-ja);font-size:12px;color:var(--muted)}.exw .wc i{font-style:normal;font-size:13px}
+.exw .wp{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:13px;color:var(--muted);padding-left:6px}
+.exw .wp em{font-style:normal}.exw .wc.sm{padding:2px 6px}.exw .wc.sm b{font-size:14px}
 .topfix{position:sticky;top:var(--hdr,52px);z-index:29;background:var(--paper);display:flex;flex-direction:column;gap:14px;padding-bottom:6px;box-shadow:0 6px 10px -8px rgba(60,45,20,.25)}
 @media (max-width:640px){.topfix{gap:8px;padding-bottom:4px}}
 .sec-h{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em}
@@ -730,7 +736,7 @@ function play(){
   const step=()=>{curStep=i;const b=$('big');b.innerHTML='';const svg=svgOf(st,i,{sw:3.6});b.appendChild(svg);
     $('cnt').textContent=`${i+1} / ${st.length}획`;markRail();
     const p=svg.lastChild;if(!reduce){const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.getBoundingClientRect();p.style.transition='stroke-dashoffset .5s ease-out';p.style.strokeDashoffset=0}
-    i++;playing=i<st.length?setTimeout(step,reduce?500:700):setTimeout(()=>{playing=null;$('play').textContent='▶ 다시 보기'},700)};
+    i++;playing=i<st.length?setTimeout(step,reduce?500:700):setTimeout(()=>{playing=null;$('play').textContent='▶ 다시 보기';toEl('hun2')},700)}; /* 끝까지 재생하면 뜻·연상으로 내림 (11/5 신수) */
   step();
 }
 function readsHTML(c,btn){const t='button';const sp=r=>isKata(r)?hira(r):r.replace(/[()]/g,'');const a=r=>btn?` data-r="${r}" aria-pressed="${r===selR}"`:` data-say="${sp(r)}"`;
@@ -822,7 +828,12 @@ function renderRP(){
 }
 function setHdr(){const h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hdr',h.offsetHeight+'px')}
 window.addEventListener('resize',setHdr);window.addEventListener('load',setHdr);setTimeout(setHdr,50);
-function toReads(){const el=$('reads');if(!el)return;const tf=[...document.querySelectorAll('.topfix')].find(x=>x.offsetParent);const h=document.querySelector('header');const off=tf?tf.getBoundingClientRect().bottom:(h?h.offsetHeight:0);const y=el.getBoundingClientRect().top+window.scrollY-off-10;window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
+function toReads(){toEl('reads')}
+function toEl(id){const el=$(id);if(!el||!el.offsetParent)return;const tf=[...document.querySelectorAll('.topfix')].find(x=>x.offsetParent);const h=document.querySelector('header');const off=tf?tf.getBoundingClientRect().bottom:(h?h.offsetHeight:0);const y=el.getBoundingClientRect().top+window.scrollY-off-10;window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
+/* 예문에 쓰인 단어 — 익히는 자리에서 바로 풀이 (11/5 신수) */
+function exWords(i){const mk=t=>esc(t).split(curC).join('<mark>'+curC+'</mark>');
+  const ws=(D.words||[]).filter(w=>w.in.some(x=>x[0]===curC&&x[1]===i));if(!ws.length)return '';
+  return `<div class="exw">${ws.map(w=>`<button class="wc" data-say="${esc(w.r)}"><b>${mk(w.w)}</b>${w.r!==w.w?`<span>${esc(w.r)}</span>`:''}<i>${esc(w.ko)}</i></button>${(w.parts||[]).length>1?`<div class="wp">= ${w.parts.map(q=>`<button class="wc sm" data-say="${esc(q.r)}"><b>${mk(q.w)}</b><span>${esc(q.r)}</span>${q.ko?`<i>${esc(q.ko)}</i>`:''}</button>`).join('<em>+</em>')}</div>`:''}`).join('')}</div>`}
 function renderInfo(){setHdr();
   const c=D.chars[curC];try{localStorage.setItem('busu-kanji-last',curC)}catch(e){}
   const an=c.ant?(D.chars[c.ant]?`<button class="ant" data-go="${c.ant}" title="반의어 ${c.ant} 익히기">↔ <span class="k">${c.ant}</span>${esc(D.chars[c.ant].hun)}</button>`:`<span class="ant off" title="반의어 — 아직 덱에 없어요">↔ <span class="k">${c.ant}</span>${esc(c.anth||'')}</span>`):'';
@@ -835,9 +846,9 @@ function renderInfo(){setHdr();
   $('mnimg').innerHTML='';$('mnimg').appendChild(partsSVG(c));
   $('parts').innerHTML=c.pg.map((g,i)=>`<span style="color:${GC[i%3]}">${g[0]}</span>`).join(' + ');$('memo').innerHTML=esc(c.memo)+(c.draft?' <em class="draft">신지 초안</em>':'');$('ill').innerHTML=illSVG(curC);
   renderRP();
-  const jw=(c.jw||[]);$('jwh').hidden=$('jw').hidden=!jw.length;$('jwh').querySelector('.jwn').textContent=jw.length?`N5·N4 ${jw.length}개`:'';
+  const jw=(c.jw||[]);$('jwh').hidden=$('jw').hidden=!jw.length;$('jwh').querySelector('.jwn').textContent=jw.length?`자주 쓰는 순 ${jw.length}개`:'';
   $('jw').innerHTML=jw.map(w=>`<div class="w"><span class="lv n${w.n}">N${w.n}</span><div><div class="t"><button class="say" data-say="${esc(w.kana.split(';')[0].trim())}" aria-label="${esc(w.w)} 듣기">▶</button>${esc(w.w).split(curC).join('<mark>'+curC+'</mark>')}</div><div class="k">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`).join('');bindSay($('jw'));
-  $('exs').innerHTML=c.ex.filter(e=>!selR||e.r===selR).map(e=>`<div class="ex"><div class="r ${isKata(e.r)?'on':'kun'}">${e.r}${isKata(e.r)?'<small>'+hira(e.r)+'</small>':''}</div><div><div class="jprow"><button class="say" data-say="${esc(e.kana)}" aria-label="예문 듣기">▶</button><div class="jp">${esc(e.jp).split(curC).join('<mark>'+curC+'</mark>')}</div></div><div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}${e.by?' <em class="draft">신지 예문</em>':''}</div></div></div>`).join('');
+  $('exs').innerHTML=c.ex.filter(e=>!selR||e.r===selR).map(e=>`<div class="ex"><div class="r ${isKata(e.r)?'on':'kun'}">${e.r}${isKata(e.r)?'<small>'+hira(e.r)+'</small>':''}</div><div><div class="jprow"><button class="say" data-say="${esc(e.kana)}" aria-label="예문 듣기">▶</button><div class="jp">${esc(e.jp).split(curC).join('<mark>'+curC+'</mark>')}</div></div><div class="kana">${esc(e.kana)}</div><div class="ko">${esc(e.ko)}${e.by?' <em class="draft">신지 예문</em>':''}</div>${exWords(c.ex.indexOf(e))}</div></div>`).join('');
   if(!c.ex.length){const mem=(lessonOf(curC)||curL).chars.filter(x=>x!==curC&&D.chars[x].w&&D.chars[x].w.length);
     $('exs').innerHTML=mem.length?`<div class="note" style="padding:8px 0">단독으로 읽지 않는 부수예요 — 이 부수가 들어간 단어</div>`+mem.map(x=>{const w=D.chars[x].w[0];return `<div class="ex"><div class="r ${isKata(w.r)?'on':'kun'}">${x}<small>${w.r}${isKata(w.r)?' · '+hira(w.r):''}</small></div><div><div class="jprow"><button class="say" data-say="${esc(w.kana)}" aria-label="듣기">▶</button><div class="jp">${esc(w.w).split(x).join('<mark>'+x+'</mark>')}</div></div><div class="kana">${esc(w.kana)}</div><div class="ko">${esc(w.ko)}</div></div></div>`}).join(''):'';}
   bindSay($('exs'));

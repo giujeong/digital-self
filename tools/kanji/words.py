@@ -17,7 +17,10 @@ def toks(s):
         comp=''.join(p[0] for p in parts)
         if len(parts)>1 and all(len(p[0])>=2 for p in parts) and comp not in KEEP4:
             for p in parts: out.append({'w':p[0],'r':p[1],'pos':'名詞'})
-        else: out.append({'w':comp,'r':''.join(p[1] for p in parts),'pos':'名詞'})
+        else:
+            o={'w':comp,'r':''.join(p[1] for p in parts),'pos':'名詞'}
+            if len(parts)>1 and len(comp)>=4: o['parts']=[{'w':p[0],'r':p[1]} for p in parts]  # 긴 덩어리는 풀이용 조각도 (11/5 신수: 絶滅危惧種)
+            out.append(o)
         buf.clear()
     for w in T(s):
         f=w.feature
@@ -38,6 +41,7 @@ for ch,v in D['chars'].items():
             if re.fullmatch(r'[ァ-ヶー]+',t['w']): t['r']=t['w']
             if t['pos']=='名詞' and t['r'] and t['r'] not in e['kana']: print('READ?',t['w'],t['r'],e['kana'],file=sys.stderr)
             o=words.setdefault(t['w'],{"w":t['w'],"r":t['r'],"pos":t['pos'],"in":[]})
+            if t.get('parts'): o['parts']=[dict(q,r=FIX.get(q['w'],q['r'])) for q in t['parts']]
             if [ch,ei] not in o["in"]: o["in"].append([ch,ei])
 print(len(words),file=sys.stderr)
 json.dump(list(words.values()),open(os.path.join(HERE,'words.json'),'w',encoding='utf-8'),ensure_ascii=False,indent=0)
