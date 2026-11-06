@@ -252,6 +252,18 @@ export default function DigitalSelf() {
           
           <div className="space-y-16">
             <div>
+              <p className="text-xs tracking-widest text-stone-400 mb-6">THE ONE I BELIEVE</p>
+              <div className="text-sm text-stone-600 leading-loose space-y-4">
+                <p>예수님의 십자가 죽음과 부활을 진심으로 믿는다.</p>
+                <p>자격 없는 내가, 그분을 통해 값없이 죄 사함과 구원을 얻었다.</p>
+                <p>그 구원의 기쁨이 있다. 그분을 생각하는 것이 가장 기쁘다.</p>
+                <p className="text-stone-800 pt-4 border-t border-stone-200">
+                  예수님, 그리고 사랑하는 아내.
+                </p>
+              </div>
+            </div>
+
+            <div>
               <p className="text-xs tracking-widest text-stone-400 mb-6">WHO I AM</p>
               <div className="space-y-3 text-sm text-stone-600 leading-relaxed">
                 <p><span className="font-medium text-stone-800">믿는 자.</span> 넘어지되 다시 일어나는 자.</p>
